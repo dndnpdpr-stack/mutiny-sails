@@ -27,9 +27,11 @@ export function CharacterCard(p: { id: CharacterId; onClick?: () => void }) {
         ))}
       </div>
       <div className="ctext">{info.text}</div>
-      <button type="button" className="pick" aria-label={`${info.name} 고르기`} onClick={p.onClick} disabled={!p.onClick}>
-        고르기
-      </button>
+      {p.onClick && (
+        <button type="button" className="pick" aria-label={`${info.name} 고르기`} onClick={p.onClick}>
+          고르기
+        </button>
+      )}
     </motion.div>
   );
 }

@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { App } from '../../src/ui/App';
 import { ResultScreen } from '../../src/ui/screens/ResultScreen';
+import { DraftScreen } from '../../src/ui/screens/DraftScreen';
 import { SetupScreen } from '../../src/ui/screens/SetupScreen';
 import type { PlayerView, Role, SeatView } from '../../src/engine/types';
 
@@ -39,6 +40,21 @@ describe('App draft flow', () => {
       expect(screen.queryByText(/다른 선원들이 캐릭터를 고르는 중/) ?? screen.queryAllByRole('button', { name: /고르기$/ })[0]).toBeTruthy(),
     );
     expect(await screen.findAllByRole('button', { name: /고르기$/ }, { timeout: 3000 })).toHaveLength(2);
+  });
+});
+
+describe('DraftScreen', () => {
+  it('does not show a pick button on my already-chosen character card', () => {
+    const seats = [0, 1].map((i) => ({
+      seat: i, name: `p${i}`, character: i === 0 ? 'tom' : null, hp: 4, maxHp: 4, alive: true,
+      handCount: 0, equipment: [], role: null, isAi: i > 0,
+    })) as unknown as SeatView[];
+    const view = { you: 0, myRole: 'captain', myHand: [], seats, current: 0,
+      pending: { kind: 'chooseCharacter', seat: 1, options: ['margo', 'lou'] }, hints: [], deckCount: 0,
+      discardTop: null, distances: {}, myRange: 1, events: [], winner: null } as unknown as PlayerView;
+    render(<DraftScreen view={view} send={vi.fn()} />);
+    expect(screen.getByText(/다른 선원들이 캐릭터를 고르는 중/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /고르기$/ })).toBeNull();
   });
 });
 

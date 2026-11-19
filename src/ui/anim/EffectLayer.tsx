@@ -36,18 +36,37 @@ export function EffectLayer(p: { effects: Effect[]; speed: 1 | 2; batchKey: numb
   const effectsRef = useRef(p.effects);
   effectsRef.current = p.effects;
 
+  // 같은 묶음 안에서 배속만 바뀌면 처음부터 다시 재생하지 않고, 지나간 시간(배속 전 기준)만큼 이어서 간다
+  const clock = useRef({ key: p.batchKey, speed: p.speed, tick: Date.now(), elapsed: 0, started: new Set<number>() });
+
   useLayoutEffect(() => {
-    setLive([]);
+    const c = clock.current;
+    const now = Date.now();
+    if (c.key === p.batchKey) {
+      c.elapsed += (now - c.tick) * c.speed;
+    } else {
+      c.key = p.batchKey;
+      c.elapsed = 0;
+      c.started = new Set();
+      setLive([]);
+    }
+    c.tick = now;
+    c.speed = p.speed;
     const timers: ReturnType<typeof setTimeout>[] = [];
     effectsRef.current.forEach((effect, id) => {
-      timers.push(
-        setTimeout(() => {
-          const path = resolve(effect);
-          if (!path) return;
-          setLive((l) => [...l, { id, effect, path }]);
-        }, effect.at / p.speed),
-        setTimeout(() => setLive((l) => l.filter((x) => x.id !== id)), (effect.at + effect.ms) / p.speed),
-      );
+      const end = effect.at + effect.ms;
+      if (end <= c.elapsed) return;
+      if (!c.started.has(id)) {
+        timers.push(
+          setTimeout(() => {
+            const path = resolve(effect);
+            if (!path) return;
+            c.started.add(id);
+            setLive((l) => [...l, { id, effect, path }]);
+          }, Math.max(0, effect.at - c.elapsed) / p.speed),
+        );
+      }
+      timers.push(setTimeout(() => setLive((l) => l.filter((x) => x.id !== id)), (end - c.elapsed) / p.speed));
     });
     return () => timers.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps

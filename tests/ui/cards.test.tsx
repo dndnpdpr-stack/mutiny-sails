@@ -34,6 +34,11 @@ describe('CharacterCard', () => {
     const { container } = render(<CharacterCard id="orso" />);
     expect(screen.getByText('갑판장 오르소')).toBeTruthy();
     expect(container.querySelectorAll('.hearts .heart')).toHaveLength(5);
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('shows a pick button only when it can be picked', () => {
+    render(<CharacterCard id="orso" onClick={() => {}} />);
     expect(screen.getByRole('button', { name: '갑판장 오르소 고르기' })).toBeTruthy();
   });
 });

@@ -95,4 +95,19 @@ describe('EffectLayer', () => {
     act(() => { vi.advanceTimersByTime(350); });
     expect(count(container, 'fly')).toBe(0);
   });
+  it('continues from where it was when speed changes mid-batch instead of replaying', () => {
+    const { container, again } = setup([fly(0), fly(400)]);
+    act(() => { vi.advanceTimersByTime(300); });
+    expect(count(container, 'fly')).toBe(1);
+    again([fly(0), fly(400)], 2, 1);
+    act(() => { vi.advanceTimersByTime(0); });
+    expect(count(container, 'fly')).toBe(1);
+    // first effect had 150ms (raw) left -> 75ms at 2x; second starts in 100ms raw -> 50ms
+    act(() => { vi.advanceTimersByTime(50); });
+    expect(count(container, 'fly')).toBe(2);
+    act(() => { vi.advanceTimersByTime(25); });
+    expect(count(container, 'fly')).toBe(1);
+    act(() => { vi.advanceTimersByTime(225); });
+    expect(count(container, 'fly')).toBe(0);
+  });
 });
