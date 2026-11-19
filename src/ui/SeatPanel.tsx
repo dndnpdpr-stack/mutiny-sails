@@ -15,7 +15,7 @@ export function SeatPanel({
   onClick?: () => void;
 }) {
   const s = view.seats[seat];
-  const ch = CHARACTER_INFO[s.character];
+  const ch = s.character ? CHARACTER_INFO[s.character] : { name: '?', text: '' };
   const waiting = view.pending?.seat === seat;
   const classes = ['seat', s.alive ? '' : 'dead', view.current === seat ? 'current' : '', waiting ? 'waiting' : '', highlight ? 'highlight' : '']
     .filter(Boolean)

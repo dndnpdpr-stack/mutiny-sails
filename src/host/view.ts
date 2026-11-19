@@ -1,4 +1,4 @@
-import type { GameEvent, PlayerView, SeatId } from '../engine/types';
+import type { GameEvent, PendingView, PlayerView, SeatId } from '../engine/types';
 import type { Game } from '../engine/Game';
 import { distance, weaponRange } from '../engine/rules';
 import { playHints } from '../engine/legal';
@@ -7,6 +7,11 @@ const EVENT_LIMIT = 100;
 
 function visible(e: GameEvent, seat: SeatId): boolean {
   return !e.visibleTo || e.visibleTo.includes(seat);
+}
+
+function maskPending(p: PendingView | null, seat: SeatId): PendingView | null {
+  if (p && p.kind === 'chooseCharacter' && p.seat !== seat) return { ...p, options: [] };
+  return p;
 }
 
 /** 한 플레이어가 볼 수 있는 정보만 골라 화면 상태를 만든다 */
@@ -30,7 +35,7 @@ export function buildView(game: Game, seat: SeatId, isAi: (s: SeatId) => boolean
     seats: game.seats.map((s) => ({
       seat: s.seat,
       name: s.name,
-      character: s.character.id,
+      character: s.characterChosen ? s.character.id : null,
       hp: s.hp,
       maxHp: s.maxHp,
       alive: s.alive,
@@ -40,7 +45,7 @@ export function buildView(game: Game, seat: SeatId, isAi: (s: SeatId) => boolean
       isAi: isAi(s.seat),
     })),
     current: game.current,
-    pending: game.pending(),
+    pending: maskPending(game.pending(), seat),
     hints: playHints(game, seat),
     deckCount: game.deck.length,
     discardTop: game.discard.at(-1)?.toView() ?? null,

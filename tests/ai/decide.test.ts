@@ -1,3 +1,5 @@
+import { Game } from '../../src/engine/Game';
+import type { CharacterId } from '../../src/engine/types';
 import { AiMemory } from '../../src/ai/memory';
 import { decide } from '../../src/ai/decide';
 import { Rng } from '../../src/engine/rng';
@@ -35,5 +37,15 @@ describe('decide', () => {
     const g = makeGame(4);
     g.start();
     expect(decide(buildView(g, 2, () => true), new AiMemory(), rng())).toBeNull();
+  });
+});
+
+describe('decide draft', () => {
+  it('picks the higher max hp character', () => {
+    const g = new Game({ seed: 1, names: ['A', 'B', 'C', 'D'] });
+    g.start();
+    const base = buildView(g, g.pending()!.seat, () => true);
+    const view = { ...base, pending: { kind: 'chooseCharacter' as const, seat: base.you, options: ['margo', 'orso'] as CharacterId[] } };
+    expect(decide(view, new AiMemory(), rng())).toEqual({ type: 'chooseCharacter', character: 'orso' });
   });
 });

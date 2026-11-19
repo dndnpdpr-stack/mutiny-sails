@@ -83,7 +83,7 @@ export interface PlayHint {
 export interface SeatView {
   seat: SeatId;
   name: string;
-  character: CharacterId;
+  character: CharacterId | null;
   hp: number;
   maxHp: number;
   alive: boolean;

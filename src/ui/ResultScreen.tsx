@@ -9,7 +9,7 @@ export function ResultScreen({ view, onRestart }: { view: PlayerView; onRestart:
       <ul>
         {view.seats.map((s) => (
           <li key={s.seat}>
-            {s.name} — {s.role ? roleName(s.role) : '?'} · {CHARACTER_INFO[s.character].name} {s.alive ? '' : '(쓰러짐)'}
+            {s.name} — {s.role ? roleName(s.role) : '?'} · {(s.character ? CHARACTER_INFO[s.character].name : '?')} {s.alive ? '' : '(쓰러짐)'}
           </li>
         ))}
       </ul>

@@ -1,3 +1,5 @@
+import { Game } from '../../src/engine/Game';
+import type { CharacterId } from '../../src/engine/types';
 import { buildView } from '../../src/host/view';
 import { makeGame } from '../engine/helpers';
 
@@ -58,5 +60,26 @@ describe('buildView', () => {
     const v = buildView(g, 1, noAi);
     expect(v.winner).toBe('rebels');
     expect(v.seats.every((s) => s.role !== null)).toBe(true);
+  });
+});
+
+describe('buildView draft', () => {
+  it('masks unchosen characters and hides options from non-choosers', () => {
+    const g = new Game({ seed: 3, names: ['A', 'B', 'C', 'D'] });
+    g.start();
+    const p = g.pending();
+    expect(p?.kind).toBe('chooseCharacter');
+    const captain = p!.seat;
+    const mine = buildView(g, captain, noAi);
+    expect(mine.pending?.kind === 'chooseCharacter' && mine.pending.options.length).toBe(2);
+    expect(mine.seats.every((s) => s.character === null)).toBe(true);
+    const other = (captain + 1) % 4;
+    const theirs = buildView(g, other, noAi);
+    expect(theirs.pending?.kind === 'chooseCharacter' && theirs.pending.options).toEqual([]);
+    const opt = (mine.pending as { options: CharacterId[] }).options[0];
+    g.apply(captain, { type: 'chooseCharacter', character: opt });
+    const after = buildView(g, other, noAi);
+    expect(after.seats[captain].character).toBe(opt);
+    expect(after.seats[other].character).toBeNull();
   });
 });

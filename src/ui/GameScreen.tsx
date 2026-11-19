@@ -81,9 +81,9 @@ export function GameScreen({ view, send, lastRejection }: { view: PlayerView; se
 
       <div className="me">
         <div>
-          <b>{me.name}</b> · {roleName(view.myRole)} · {CHARACTER_INFO[me.character].name} · 체력 {me.hp}/{me.maxHp} · 사거리 {view.myRange}
+          <b>{me.name}</b> · {roleName(view.myRole)} · {(me.character ? CHARACTER_INFO[me.character].name : '?')} · 체력 {me.hp}/{me.maxHp} · 사거리 {view.myRange}
         </div>
-        <div className="ability">{CHARACTER_INFO[me.character].text}</div>
+        <div className="ability">{me.character ? CHARACTER_INFO[me.character].text : ''}</div>
         <div className="seat-equip">
           {me.equipment.map((c) => (
             <CardBox key={c.id} card={c} />

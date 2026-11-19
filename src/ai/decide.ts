@@ -1,6 +1,7 @@
 import type { Rng } from '../engine/rng';
 import type { Action, CardKind, CardView, PendingView, PlayerView, PlayHint, SeatId } from '../engine/types';
 import type { AiMemory } from './memory';
+import { CHARACTER_INFO } from '../engine/characters/roster';
 
 const WEAPON_RANGE: Partial<Record<CardKind, number>> = { pistol: 2, musket: 3, longMusket: 4, deckCannon: 5, twinPistols: 1 };
 const WEAPONS = Object.keys(WEAPON_RANGE) as CardKind[];
@@ -227,6 +228,11 @@ export function decide(view: PlayerView, mem: AiMemory, rng: Rng): Action | null
     case 'drawSource': {
       const top = view.discardTop;
       return { type: 'chooseDrawSource', fromDiscard: !!top && (top.kind === 'rum' || top.kind === 'dodge' || top.kind === 'slash') };
+    }
+    case 'chooseCharacter': {
+      const best = Math.max(...p.options.map((id) => CHARACTER_INFO[id].maxHp));
+      const top = p.options.filter((id) => CHARACTER_INFO[id].maxHp === best);
+      return { type: 'chooseCharacter', character: top[rng.int(top.length)] };
     }
     default:
       return fallbackAction(view);

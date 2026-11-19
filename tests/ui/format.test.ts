@@ -27,10 +27,19 @@ describe('format', () => {
       { type: 'peek', seat: 0, target: 1, card },
       { type: 'death', seat: 0, role: 'rebel', killer: null },
       { type: 'ability', seat: 0, character: 'tom' },
+      { type: 'characterChosen', seat: 0, character: 'tom' },
       { type: 'gameOver', winner: 'spy' },
     ];
     for (const e of events) expect(formatEvent(e, names)).not.toBe('');
     expect(roleName('spy')).toBe('첩자');
     expect(winnerText('rebels')).toContain('반란');
+  });
+});
+
+describe('format draft', () => {
+  it('announces a chosen character', () => {
+    const s = formatEvent({ type: 'characterChosen', seat: 2, character: 'orso' }, names);
+    expect(s).toContain('P2');
+    expect(s).toContain('을(를) 골랐어요.');
   });
 });
