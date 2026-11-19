@@ -2,20 +2,28 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { App } from '../../src/ui/App';
 
 function startGame(count = 5) {
-  render(<App defaults={{ seed: 11, aiDelayMs: 0 }} />);
+  render(<App defaults={{ seed: 11, aiDelayMs: 0, animations: false }} />);
   fireEvent.click(screen.getByText(`${count}명`));
-  fireEvent.click(screen.getByText('시작'));
+  fireEvent.click(screen.getByText('출항'));
+}
+
+// Task 7 rewrites this file; for now just get past the character draft.
+async function pickCharacter() {
+  const picks = await screen.findAllByRole('button', { name: /고르기$/ }, { timeout: 3000 });
+  fireEvent.click(picks[0]);
 }
 
 describe('App', () => {
   it('shows other seats and my hand after start', async () => {
     startGame(5);
+    await pickCharacter();
     await waitFor(() => expect(screen.getAllByTestId('seat-panel')).toHaveLength(4));
     expect(document.querySelectorAll('.hand .card').length).toBeGreaterThan(0);
   });
 
   it('plays through with default actions until spectating or result', async () => {
     startGame(5);
+    await pickCharacter();
     const click = (name: string | RegExp, root: HTMLElement) => {
       const b = within(root).queryAllByRole('button', { name }).find((x) => !(x as HTMLButtonElement).disabled);
       if (b) fireEvent.click(b);
@@ -46,6 +54,6 @@ describe('App', () => {
     } finally {
       clearInterval(timer);
     }
-    expect(screen.getAllByText(/선장|충성 선원|반란 선원|첩자/).length).toBeGreaterThanOrEqual(5);
+    await waitFor(() => expect(screen.getAllByText(/선장|충성 선원|반란 선원|첩자/).length).toBeGreaterThanOrEqual(5));
   }, 25000);
 });
