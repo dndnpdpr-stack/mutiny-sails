@@ -8,6 +8,7 @@ import './cards/equipment';
 import type { Character } from './characters/Character';
 import { CHARACTERS, CHARACTER_IDS } from './characters/roster';
 import { drawCount, handLimit, type RuleModifier } from './rules';
+import { isHeart, isKegBlast, judge } from './judge';
 
 export interface GameConfig {
   seed: number;
@@ -157,23 +158,56 @@ export class Game {
     this.stack.push({ kind: 'run', run });
   }
 
-  /** 지금 쌓인 단계를 전부 버림 (게임 종료, 턴 주인 쓰러짐) */
-  protected clearStack(): void {
-    this.stack = [];
-  }
-
   private beginTurn(seat: SeatId): void {
     this.current = seat;
     this.slashesPlayedThisTurn = 0;
     this.abilityUsedThisTurn = false;
     this.emit({ type: 'turnStart', seat });
-    this.pushTurnInput(seat);
-    this.pushStep(() => this.drawPhase(seat));
-    this.turnStartHooks(seat);
+    this.pushStep(() => this.kegPhase(seat));
   }
 
-  /** 뽑기 전에 처리할 것들(판정, 캐릭터 능력). 나중에 쌓인 것이 먼저 실행된다 */
-  protected turnStartHooks(_seat: SeatId): void {}
+  private findEquip(seat: SeatId, kind: CardKind): Card | undefined {
+    return this.seats[seat].equipment.find((c) => c.kind === kind);
+  }
+
+  /** 턴 시작 ①: 화약통 */
+  private kegPhase(seat: SeatId): void {
+    const keg = this.findEquip(seat, 'powderKeg');
+    if (!keg) return this.brigPhase(seat);
+    judge(this, seat, 'powderKeg', isKegBlast, (blast) => {
+      this.removeEquipment(seat, keg.id);
+      if (blast) {
+        this.discardCard(keg);
+        this.pushStep(() => this.brigPhase(seat));
+        this.dealDamage(seat, 3, null);
+      } else {
+        this.seats[this.nextAlive(seat)].equipment.push(keg);
+        this.brigPhase(seat);
+      }
+    });
+  }
+
+  /** 턴 시작 ②: 영창 */
+  private brigPhase(seat: SeatId): void {
+    const brig = this.findEquip(seat, 'brig');
+    if (!brig) return this.mainPhase(seat);
+    judge(this, seat, 'brig', isHeart, (free) => {
+      this.removeEquipment(seat, brig.id);
+      this.discardCard(brig);
+      if (free) this.mainPhase(seat);
+      else this.pushStep(() => this.nextTurn());
+    });
+  }
+
+  /** 턴 시작 ③: (캐릭터 능력) → 뽑기 → 카드 사용 */
+  private mainPhase(seat: SeatId): void {
+    this.pushTurnInput(seat);
+    this.pushStep(() => this.drawPhase(seat));
+    this.beforeDrawHooks(seat);
+  }
+
+  /** 뽑기 직전에 처리할 캐릭터 능력. 나중에 쌓인 것이 먼저 실행된다 */
+  protected beforeDrawHooks(_seat: SeatId): void {}
 
   protected drawPhase(seat: SeatId): void {
     this.giveCards(seat, this.draw(drawCount(this, seat)));
@@ -332,6 +366,16 @@ export class Game {
 
   /** 칼질·포격 공격 1회. afterHit: 피해를 준 뒤(쓰러짐 처리 후) 실행 */
   attack(target: SeatId, attacker: SeatId, source: 'slash' | 'cannonade', afterHit?: () => void): void {
+    if (this.findEquip(target, 'barrel')) {
+      judge(this, target, 'barrel', isHeart, (dodged) => {
+        if (!dodged) this.attackResponse(target, attacker, source, afterHit);
+      });
+      return;
+    }
+    this.attackResponse(target, attacker, source, afterHit);
+  }
+
+  private attackResponse(target: SeatId, attacker: SeatId, source: 'slash' | 'cannonade', afterHit?: () => void): void {
     this.pushCardResponse(
       { kind: 'respondAttack', seat: target, attacker, source },
       'dodge',

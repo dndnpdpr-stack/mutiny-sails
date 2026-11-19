@@ -1,18 +1,6 @@
 import type { Game } from '../../src/engine/Game';
 import type { Role } from '../../src/engine/types';
-import { giveEquip, makeGame, setHand } from './helpers';
-
-/** 현재 턴인 사람이 턴을 끝내고(넘치면 앞에서부터 버림) 다음 사람으로 넘긴다 */
-function passTurn(g: Game) {
-  const seat = g.current;
-  expect(g.apply(seat, { type: 'endTurn' }).ok).toBe(true);
-  const p = g.pending();
-  if (p?.kind === 'discardExcess') g.apply(seat, { type: 'discard', cardIds: g.seats[seat].hand.slice(0, p.count).map((c) => c.id) });
-}
-
-function passUntil(g: Game, seat: number) {
-  while (g.current !== seat) passTurn(g);
-}
+import { giveEquip, makeGame, passUntil, setHand } from './helpers';
 
 /** 5명 기본: 0 선장(hp5), 1 반란, 2 반란, 3 첩자, 4 충성 */
 function started(roles?: Role[], n = 5): Game {

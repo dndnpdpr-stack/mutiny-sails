@@ -68,3 +68,16 @@ export function stackTop(game: Game, specs: TopSpec[]): Card[] {
 }
 
 export const ids = (cards: Card[]) => cards.map((c) => c.id);
+
+/** 현재 턴인 사람이 턴을 끝내고(넘치면 앞에서부터 버림) 다음 사람으로 넘긴다 */
+export function passTurn(g: Game) {
+  const seat = g.current;
+  const r = g.apply(seat, { type: 'endTurn' });
+  if (!r.ok) throw new Error(r.reason);
+  const p = g.pending();
+  if (p?.kind === 'discardExcess') g.apply(seat, { type: 'discard', cardIds: g.seats[seat].hand.slice(0, p.count).map((c) => c.id) });
+}
+
+export function passUntil(g: Game, seat: number) {
+  while (g.current !== seat) passTurn(g);
+}
