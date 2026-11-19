@@ -54,7 +54,10 @@ describe('game setup', () => {
   it('same seed reproduces the setup', () => {
     const a = new Game({ seed: 77, names: names(5) });
     const b = new Game({ seed: 77, names: names(5) });
+    finishDraft(a);
+    finishDraft(b);
     const snap = (g: Game) => g.seats.map((s) => [s.role, s.character.id, s.hand.map((c) => c.id)]);
+    expect(snap(a).every(([, , hand]) => (hand as string[]).length > 0)).toBe(true);
     expect(snap(a)).toEqual(snap(b));
   });
 

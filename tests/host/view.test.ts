@@ -30,6 +30,16 @@ describe('buildView', () => {
     }
   });
 
+  it('reports abilityUsed only for the current seat', () => {
+    const g = makeGame(5);
+    g.start();
+    g.abilityUsedThisTurn = true;
+    expect(buildView(g, g.current, noAi).abilityUsed).toBe(true);
+    expect(buildView(g, (g.current + 1) % 5, noAi).abilityUsed).toBe(false);
+    g.abilityUsedThisTurn = false;
+    expect(buildView(g, g.current, noAi).abilityUsed).toBe(false);
+  });
+
   it('shows my hand, counts, distances and hints', () => {
     const g = makeGame(5);
     g.start();

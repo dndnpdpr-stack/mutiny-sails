@@ -102,12 +102,15 @@ describe('EffectLayer', () => {
     again([fly(0), fly(400)], 2, 1);
     act(() => { vi.advanceTimersByTime(0); });
     expect(count(container, 'fly')).toBe(1);
-    // first effect had 150ms (raw) left -> 75ms at 2x; second starts in 100ms raw -> 50ms
+    // second starts in 100ms raw -> 50ms at 2x
     act(() => { vi.advanceTimersByTime(50); });
     expect(count(container, 'fly')).toBe(2);
-    act(() => { vi.advanceTimersByTime(25); });
+    // the first ghost's animation keeps its original speed, so it is not cut off: it ends 150ms after the change
+    act(() => { vi.advanceTimersByTime(75); });
+    expect(count(container, 'fly')).toBe(2);
+    act(() => { vi.advanceTimersByTime(30); });
     expect(count(container, 'fly')).toBe(1);
-    act(() => { vi.advanceTimersByTime(225); });
+    act(() => { vi.advanceTimersByTime(125); });
     expect(count(container, 'fly')).toBe(0);
   });
 });

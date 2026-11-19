@@ -5,7 +5,7 @@ import type { GameEvent, PlayerView } from '../../src/engine/types';
 function view(events: GameEvent[], extra: Partial<PlayerView> = {}): PlayerView {
   return {
     you: 0, myRole: 'rebel', myHand: [], seats: [], current: 0, pending: null, hints: [],
-    deckCount: 10, discardTop: null, distances: {}, myRange: 1, events, winner: null, ...extra,
+    deckCount: 10, discardTop: null, distances: {}, myRange: 1, abilityUsed: false, events, winner: null, ...extra,
   };
 }
 const dmg = (seq: number): GameEvent => ({ type: 'damage', seat: 1, amount: 1, source: 0, seq });
@@ -25,6 +25,16 @@ describe('useAnimatedView', () => {
     const v = view([dmg(1)]);
     const { result } = setup(v);
     expect(result.current.shown).toBe(v);
+    expect(result.current.effects).toEqual([]);
+  });
+
+  it('jumps straight to the first table view when the draft just ended', () => {
+    const seat = (character: string | null) => ({ seat: 0, name: 'a', character, hp: 0, maxHp: 0, alive: true, handCount: 0, equipment: [], role: null, isAi: false });
+    const drafting = view([], { seats: [seat(null)] as any });
+    const table = view([dmg(1), dmg(2)], { seats: [seat('tom')] as any });
+    const { result, rerender } = setup(drafting);
+    rerender(props(table));
+    expect(result.current.shown).toBe(table);
     expect(result.current.effects).toEqual([]);
   });
 

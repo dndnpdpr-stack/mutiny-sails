@@ -108,6 +108,8 @@ export interface PlayerView {
   /** 나에서 각 살아있는 자리까지의 거리 */
   distances: Record<SeatId, number>;
   myRange: number;
+  /** 이번 턴에 내 능력을 이미 썼는지(내 차례일 때만 true가 될 수 있다) */
+  abilityUsed: boolean;
   /** 내게 보이는 것만, 최근 100개 */
   events: GameEvent[];
   winner: Winner | null;

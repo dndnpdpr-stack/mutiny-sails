@@ -51,6 +51,7 @@ export function buildView(game: Game, seat: SeatId, isAi: (s: SeatId) => boolean
     discardTop: game.discard.at(-1)?.toView() ?? null,
     distances,
     myRange: weaponRange(game, seat),
+    abilityUsed: game.current === seat && game.abilityUsedThisTurn,
     events,
     winner: game.winner,
   };

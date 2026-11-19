@@ -119,8 +119,9 @@ export function useAnimatedView(latest: PlayerView | null, opts: { enabled: bool
     }
 
     const top = maxSeq(latest.events);
-    if (s.shown === null || (top > 0 && top < s.lastSeq)) {
-      // 첫 view이거나 새 게임: 연출 없이 바로 표시
+    const draftEnded = !!s.shown && s.shown.seats.some((x) => x.character === null) && !latest.seats.some((x) => x.character === null);
+    if (s.shown === null || draftEnded || (top > 0 && top < s.lastSeq)) {
+      // 첫 view이거나 새 게임, 또는 캐릭터 뽑기 직후의 첫 테이블: 연출 없이 바로 표시
       reset();
       s.lastSeq = top;
       show(latest, false);

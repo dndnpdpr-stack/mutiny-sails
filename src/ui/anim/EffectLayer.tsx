@@ -5,7 +5,7 @@ import { anchorRect } from './anchors';
 import type { Anchor, Effect } from './effects';
 
 interface Pt { x: number; y: number }
-interface Live { id: number; effect: Effect; path: Pt[]; }
+interface Live { id: number; effect: Effect; path: Pt[]; speed: 1 | 2 }
 
 function center(a: Anchor): Pt | null {
   const r = anchorRect(a);
@@ -37,7 +37,7 @@ export function EffectLayer(p: { effects: Effect[]; speed: 1 | 2; batchKey: numb
   effectsRef.current = p.effects;
 
   // 같은 묶음 안에서 배속만 바뀌면 처음부터 다시 재생하지 않고, 지나간 시간(배속 전 기준)만큼 이어서 간다
-  const clock = useRef({ key: p.batchKey, speed: p.speed, tick: Date.now(), elapsed: 0, started: new Set<number>() });
+  const clock = useRef({ key: p.batchKey, speed: p.speed, tick: Date.now(), elapsed: 0, started: new Map<number, { t: number; speed: 1 | 2 }>() });
 
   useLayoutEffect(() => {
     const c = clock.current;
@@ -47,7 +47,7 @@ export function EffectLayer(p: { effects: Effect[]; speed: 1 | 2; batchKey: numb
     } else {
       c.key = p.batchKey;
       c.elapsed = 0;
-      c.started = new Set();
+      c.started = new Map();
       setLive([]);
     }
     c.tick = now;
@@ -61,12 +61,15 @@ export function EffectLayer(p: { effects: Effect[]; speed: 1 | 2; batchKey: numb
           setTimeout(() => {
             const path = resolve(effect);
             if (!path) return;
-            c.started.add(id);
-            setLive((l) => [...l, { id, effect, path }]);
+            c.started.set(id, { t: Date.now(), speed: p.speed });
+            setLive((l) => [...l, { id, effect, path, speed: p.speed }]);
           }, Math.max(0, effect.at - c.elapsed) / p.speed),
         );
       }
-      timers.push(setTimeout(() => setLive((l) => l.filter((x) => x.id !== id)), (end - c.elapsed) / p.speed));
+      // 이미 날아가는 중인 효과는 framer 애니메이션이 처음 배속 그대로 계속되므로, 제거도 그 기준으로 맞춘다
+      const run = c.started.get(id);
+      const removeIn = run ? Math.max(0, effect.ms / run.speed - (now - run.t)) : (end - c.elapsed) / p.speed;
+      timers.push(setTimeout(() => setLive((l) => l.filter((x) => x.id !== id)), removeIn));
     });
     return () => timers.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -74,8 +77,8 @@ export function EffectLayer(p: { effects: Effect[]; speed: 1 | 2; batchKey: numb
 
   return (
     <div className="effect-layer" aria-hidden="true">
-      {live.map(({ id, effect: e, path }) => {
-        const dur = e.ms / p.speed / 1000;
+      {live.map(({ id, effect: e, path, speed }) => {
+        const dur = e.ms / speed / 1000;
         if (e.kind === 'fly') {
           return (
             <motion.div

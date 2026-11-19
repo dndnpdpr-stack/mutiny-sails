@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { TableScreen } from '../../src/ui/screens/TableScreen';
 import type { Effect } from '../../src/ui/anim/effects';
 import type { Action, CardView, PlayerView, SeatView } from '../../src/engine/types';
@@ -17,7 +17,7 @@ function makeView(extra: Partial<PlayerView> = {}, seats?: SeatView[]): PlayerVi
   return {
     you: 1, myRole: 'rebel', myHand: [], seats: seats ?? [0, 1, 2, 3, 4].map((i) => seat(i)), current: 1,
     pending: { kind: 'turn', seat: 1 }, hints: [], deckCount: 40, discardTop: card('d0', 'rum', 'hearts', 9),
-    distances: { 0: 1, 2: 1, 3: 2, 4: 2 }, myRange: 1, events: [], winner: null, ...extra,
+    distances: { 0: 1, 2: 1, 3: 2, 4: 2 }, myRange: 1, abilityUsed: false, events: [], winner: null, ...extra,
   };
 }
 
@@ -156,6 +156,13 @@ describe('TableScreen', () => {
     expect(send).toHaveBeenCalledWith({ type: 'endTurn' });
   });
 
+  it('disables the derrick ability button once it was used this turn', () => {
+    const seats = [0, 1, 2, 3, 4].map((i) => seat(i, i === 1 ? { character: 'derrick' } : {}));
+    const v = makeView({ myHand: [card('s1', 'slash'), card('s2', 'slash')], abilityUsed: true }, seats);
+    renderTable(v);
+    expect((screen.getByText('능력 사용').closest('button') as HTMLButtonElement).disabled).toBe(true);
+  });
+
   it('shows spectating instead of the hand when I am dead', () => {
     const seats = [0, 1, 2, 3, 4].map((i) => seat(i, i === 1 ? { alive: false, hp: 0, role: 'rebel' } : {}));
     renderTable(makeView({ myHand: [card('s1', 'slash')], current: 0, pending: { kind: 'turn', seat: 0 } }, seats));
@@ -167,6 +174,28 @@ describe('TableScreen', () => {
     renderTable(makeView(), { effects: [{ kind: 'shake', seat: 2, at: 0, ms: 400 }] });
     await waitFor(() => expect(panel(2).classList.contains('shake')).toBe(true));
     expect(panel(3).classList.contains('shake')).toBe(false);
+  });
+
+  it('does not re-apply a finished flag when the speed changes mid-batch', () => {
+    vi.useFakeTimers();
+    try {
+      const v = makeView();
+      const fx: Effect[] = [{ kind: 'shake', seat: 2, at: 0, ms: 400 }, { kind: 'shake', seat: 3, at: 0, ms: 2000 }];
+      const ui = (speed: 1 | 2) => <TableScreen latest={v} shown={v} effects={fx} speed={speed} batchKey={7} send={vi.fn()} lastRejection={null} />;
+      const r = render(ui(1));
+      act(() => { vi.advanceTimersByTime(10); });
+      expect(panel(2).classList.contains('shake')).toBe(true);
+      act(() => { vi.advanceTimersByTime(450); });
+      expect(panel(2).classList.contains('shake')).toBe(false);
+      r.rerender(ui(2));
+      act(() => { vi.advanceTimersByTime(10); });
+      expect(panel(2).classList.contains('shake')).toBe(false);
+      expect(panel(3).classList.contains('shake')).toBe(true);
+      act(() => { vi.advanceTimersByTime(800); }); // remaining ~1540ms at 2x
+      expect(panel(3).classList.contains('shake')).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('shows the my-turn banner during my turn effect', async () => {

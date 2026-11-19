@@ -51,7 +51,7 @@ describe('DraftScreen', () => {
     })) as unknown as SeatView[];
     const view = { you: 0, myRole: 'captain', myHand: [], seats, current: 0,
       pending: { kind: 'chooseCharacter', seat: 1, options: ['margo', 'lou'] }, hints: [], deckCount: 0,
-      discardTop: null, distances: {}, myRange: 1, events: [], winner: null } as unknown as PlayerView;
+      discardTop: null, distances: {}, myRange: 1, abilityUsed: false, events: [], winner: null } as unknown as PlayerView;
     render(<DraftScreen view={view} send={vi.fn()} />);
     expect(screen.getByText(/다른 선원들이 캐릭터를 고르는 중/)).toBeTruthy();
     expect(screen.queryByRole('button', { name: /고르기$/ })).toBeNull();
@@ -66,7 +66,7 @@ describe('ResultScreen', () => {
       handCount: 0, equipment: [], role: r, isAi: i > 0,
     }));
     const view = { you: 0, myRole: 'captain', myHand: [], seats, current: 0, pending: null, hints: [], deckCount: 0,
-      discardTop: null, distances: {}, myRange: 1, events: [], winner: 'rebels' } as unknown as PlayerView;
+      discardTop: null, distances: {}, myRange: 1, abilityUsed: false, events: [], winner: 'rebels' } as unknown as PlayerView;
     const onRestart = vi.fn();
     render(<ResultScreen view={view} onRestart={onRestart} />);
     expect(screen.getByText('반란 선원의 승리!')).toBeTruthy();

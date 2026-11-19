@@ -15,11 +15,29 @@ function useEffectFlags(effects: Effect[], speed: 1 | 2, key: number): Flags {
   const [flags, setFlags] = useState<Flags>({});
   const effectsRef = useRef(effects);
   effectsRef.current = effects;
+  // 같은 묶음 안에서 배속만 바뀌면 처음부터 다시 켜지 않고, 지나간 시간(배속 전 기준)만큼 이어서 간다
+  const clock = useRef({ key, speed, tick: Date.now(), elapsed: 0, started: new Set<number>() });
   useLayoutEffect(() => {
-    setFlags({});
+    const c = clock.current;
+    const now = Date.now();
+    if (c.key === key) {
+      c.elapsed += (now - c.tick) * c.speed;
+    } else {
+      c.key = key;
+      c.elapsed = 0;
+      c.started = new Set();
+      setFlags({});
+    }
+    c.tick = now;
+    c.speed = speed;
     const timers: ReturnType<typeof setTimeout>[] = [];
-    const bump = (k: string, d: number) => setFlags((f) => ({ ...f, [k]: Math.max(0, (f[k] ?? 0) + d) }));
-    for (const e of effectsRef.current) {
+    const bump = (names: string[], d: number) =>
+      setFlags((f) => {
+        const next = { ...f };
+        for (const k of names) next[k] = Math.max(0, (next[k] ?? 0) + d);
+        return next;
+      });
+    effectsRef.current.forEach((e, id) => {
       const names: string[] = [];
       if (e.kind === 'shake') names.push(`${e.seat}:shake`);
       if (e.kind === 'death') names.push(`${e.seat}:dying`);
@@ -27,11 +45,18 @@ function useEffectFlags(effects: Effect[], speed: 1 | 2, key: number): Flags {
         names.push(`${e.seat}:turn-glow`);
         if (e.mine) names.push('banner');
       }
-      for (const k of names) {
-        timers.push(setTimeout(() => bump(k, 1), e.at / speed));
-        timers.push(setTimeout(() => bump(k, -1), (e.at + e.ms) / speed));
+      const end = e.at + e.ms;
+      if (names.length === 0 || end <= c.elapsed) return;
+      if (!c.started.has(id)) {
+        timers.push(
+          setTimeout(() => {
+            c.started.add(id);
+            bump(names, 1);
+          }, Math.max(0, e.at - c.elapsed) / speed),
+        );
       }
-    }
+      timers.push(setTimeout(() => bump(names, -1), (end - c.elapsed) / speed));
+    });
     return () => timers.forEach(clearTimeout);
   }, [key, speed]);
   return flags;
@@ -155,7 +180,7 @@ export function TableScreen(p: {
         ability={
           latestMe.character === 'derrick'
             ? {
-                enabled: myTurn && slashes.length >= 2,
+                enabled: myTurn && !latest.abilityUsed && slashes.length >= 2,
                 onUse: () => (cancel(), send({ type: 'useAbility', cardIds: slashes.slice(0, 2).map((c) => c.id) })),
               }
             : null
