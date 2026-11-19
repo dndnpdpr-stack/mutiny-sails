@@ -74,3 +74,36 @@ export interface PlayHint {
   targets: SeatId[] | null;
   targetCards: boolean;
 }
+
+export interface SeatView {
+  seat: SeatId;
+  name: string;
+  character: CharacterId;
+  hp: number;
+  maxHp: number;
+  alive: boolean;
+  handCount: number;
+  equipment: CardView[];
+  /** 선장, 쓰러진 사람, 게임 종료 후에만 공개 */
+  role: Role | null;
+  isAi: boolean;
+}
+
+/** 방장이 플레이어 한 명에게 보내는 화면 상태. 그 사람이 볼 수 있는 정보만 담는다 */
+export interface PlayerView {
+  you: SeatId;
+  myRole: Role;
+  myHand: CardView[];
+  seats: SeatView[];
+  current: SeatId;
+  pending: PendingView | null;
+  hints: PlayHint[];
+  deckCount: number;
+  discardTop: CardView | null;
+  /** 나에서 각 살아있는 자리까지의 거리 */
+  distances: Record<SeatId, number>;
+  myRange: number;
+  /** 내게 보이는 것만, 최근 100개 */
+  events: GameEvent[];
+  winner: Winner | null;
+}
