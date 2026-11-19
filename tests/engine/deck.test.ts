@@ -1,0 +1,39 @@
+import { Rng } from '../../src/engine/rng';
+import { buildDeckSpec } from '../../src/engine/cards/deck';
+import { CARD_CATALOG } from '../../src/engine/cards/catalog';
+import type { CardKind } from '../../src/engine/types';
+
+describe('buildDeckSpec', () => {
+  const deck = buildDeckSpec(new Rng(1));
+  it('has 80 unique cards', () => {
+    expect(deck.length).toBe(80);
+    expect(new Set(deck.map((c) => c.id)).size).toBe(80);
+  });
+  it('matches catalog counts', () => {
+    const total = Object.values(CARD_CATALOG).reduce((s, i) => s + i.count, 0);
+    expect(total).toBe(80);
+    for (const kind of Object.keys(CARD_CATALOG) as CardKind[]) {
+      expect(deck.filter((c) => c.kind === kind).length).toBe(CARD_CATALOG[kind].count);
+    }
+  });
+  it('has 20 cards per suit', () => {
+    for (const s of ['spades', 'hearts', 'diamonds', 'clubs'] as const) {
+      expect(deck.filter((c) => c.suit === s).length).toBe(20);
+    }
+  });
+  it('has exactly 12 spades of rank 2-9', () => {
+    expect(deck.filter((c) => c.suit === 'spades' && c.rank >= 2 && c.rank <= 9).length).toBe(12);
+  });
+  it('does not concentrate a kind in one suit', () => {
+    for (const seed of [1, 2, 3, 99]) {
+      const d = buildDeckSpec(new Rng(seed));
+      for (const kind of Object.keys(CARD_CATALOG) as CardKind[]) {
+        const cnt = CARD_CATALOG[kind].count;
+        if (cnt < 4) continue;
+        for (const s of ['spades', 'hearts', 'diamonds', 'clubs'] as const) {
+          expect(d.filter((c) => c.kind === kind && c.suit === s).length).toBeLessThanOrEqual(cnt * 0.7);
+        }
+      }
+    }
+  });
+});
