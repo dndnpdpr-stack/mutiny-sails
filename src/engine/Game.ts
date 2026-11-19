@@ -174,6 +174,17 @@ export class Game {
   private kegPhase(seat: SeatId): void {
     const keg = this.findEquip(seat, 'powderKeg');
     if (!keg) return this.brigPhase(seat);
+    if (this.seats[seat].character.passesKegFreely()) {
+      this.pushInput({ kind: 'passKeg', seat }, (a) => {
+        if (a.type !== 'chooseSeat' || a.target === seat || !this.seats[a.target]?.alive) return '화약통을 넘길 다른 사람을 골라 주세요';
+        this.removeEquipment(seat, keg.id);
+        this.seats[a.target].equipment.push(keg);
+        this.emit({ type: 'ability', seat, character: this.seats[seat].character.id });
+        this.brigPhase(seat);
+        return null;
+      });
+      return;
+    }
     judge(this, seat, 'powderKeg', isKegBlast, (blast) => {
       this.removeEquipment(seat, keg.id);
       if (blast) {
@@ -207,10 +218,22 @@ export class Game {
   }
 
   /** 뽑기 직전에 처리할 캐릭터 능력. 나중에 쌓인 것이 먼저 실행된다 */
-  protected beforeDrawHooks(_seat: SeatId): void {}
+  private beforeDrawHooks(seat: SeatId): void {
+    this.seats[seat].character.onTurnStartBeforeDraw(this, seat);
+  }
 
   protected drawPhase(seat: SeatId): void {
-    this.giveCards(seat, this.draw(drawCount(this, seat)));
+    const n = drawCount(this, seat);
+    if (this.seats[seat].character.offersDiscardDraw() && this.discard.length > 0 && n > 0) {
+      this.pushInput({ kind: 'drawSource', seat }, (a) => {
+        if (a.type !== 'chooseDrawSource') return WRONG_ACTION;
+        const first = a.fromDiscard ? [this.discard.pop()!] : [];
+        this.giveCards(seat, [...first, ...this.draw(n - first.length)]);
+        return null;
+      });
+      return;
+    }
+    this.giveCards(seat, this.draw(n));
   }
 
   giveCards(seat: SeatId, cards: Card[]): void {
@@ -429,7 +452,7 @@ export class Game {
 
   /** 칼질 카드로 하는 공격 */
   slashAttack(target: SeatId, attacker: SeatId): void {
-    this.attack(target, attacker, 'slash');
+    this.attack(target, attacker, 'slash', () => this.seats[attacker].character.onSlashDamageDealt(this, attacker, target));
   }
 
   dealDamage(target: SeatId, amount: number, source: SeatId | null): void {
