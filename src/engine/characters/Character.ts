@@ -1,4 +1,4 @@
-import type { CharacterId, SeatId } from '../types';
+import type { CardId, CharacterId, SeatId } from '../types';
 import type { Game } from '../Game';
 
 export abstract class Character {
@@ -21,4 +21,8 @@ export abstract class Character {
   duelSlashesRequiredFromOpponent(): number {
     return 1;
   }
+  canUseAbility(_game: Game, _me: SeatId, _cardIds: CardId[]): string | null {
+    return '쓸 수 있는 능력이 없어요';
+  }
+  useAbility(_game: Game, _me: SeatId, _cardIds: CardId[]): void {}
 }

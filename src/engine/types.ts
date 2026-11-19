@@ -18,3 +18,52 @@ export interface CardView {
   suit: Suit;
   rank: Rank;
 }
+
+export type Action =
+  | { type: 'playCard'; cardId: CardId; target?: SeatId; targetCardId?: CardId }
+  /** 포수 데릭 */
+  | { type: 'useAbility'; cardIds: CardId[] }
+  | { type: 'endTurn' }
+  /** 피하기/칼질/럼주 내기. [] = 안 냄(맞기·포기) */
+  | { type: 'respond'; cardIds: CardId[] }
+  | { type: 'discard'; cardIds: CardId[] }
+  /** 전리품 선택, 실라 판정 선택 */
+  | { type: 'chooseCard'; cardId: CardId }
+  /** 마고 엿보기, 비비 화약통 넘기기 */
+  | { type: 'chooseSeat'; target: SeatId }
+  /** 밀수꾼 루 */
+  | { type: 'chooseDrawSource'; fromDiscard: boolean };
+
+export type PendingView =
+  | { kind: 'turn'; seat: SeatId }
+  | { kind: 'respondAttack'; seat: SeatId; attacker: SeatId; source: 'slash' | 'cannonade' }
+  | { kind: 'respondBrawl'; seat: SeatId; attacker: SeatId }
+  | { kind: 'respondDuel'; seat: SeatId; opponent: SeatId; required: number }
+  /** need = 살아나려면 내야 할 럼주 장수 */
+  | { kind: 'dying'; seat: SeatId; need: number }
+  | { kind: 'discardExcess'; seat: SeatId; count: number }
+  | { kind: 'loot'; seat: SeatId; revealed: CardView[] }
+  | { kind: 'judgeChoice'; seat: SeatId; options: CardView[] }
+  | { kind: 'peekTarget'; seat: SeatId }
+  | { kind: 'passKeg'; seat: SeatId }
+  | { kind: 'drawSource'; seat: SeatId };
+
+export type Winner = 'captainTeam' | 'rebels' | 'spy';
+
+/** visibleTo 없음 = 모두에게 공개 */
+export type GameEvent = { visibleTo?: SeatId[] } & (
+  | { type: 'turnStart'; seat: SeatId }
+  | { type: 'draw'; seat: SeatId; count: number }
+  | { type: 'drawCards'; seat: SeatId; cards: CardView[] }
+  | { type: 'play'; seat: SeatId; card: CardView; target?: SeatId }
+  | { type: 'respond'; seat: SeatId; cards: CardView[] }
+  | { type: 'damage'; seat: SeatId; amount: number; source: SeatId | null }
+  | { type: 'heal'; seat: SeatId; amount: number }
+  | { type: 'judge'; seat: SeatId; card: CardView; success: boolean; reason: CardKind }
+  | { type: 'steal'; from: SeatId; to: SeatId; card: CardView | null }
+  | { type: 'discardCards'; seat: SeatId; cards: CardView[] }
+  | { type: 'peek'; seat: SeatId; target: SeatId; card: CardView }
+  | { type: 'death'; seat: SeatId; role: Role; killer: SeatId | null }
+  | { type: 'ability'; seat: SeatId; character: CharacterId }
+  | { type: 'gameOver'; winner: Winner }
+);
