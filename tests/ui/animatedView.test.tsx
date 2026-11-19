@@ -60,21 +60,37 @@ describe('useAnimatedView', () => {
     expect(result.current.shown).toBe(v2);
   });
 
-  it('drops the queue and jumps to the latest when backlog > 3000ms', () => {
-    const first = view([]);
-    const { result, rerender } = setup(first);
-    let last = first;
-    let seq = 1;
+  it('catch-up: 10 back-to-back animated views end on the 10th, shown immediately', () => {
+    const { result, rerender } = setup(view([]));
+    let last = view([]);
     for (let i = 0; i < 10; i++) {
-      last = view(dmgs(seq, 5)); // ~1080ms each
-      seq += 5;
+      last = view(dmgs(1 + i * 5, 5)); // ~1080ms each
       rerender(props(last));
-      if (result.current.shown === last) break;
     }
     expect(result.current.shown).toBe(last);
     expect(result.current.effects).toEqual([]);
     act(() => { vi.advanceTimersByTime(20000); });
     expect(result.current.shown).toBe(last);
+    expect(result.current.effects).toEqual([]);
+  });
+
+  it('animates normally again after the quiet period', () => {
+    const { result, rerender } = setup(view([]));
+    let seq = 1;
+    let last = view([]);
+    for (let i = 0; i < 6; i++) {
+      last = view(dmgs(seq, 5));
+      seq += 5;
+      rerender(props(last));
+    }
+    expect(result.current.shown).toBe(last);
+    act(() => { vi.advanceTimersByTime(700); });
+    const next = view([...last.events, ...dmgs(seq, 1)]);
+    rerender(props(next));
+    expect(result.current.shown).toBe(last);
+    expect(result.current.effects).toHaveLength(2);
+    act(() => { vi.advanceTimersByTime(700); });
+    expect(result.current.shown).toBe(next);
   });
 
   it('speeds up to 2x between 1500 and 3000ms', () => {

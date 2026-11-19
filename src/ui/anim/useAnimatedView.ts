@@ -11,6 +11,7 @@ export interface AnimatedView {
 
 const FAST_MS = 1500;
 const SKIP_MS = 3000;
+const CATCH_UP_QUIET_MS = 600;
 
 const maxSeq = (events: GameEvent[]) => events.reduce((m, e) => Math.max(m, e.seq ?? 0), 0);
 const fresh = (view: PlayerView, lastSeq: number) => view.events.filter((e) => (e.seq ?? 0) > lastSeq);
@@ -37,6 +38,7 @@ export function useAnimatedView(latest: PlayerView | null, opts: { enabled: bool
     speed: 1 as 1 | 2,
     batchKey: 0,
     running: null as PlayerView | null,
+    catchUp: null as ReturnType<typeof setTimeout> | null,
   });
 
   useEffect(() => {
@@ -52,8 +54,13 @@ export function useAnimatedView(latest: PlayerView | null, opts: { enabled: bool
       if (bumpBatch) s.batchKey++;
       setState({ shown: view, effects: [], speed: s.speed, batchKey: s.batchKey });
     };
+    const endCatchUp = () => {
+      if (s.catchUp) clearTimeout(s.catchUp);
+      s.catchUp = null;
+    };
     const reset = () => {
       clearTimer();
+      endCatchUp();
       s.queue = [];
       s.lastSeq = 0;
       s.curMs = 0;
@@ -84,6 +91,7 @@ export function useAnimatedView(latest: PlayerView | null, opts: { enabled: bool
         }
         s.curMs = ms;
         s.rawLeft = ms;
+        s.speed = ms + backlog() > FAST_MS ? 2 : 1;
         setState({ shown: s.shown, effects: fx, speed: s.speed, batchKey: s.batchKey });
         schedule(view);
       }
@@ -125,11 +133,21 @@ export function useAnimatedView(latest: PlayerView | null, opts: { enabled: bool
       return;
     }
 
+    if (s.catchUp) {
+      // 건너뛴 직후: 조용해질 때까지 연출 없이 바로 표시
+      clearTimeout(s.catchUp);
+      s.catchUp = setTimeout(() => { s.catchUp = null; }, CATCH_UP_QUIET_MS);
+      s.lastSeq = Math.max(s.lastSeq, top);
+      show(latest, false);
+      return;
+    }
+
     s.queue.push(latest);
     const total = backlog();
     if (total > SKIP_MS) {
       reset();
       s.lastSeq = top;
+      s.catchUp = setTimeout(() => { s.catchUp = null; }, CATCH_UP_QUIET_MS);
       show(latest, true);
       return;
     }
@@ -152,6 +170,8 @@ export function useAnimatedView(latest: PlayerView | null, opts: { enabled: bool
     () => () => {
       if (m.current.timer) clearTimeout(m.current.timer);
       m.current.timer = null;
+      if (m.current.catchUp) clearTimeout(m.current.catchUp);
+      m.current.catchUp = null;
     },
     [],
   );
