@@ -86,3 +86,20 @@
 .role-card .remoji { font-size: 36px; }
 .role-card .rname { font-weight: bold; margin: 4px 0; }
 .role-card .rgoal { font-size: 12px; }
+
+.effect-layer { position: fixed; inset: 0; pointer-events: none; z-index: 50; overflow: hidden; }
+.effect-layer .fly-ghost,
+.effect-layer .judge-ghost { position: fixed; translate: -50% -50%; perspective: 600px; }
+.effect-layer .judge-ghost { border-radius: 8px; border: 3px solid transparent; }
+.effect-layer .judge-ghost.success { border-color: #3f8f4a; }
+.effect-layer .judge-ghost.fail { border-color: #b3261e; }
+.effect-layer .float-num {
+  position: fixed;
+  translate: -50% -50%;
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: bold;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+.effect-layer .float-num.damage { color: #e0453a; }
+.effect-layer .float-num.heal { color: #5fc46b; }
