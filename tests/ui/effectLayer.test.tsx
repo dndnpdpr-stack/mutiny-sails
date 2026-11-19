@@ -83,4 +83,16 @@ describe('EffectLayer', () => {
     act(() => { vi.advanceTimersByTime(0); });
     expect(count(container, 'fly')).toBe(0);
   });
+
+  it('keeps in-flight elements when rerendered with a new equal array and same batchKey', () => {
+    const { container, again } = setup([fly(0)]);
+    act(() => { vi.advanceTimersByTime(100); });
+    const el = container.querySelector('[data-effect="fly"]');
+    expect(el).not.toBeNull();
+    again([fly(0)], 1, 1);
+    act(() => { vi.advanceTimersByTime(0); });
+    expect(container.querySelector('[data-effect="fly"]')).toBe(el);
+    act(() => { vi.advanceTimersByTime(350); });
+    expect(count(container, 'fly')).toBe(0);
+  });
 });

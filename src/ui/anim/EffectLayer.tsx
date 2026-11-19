@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { CardBack, CardFace } from '../table/Card';
 import { anchorRect } from './anchors';
 import type { Anchor, Effect } from './effects';
@@ -33,11 +33,13 @@ function resolve(e: Effect): Pt[] | null {
 
 export function EffectLayer(p: { effects: Effect[]; speed: 1 | 2; batchKey: number }) {
   const [live, setLive] = useState<Live[]>([]);
+  const effectsRef = useRef(p.effects);
+  effectsRef.current = p.effects;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setLive([]);
     const timers: ReturnType<typeof setTimeout>[] = [];
-    p.effects.forEach((effect, id) => {
+    effectsRef.current.forEach((effect, id) => {
       timers.push(
         setTimeout(() => {
           const path = resolve(effect);
@@ -49,7 +51,7 @@ export function EffectLayer(p: { effects: Effect[]; speed: 1 | 2; batchKey: numb
     });
     return () => timers.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [p.batchKey, p.effects, p.speed]);
+  }, [p.batchKey, p.speed]);
 
   return (
     <div className="effect-layer" aria-hidden="true">
