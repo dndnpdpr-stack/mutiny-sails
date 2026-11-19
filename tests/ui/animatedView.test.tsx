@@ -40,7 +40,34 @@ describe('useAnimatedView', () => {
     act(() => { vi.advanceTimersByTime(2); });
     expect(result.current.shown).toBe(v2);
     expect(result.current.effects).toEqual([]);
-    expect(result.current.batchKey).toBe(1);
+    expect(result.current.batchKey).toBeGreaterThan(0);
+  });
+
+  it('changes batchKey when a batch with effects starts, and again for the next batch', () => {
+    const { result, rerender } = setup(view([]));
+    const k0 = result.current.batchKey;
+    rerender(props(view([dmg(1)])));
+    expect(result.current.effects).toHaveLength(2);
+    const k1 = result.current.batchKey;
+    expect(k1).not.toBe(k0);
+    act(() => { vi.advanceTimersByTime(601); });
+    const kEnd = result.current.batchKey;
+    expect(result.current.effects).toEqual([]);
+    rerender(props(view([dmg(1), dmg(2)])));
+    expect(result.current.effects).toHaveLength(2);
+    const k2 = result.current.batchKey;
+    expect(k2).not.toBe(k1);
+    expect(k2).not.toBe(kEnd);
+  });
+
+  it('gives back-to-back batches different keys without an empty state between them', () => {
+    const { result, rerender } = setup(view([]));
+    rerender(props(view([dmg(1)])));
+    const k1 = result.current.batchKey;
+    rerender(props(view([dmg(1), dmg(2)]))); // 대기열에 쌓임
+    act(() => { vi.advanceTimersByTime(601); });
+    expect(result.current.effects).toHaveLength(2);
+    expect(result.current.batchKey).not.toBe(k1);
   });
 
   it('enabled=false swaps immediately', () => {

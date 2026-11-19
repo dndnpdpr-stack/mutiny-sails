@@ -53,9 +53,7 @@ export function TableScreen(p: {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [pickFor, setPickFor] = useState<{ cardId: string; target: SeatId } | null>(null);
 
-  // useAnimatedView는 연출이 시작될 때 batchKey를 올리지 않으므로, 연출 시작/끝을 각각 다른 키로 만든다
-  const fxKey = p.batchKey * 2 + (p.effects.length > 0 ? 1 : 0);
-  const flags = useEffectFlags(p.effects, p.speed, fxKey);
+  const flags = useEffectFlags(p.effects, p.speed, p.batchKey);
   const fxOf = (s: SeatId) => FX.filter((c) => (flags[`${s}:${c}`] ?? 0) > 0);
 
   const hint = selectedId ? latest.hints.find((h) => h.cardId === selectedId && latest.myHand.some((c) => c.id === h.cardId)) ?? null : null;
@@ -180,7 +178,7 @@ export function TableScreen(p: {
 
       {(flags.banner ?? 0) > 0 && <div className="turn-banner">내 차례!</div>}
       {p.lastRejection && <div className="toast note">{p.lastRejection}</div>}
-      <EffectLayer effects={p.effects} speed={p.speed} batchKey={fxKey} />
+      <EffectLayer effects={p.effects} speed={p.speed} batchKey={p.batchKey} />
     </div>
   );
 }

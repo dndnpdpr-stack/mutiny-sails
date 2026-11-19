@@ -92,6 +92,7 @@ export function useAnimatedView(latest: PlayerView | null, opts: { enabled: bool
         s.curMs = ms;
         s.rawLeft = ms;
         s.speed = ms + backlog() > FAST_MS ? 2 : 1;
+        s.batchKey++; // 연출 시작도 새 묶음: EffectLayer가 이 키로 다시 재생한다
         setState({ shown: s.shown, effects: fx, speed: s.speed, batchKey: s.batchKey });
         schedule(view);
       }
