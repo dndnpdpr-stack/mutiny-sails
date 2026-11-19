@@ -1,0 +1,88 @@
+/* 나무 갑판 테이블 테마 (Task 7에서 styles.css를 대체) */
+:root {
+  --gold: #d8b56a;
+  --ink: #3a2410;
+  --serif: Georgia, 'Batang', 'Noto Serif KR', serif;
+}
+.table-bg {
+  min-height: 100vh;
+  color: #f6ead0;
+  font-family: var(--serif);
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.06) 0 2px, transparent 2px 22px),
+    linear-gradient(#6b4423, #4a2e16);
+}
+.panel {
+  background: rgba(30, 18, 8, 0.55);
+  border: 1px solid var(--gold);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+.table-layout { display: grid; gap: 12px; padding: 12px; }
+.table-layout .seats { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.table-layout .hand { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+
+.pcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 4px;
+  font-family: var(--serif);
+  color: var(--ink);
+  background: linear-gradient(#f6ead0, #e7d3a8);
+  border: 2px solid #7a4e24;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45);
+  cursor: default;
+}
+.pcard.md { width: 92px; height: 132px; font-size: 14px; }
+.pcard.sm { width: 52px; height: 74px; font-size: 10px; }
+.pcard.equipment { background: linear-gradient(#dfe8ef, #b9c9d6); border-color: #3b5870; }
+.pcard:not(:disabled) { cursor: pointer; }
+.pcard .corner { position: absolute; top: 3px; left: 5px; display: flex; flex-direction: column; align-items: center; line-height: 1; font-weight: bold; }
+.pcard .suit.red { color: #b3261e; }
+.pcard .emoji { font-size: 2.2em; }
+.pcard.sm .emoji { font-size: 1.8em; }
+.pcard .name { position: absolute; bottom: 4px; font-size: 0.9em; font-weight: bold; }
+.pcard.dim { opacity: 0.45; filter: grayscale(0.4); }
+.pcard.raised { transform: translateY(-10px); }
+.pcard.selected { outline: 3px solid var(--gold); box-shadow: 0 0 10px var(--gold); }
+.pcard.highlight { box-shadow: 0 0 12px 3px #ffe08a; }
+.pcard.back {
+  background: repeating-linear-gradient(45deg, #7d1d1d 0 8px, #5e1414 8px 16px);
+  border: 2px solid var(--gold);
+}
+
+.char-card {
+  width: 150px;
+  padding: 10px;
+  text-align: center;
+  font-family: var(--serif);
+  color: var(--ink);
+  background: linear-gradient(#f6ead0, #e7d3a8);
+  border: 2px solid #7a4e24;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+.char-card .face { font-size: 44px; }
+.char-card .cname { font-weight: bold; margin: 4px 0; }
+.char-card .hearts .heart { color: #b3261e; }
+.char-card .ctext { font-size: 12px; margin: 6px 0; min-height: 48px; }
+.char-card .pick { font-family: var(--serif); padding: 4px 12px; border: 1px solid #7a4e24; border-radius: 6px; background: #f0dcae; cursor: pointer; }
+.char-card .pick:disabled { cursor: default; opacity: 0.6; }
+
+.role-card { width: 110px; min-height: 150px; perspective: 600px; text-align: center; font-family: var(--serif); }
+.role-card.front {
+  padding: 10px;
+  color: var(--ink);
+  background: linear-gradient(#f6ead0, #e7d3a8);
+  border: 2px solid #7a4e24;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+.role-card .remoji { font-size: 36px; }
+.role-card .rname { font-weight: bold; margin: 4px 0; }
+.role-card .rgoal { font-size: 12px; }
