@@ -28,5 +28,7 @@ export function defaultActionFor(game: Game, p: PendingView): Action {
       return { type: 'chooseSeat', target: game.nextAlive(p.seat) };
     case 'drawSource':
       return { type: 'chooseDrawSource', fromDiscard: false };
+    case 'chooseCharacter':
+      return { type: 'chooseCharacter', character: p.options[0] };
   }
 }

@@ -32,7 +32,9 @@ export type Action =
   /** 마고 엿보기, 비비 화약통 넘기기 */
   | { type: 'chooseSeat'; target: SeatId }
   /** 밀수꾼 루 */
-  | { type: 'chooseDrawSource'; fromDiscard: boolean };
+  | { type: 'chooseDrawSource'; fromDiscard: boolean }
+  /** 캐릭터 뽑기 */
+  | { type: 'chooseCharacter'; character: CharacterId };
 
 export type PendingView =
   | { kind: 'turn'; seat: SeatId }
@@ -46,12 +48,14 @@ export type PendingView =
   | { kind: 'judgeChoice'; seat: SeatId; options: CardView[] }
   | { kind: 'peekTarget'; seat: SeatId }
   | { kind: 'passKeg'; seat: SeatId }
-  | { kind: 'drawSource'; seat: SeatId };
+  | { kind: 'drawSource'; seat: SeatId }
+  | { kind: 'chooseCharacter'; seat: SeatId; options: CharacterId[] };
 
 export type Winner = 'captainTeam' | 'rebels' | 'spy';
 
 /** visibleTo 없음 = 모두에게 공개 */
-export type GameEvent = { visibleTo?: SeatId[] } & (
+/** seq는 Game.emit이 채운다(1부터) */
+export type GameEvent = { visibleTo?: SeatId[]; seq?: number } & (
   | { type: 'turnStart'; seat: SeatId }
   | { type: 'draw'; seat: SeatId; count: number }
   | { type: 'drawCards'; seat: SeatId; cards: CardView[] }
@@ -66,6 +70,7 @@ export type GameEvent = { visibleTo?: SeatId[] } & (
   | { type: 'death'; seat: SeatId; role: Role; killer: SeatId | null }
   | { type: 'ability'; seat: SeatId; character: CharacterId }
   | { type: 'gameOver'; winner: Winner }
+  | { type: 'characterChosen'; seat: SeatId; character: CharacterId }
 );
 
 /** targets null = 대상 불필요. targetCards = 대상의 장비를 고를 수 있음 */

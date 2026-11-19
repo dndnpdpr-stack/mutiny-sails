@@ -56,6 +56,8 @@ export function formatEvent(e: GameEvent, names: (s: SeatId) => string): string 
       return `${names(e.seat)}이(가) 쓰러졌어요. (${roleName(e.role)})`;
     case 'ability':
       return `${names(e.seat)}이(가) ${CHARACTER_INFO[e.character].name}의 능력을 썼어요.`;
+    case 'characterChosen':
+      return `${names(e.seat)}이(가) ${CHARACTER_INFO[e.character].name}을(를) 골랐어요.`;
     case 'gameOver':
       return winnerText(e.winner);
   }

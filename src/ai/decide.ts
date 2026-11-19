@@ -170,6 +170,8 @@ export function fallbackAction(view: PlayerView): Action | null {
       return { type: 'chooseSeat', target: nextAliveAfter(view, view.you) };
     case 'drawSource':
       return { type: 'chooseDrawSource', fromDiscard: false };
+    case 'chooseCharacter':
+      return { type: 'chooseCharacter', character: p.options[0] };
   }
 }
 

@@ -30,6 +30,7 @@ export interface SeatState {
   hand: Card[];
   equipment: Card[];
   alive: boolean;
+  characterChosen: boolean;
 }
 
 export type ApplyResult = { ok: true } | { ok: false; reason: string };
@@ -55,13 +56,14 @@ export class Game {
   abilityUsedThisTurn = false;
   private stack: Step[] = [];
   private started = false;
+  private seq = 0;
 
   constructor(config: GameConfig) {
     const n = config.names.length;
     if (n < 4 || n > 7) throw new Error('인원은 4~7명이어야 해요');
     this.rng = new Rng(config.seed);
     const roles = config.roles ?? this.rng.shuffle(ROLE_TABLE.slice(0, n));
-    const chars = config.characters ?? this.rng.shuffle([...CHARACTER_IDS]).slice(0, n);
+    const forced = config.characters;
 
     let specs = this.rng.shuffle(buildDeckSpec(this.rng));
     if (config.stackDeck) {
@@ -71,11 +73,15 @@ export class Game {
     this.deck = specs.map(createCard);
 
     this.seats = config.names.map((name, seat) => {
-      const character = CHARACTERS[chars[seat]];
+      if (!forced) {
+        // 임시 캐릭터(뽑기 전에는 읽지 않음)
+        return { seat, name, role: roles[seat], character: CHARACTERS[CHARACTER_IDS[0]], hp: 0, maxHp: 0, hand: [], equipment: [], alive: true, characterChosen: false };
+      }
+      const character = CHARACTERS[forced[seat]];
       const maxHp = character.maxHp + (roles[seat] === 'captain' ? 1 : 0);
-      return { seat, name, role: roles[seat], character, hp: maxHp, maxHp, hand: [], equipment: [], alive: true };
+      return { seat, name, role: roles[seat], character, hp: maxHp, maxHp, hand: [], equipment: [], alive: true, characterChosen: true };
     });
-    for (const s of this.seats) s.hand.push(...this.draw(s.hp));
+    if (forced) this.dealOpeningHands();
     this.current = this.captainSeat();
   }
 
@@ -115,8 +121,40 @@ export class Game {
   start(): void {
     if (this.started) return;
     this.started = true;
-    this.beginTurn(this.captainSeat());
+    if (this.seats.every((s) => s.characterChosen)) this.beginTurn(this.captainSeat());
+    else this.draftFrom(0);
     this.advance();
+  }
+
+  private dealOpeningHands(): void {
+    for (const s of this.seats) s.hand.push(...this.draw(s.hp));
+  }
+
+  /** 선장부터 시계 방향으로 i번째 사람이 캐릭터를 고른다 */
+  private draftFrom(i: number): void {
+    const n = this.seats.length;
+    if (i >= n) {
+      for (const s of this.seats) {
+        s.maxHp = s.character.maxHp + (s.role === 'captain' ? 1 : 0);
+        s.hp = s.maxHp;
+      }
+      this.dealOpeningHands();
+      this.beginTurn(this.captainSeat());
+      return;
+    }
+    const seat = (this.captainSeat() + i) % n;
+    const taken = new Set(this.seats.filter((s) => s.characterChosen).map((s) => s.character.id));
+    const options = this.rng.shuffle(CHARACTER_IDS.filter((c) => !taken.has(c))).slice(0, 2);
+    this.pushInput({ kind: 'chooseCharacter', seat, options }, (a) => {
+      if (a.type !== 'chooseCharacter') return WRONG_ACTION;
+      if (!options.includes(a.character)) return '제시된 캐릭터 중에서 골라 주세요';
+      const s = this.seats[seat];
+      s.character = CHARACTERS[a.character];
+      s.characterChosen = true;
+      this.emit({ type: 'characterChosen', seat, character: a.character });
+      this.draftFrom(i + 1);
+      return null;
+    });
   }
 
   apply(seat: SeatId, action: Action): ApplyResult {
@@ -317,6 +355,7 @@ export class Game {
   // ───────────── 카드·피해 (카드·캐릭터 클래스가 사용) ─────────────
 
   emit(e: GameEvent): void {
+    e.seq = ++this.seq;
     this.events.push(e);
   }
 

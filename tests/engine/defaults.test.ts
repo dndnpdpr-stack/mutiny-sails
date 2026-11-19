@@ -75,6 +75,12 @@ describe('defaultActionFor', () => {
     expectDefaultOk(g, 'drawSource');
   });
 
+  it('chooseCharacter', () => {
+    const g = new Game({ seed: 1, names: ['a', 'b', 'c', 'd'] });
+    g.start();
+    expectDefaultOk(g, 'chooseCharacter');
+  });
+
   it('defaults alone never break a game', () => {
     for (let seed = 1; seed <= 50; seed++) {
       const n = 4 + (seed % 4);

@@ -1,6 +1,13 @@
 import { Game } from '../../src/engine/Game';
 import type { Role } from '../../src/engine/types';
+import { defaultActionFor } from '../../src/engine/defaults';
 import { makeGame } from './helpers';
+
+/** 캐릭터 뽑기를 기본 행동으로 끝낸다 */
+function finishDraft(g: Game) {
+  g.start();
+  while (g.pending()?.kind === 'chooseCharacter') g.apply(g.pending()!.seat, defaultActionFor(g, g.pending()!));
+}
 
 const names = (n: number) => Array.from({ length: n }, (_, i) => `P${i}`);
 const count = (roles: Role[], r: Role) => roles.filter((x) => x === r).length;
@@ -22,10 +29,11 @@ describe('game setup', () => {
 
   it('captain has +1 hp and hands equal hp', () => {
     const g = new Game({ seed: 9, names: names(6) });
+    finishDraft(g);
     const cap = g.seats[g.captainSeat()];
     expect(cap.maxHp).toBe(cap.character.maxHp + 1);
     for (const s of g.seats) {
-      expect(s.hand.length).toBe(s.hp);
+      expect(s.hand.length).toBe(s.hp + (s.seat === g.captainSeat() ? 2 : 0)); // 선장은 첫 턴 뽑기 2장
       expect(s.hp).toBe(s.maxHp);
     }
     const handSum = g.seats.reduce((a, s) => a + s.hand.length, 0);
@@ -39,6 +47,7 @@ describe('game setup', () => {
 
   it('assigns unique characters', () => {
     const g = new Game({ seed: 3, names: names(7) });
+    finishDraft(g);
     expect(new Set(g.seats.map((s) => s.character.id)).size).toBe(7);
   });
 

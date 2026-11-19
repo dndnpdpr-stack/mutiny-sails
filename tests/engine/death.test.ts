@@ -51,7 +51,7 @@ describe('win conditions', () => {
     g.apply(1, { type: 'respond', cardIds: [s.id] });
     g.apply(0, { type: 'respond', cardIds: [] });
     expect(g.winner).toBe('spy');
-    expect(g.events.at(-1)).toEqual({ type: 'gameOver', winner: 'spy' });
+    expect(g.events.at(-1)).toMatchObject({ type: 'gameOver', winner: 'spy' });
   });
 
   it('rebels win if any rebel lives when the captain falls', () => {
