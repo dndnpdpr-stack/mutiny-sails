@@ -67,3 +67,10 @@ export type GameEvent = { visibleTo?: SeatId[] } & (
   | { type: 'ability'; seat: SeatId; character: CharacterId }
   | { type: 'gameOver'; winner: Winner }
 );
+
+/** targets null = 대상 불필요. targetCards = 대상의 장비를 고를 수 있음 */
+export interface PlayHint {
+  cardId: CardId;
+  targets: SeatId[] | null;
+  targetCards: boolean;
+}

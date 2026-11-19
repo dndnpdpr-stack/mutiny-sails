@@ -7,9 +7,13 @@ export interface CardInfo {
   category: 'action' | 'equipment';
   emoji: string;
   text: string;
+  /** 대상(자리)을 골라야 하는 카드 */
+  needsTarget: boolean;
+  /** 대상의 장비를 고를 수 있는 카드 */
+  targetsCards: boolean;
 }
 
-const list: CardInfo[] = [
+const list: Array<Omit<CardInfo, 'needsTarget' | 'targetsCards'>> = [
   { kind: 'slash', name: '칼질', count: 23, category: 'action', emoji: '🗡️', text: '사거리 안의 1명을 공격해요. 상대는 피하기를 내거나 체력 1을 잃어요. (한 턴에 1번)' },
   { kind: 'dodge', name: '피하기', count: 12, category: 'action', emoji: '💨', text: '공격을 받았을 때 내서 무효로 만들어요.' },
   { kind: 'rum', name: '럼주', count: 6, category: 'action', emoji: '🍺', text: '체력 1을 회복해요. 두 명만 남으면 쓸 수 없어요.' },
@@ -34,4 +38,9 @@ const list: CardInfo[] = [
   { kind: 'brig', name: '영창', count: 3, category: 'equipment', emoji: '⛓️', text: '다른 사람(선장 제외) 앞에 둬요. 그 사람은 턴 시작 시 판정: ♥이 아니면 턴을 건너뛰어요.' },
 ];
 
-export const CARD_CATALOG = Object.fromEntries(list.map((i) => [i.kind, i])) as Record<CardKind, CardInfo>;
+const TARGETED: CardKind[] = ['slash', 'duel', 'pickpocket', 'cutRope', 'brig'];
+const CARD_TARGETING: CardKind[] = ['pickpocket', 'cutRope'];
+
+export const CARD_CATALOG = Object.fromEntries(
+  list.map((i) => [i.kind, { ...i, needsTarget: TARGETED.includes(i.kind), targetsCards: CARD_TARGETING.includes(i.kind) }]),
+) as Record<CardKind, CardInfo>;
