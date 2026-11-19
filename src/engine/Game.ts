@@ -344,6 +344,45 @@ export class Game {
     );
   }
 
+  /** 포격 효과: 나를 뺀 모두에게 앉은 순서대로 */
+  cannonade(actor: SeatId): void {
+    for (const t of [...this.othersFrom(actor)].reverse()) this.pushStep(() => this.attack(t, actor, 'cannonade'));
+  }
+
+  /** 결투에서 seat가 칼질을 낼 차례 */
+  duelTurn(seat: SeatId, opponent: SeatId): void {
+    const required = this.seats[opponent].character.duelSlashesRequiredFromOpponent();
+    this.pushCardResponse(
+      { kind: 'respondDuel', seat, opponent, required },
+      'slash',
+      required,
+      () => this.duelTurn(opponent, seat),
+      () => this.dealDamage(seat, 1, opponent),
+    );
+  }
+
+  /** 전리품 분배: order 순서대로 한 장씩. 마지막 한 장은 자동 */
+  lootPick(order: SeatId[], cards: Card[]): void {
+    if (cards.length === 0) return;
+    const [seat, ...rest] = order;
+    if (seat === undefined) {
+      for (const c of cards) this.discardCard(c);
+      return;
+    }
+    if (cards.length === 1) {
+      this.giveCards(seat, cards);
+      return;
+    }
+    this.pushInput({ kind: 'loot', seat, revealed: cards.map((c) => c.toView()) }, (a) => {
+      if (a.type !== 'chooseCard') return WRONG_ACTION;
+      const picked = cards.find((c) => c.id === a.cardId);
+      if (!picked) return '펼쳐진 카드 중에서 골라 주세요';
+      this.giveCards(seat, [picked]);
+      this.lootPick(rest, cards.filter((c) => c !== picked));
+      return null;
+    });
+  }
+
   /** 칼질 카드로 하는 공격 */
   slashAttack(target: SeatId, attacker: SeatId): void {
     this.attack(target, attacker, 'slash');
