@@ -30,7 +30,7 @@ export function responseWith(view: PlayerView, cardId: string): string[] | null 
   return ids.length === need.count ? ids : null;
 }
 
-function Note(p: { title: string; children: ReactNode }) {
+export function Note(p: { title: string; children: ReactNode }) {
   return (
     <div className="note-overlay">
       <div className="note" role="dialog" aria-label={p.title}>
@@ -38,6 +38,21 @@ function Note(p: { title: string; children: ReactNode }) {
         <div className="note-body">{p.children}</div>
       </div>
     </div>
+  );
+}
+
+/** 마고 능력: 엿본 카드를 보여주는 쪽지 */
+export function PeekNote(p: { targetName: string; card: CardView; onClose: () => void }) {
+  return (
+    <Note title="엿본 카드">
+      <p>{p.targetName}의 손패에서 본 카드예요.</p>
+      <div className="note-cards">
+        <CardFace card={p.card} />
+      </div>
+      <button type="button" onClick={p.onClose}>
+        확인
+      </button>
+    </Note>
   );
 }
 

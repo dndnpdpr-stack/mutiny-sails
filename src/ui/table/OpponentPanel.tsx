@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { CHARACTER_INFO } from '../../engine/characters/roster';
-import type { SeatView } from '../../engine/types';
+import type { CardView, SeatView } from '../../engine/types';
+import { CARD_CATALOG } from '../../engine/cards/catalog';
 import { roleName } from '../format';
 import { CardBack, CardFace } from './Card';
 import { CHARACTER_FACE } from './CharacterCard';
@@ -18,6 +19,8 @@ export function OpponentPanel(p: {
   targetable: boolean;
   outOfRange: boolean;
   fx: SeatFx[];
+  /** 마고 능력으로 엿본 카드 */
+  peeked?: CardView | null;
   style?: CSSProperties;
   onClick?: () => void;
 }) {
@@ -61,6 +64,11 @@ export function OpponentPanel(p: {
           <CardFace key={c.id} card={c} size="sm" />
         ))}
       </div>
+      {p.peeked && (
+        <div className="mini peek-memo" title="마고 능력으로 엿본 카드">
+          👁 엿본 카드: {CARD_CATALOG[p.peeked.kind].name}
+        </div>
+      )}
       {s.role && <div className="mini role">{roleName(s.role)}</div>}
       {s.alive && p.distance !== undefined && <div className="mini dist">거리 {p.distance}</div>}
     </div>

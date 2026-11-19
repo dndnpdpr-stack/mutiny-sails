@@ -32,6 +32,26 @@ function renderTable(latest: PlayerView, opts: { shown?: PlayerView; effects?: E
 const panel = (n: number) => document.querySelector(`[data-testid="seat-panel"][data-anchor="seat:${n}"]`) as HTMLElement;
 const handCard = (name: string) => within(document.querySelector('[data-anchor="hand"]') as HTMLElement).getByRole('button', { name });
 
+describe('TableScreen — margo peek', () => {
+  const peeked = card('x9', 'dodge', 'hearts', 7);
+  const peekEvent = { seq: 3, type: 'peek' as const, seat: 1, target: 2, card: peeked, visibleTo: [1] };
+
+  it('shows the peeked card in a note until confirmed', () => {
+    renderTable(makeView({ events: [peekEvent] }));
+    const note = screen.getByRole('dialog', { name: /엿본 카드/ });
+    expect(note.textContent).toContain('p2');
+    expect(within(note).getByRole('button', { name: '피하기' })).toBeTruthy();
+    fireEvent.click(within(note).getByRole('button', { name: '확인' }));
+    expect(screen.queryByRole('dialog', { name: /엿본 카드/ })).toBeNull();
+  });
+
+  it('keeps a memo on the peeked opponent panel', () => {
+    renderTable(makeView({ events: [peekEvent] }));
+    expect(panel(2).textContent).toContain('엿본 카드: 피하기');
+    expect(panel(3).textContent).not.toContain('엿본 카드');
+  });
+});
+
 describe('TableScreen', () => {
   it('lays out 4 opponents, crown on the captain, and every anchor', () => {
     renderTable(makeView({ myHand: [card('h1', 'slash')] }));

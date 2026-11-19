@@ -6,7 +6,8 @@ import { CenterPile } from '../table/CenterPile';
 import { GameLog } from '../table/GameLog';
 import { MyArea } from '../table/MyArea';
 import { OpponentPanel, type SeatFx } from '../table/OpponentPanel';
-import { PromptNote, TargetCardNote, responseNeed, responseWith } from '../table/PromptNote';
+import { PeekNote, PromptNote, TargetCardNote, responseNeed, responseWith } from '../table/PromptNote';
+import { latestPeek, peekMemos } from '../table/peek';
 
 type Flags = Record<string, number>;
 
@@ -77,6 +78,9 @@ export function TableScreen(p: {
   const { latest, shown, send } = p;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [pickFor, setPickFor] = useState<{ cardId: string; target: SeatId } | null>(null);
+  const [peekAck, setPeekAck] = useState(0);
+  const newPeek = latestPeek(latest.events, latest.you, peekAck);
+  const memos = peekMemos(latest.events, latest.you);
 
   const flags = useEffectFlags(p.effects, p.speed, p.batchKey);
   const fxOf = (s: SeatId) => FX.filter((c) => (flags[`${s}:${c}`] ?? 0) > 0);
@@ -152,6 +156,7 @@ export function TableScreen(p: {
               targetable={!!hint?.targets?.includes(s.seat)}
               outOfRange={!!hint?.targets && s.alive && !hint.targets.includes(s.seat)}
               fx={fxOf(s.seat)}
+              peeked={memos[s.seat] ?? null}
               style={{ marginTop: Math.round((1 - lift) * 48) }}
               onClick={() => onSeatClick(s.seat)}
             />
@@ -188,6 +193,7 @@ export function TableScreen(p: {
       />
 
       <PromptNote view={latest} send={send} />
+      {newPeek && <PeekNote targetName={latest.seats[newPeek.target].name} card={newPeek.card} onClose={() => setPeekAck(newPeek.seq ?? 0)} />}
       {pick && (
         <TargetCardNote
           targetName={latest.seats[pick.target].name}
