@@ -423,5 +423,36 @@ export class Game {
     this.emit({ type: 'death', seat, role: s.role, killer });
     for (const c of s.hand.splice(0)) this.discardCard(c);
     for (const c of s.equipment.splice(0)) this.discardCard(c);
+
+    const winner = this.checkWinner();
+    if (winner) {
+      this.winner = winner;
+      this.stack = [];
+      this.emit({ type: 'gameOver', winner });
+      return;
+    }
+    if (killer !== null && killer !== seat && this.seats[killer].alive) {
+      if (s.role === 'rebel') this.giveCards(killer, this.draw(3));
+      if (s.role === 'loyalist' && this.seats[killer].role === 'captain') {
+        const k = this.seats[killer];
+        const lost = [...k.hand.splice(0), ...k.equipment.splice(0)];
+        for (const c of lost) this.discardCard(c);
+        if (lost.length) this.emit({ type: 'discardCards', seat: killer, cards: lost.map((c) => c.toView()) });
+      }
+    }
+    if (seat === this.current) {
+      // 자기 턴에 쓰러지면 남은 턴 단계를 버리고 다음 사람에게
+      this.stack = [];
+      this.pushStep(() => this.nextTurn());
+    }
+  }
+
+  private checkWinner(): Winner | null {
+    const alive = this.seats.filter((x) => x.alive);
+    if (!alive.some((x) => x.role === 'captain')) {
+      return alive.length === 1 && alive[0].role === 'spy' ? 'spy' : 'rebels';
+    }
+    if (!alive.some((x) => x.role === 'rebel' || x.role === 'spy')) return 'captainTeam';
+    return null;
   }
 }
