@@ -21,7 +21,6 @@ function playOut(seed: number) {
     const r = game.apply(p.seat, action);
     if (!r.ok) {
       rejected++;
-      if (process.env.DBG) console.log(r.reason, JSON.stringify(action), p.kind);
       game.apply(p.seat, fallbackAction(view)!);
     }
     steps++;
