@@ -25,11 +25,18 @@ describe('SetupScreen', () => {
   });
 });
 
+/** 내 차례가 오면 첫 번째 역할 카드를 뽑는다 */
+async function drawMyRole() {
+  const cards = await screen.findAllByRole('button', { name: /^역할 카드 \d+번$/ }, { timeout: 3000 });
+  fireEvent.click(cards[0]);
+}
+
 describe('App draft flow', () => {
-  it('reveals role, drafts a character, then enters the table', async () => {
+  it('draws a role, drafts a character, then enters the table', async () => {
     render(<App defaults={{ seed: 11, aiDelayMs: 0, animations: false }} />);
     fireEvent.click(screen.getByText('4명'));
     fireEvent.click(screen.getByText('출항'));
+    await drawMyRole();
     const picks = await screen.findAllByRole('button', { name: /고르기$/ }, { timeout: 3000 });
     expect(picks).toHaveLength(2);
     expect(screen.getAllByText(ROLES).length).toBeGreaterThan(0);
@@ -43,10 +50,48 @@ describe('App draft flow', () => {
     render(<App defaults={{ seed: 2, aiDelayMs: 0, animations: false }} />);
     fireEvent.click(screen.getByText('4명'));
     fireEvent.click(screen.getByText('출항'));
+    await drawMyRole();
     await waitFor(() =>
       expect(screen.queryByText(/다른 선원들이 캐릭터를 고르는 중/) ?? screen.queryAllByRole('button', { name: /고르기$/ })[0]).toBeTruthy(),
     );
     expect(await screen.findAllByRole('button', { name: /고르기$/ }, { timeout: 3000 })).toHaveLength(2);
+  });
+});
+
+describe('DraftScreen role draw', () => {
+  const seats = [0, 1, 2, 3].map((i) => ({
+    seat: i, name: `p${i}`, character: null, hp: 0, maxHp: 0, alive: true,
+    handCount: 0, equipment: [], role: null, isAi: i !== 1,
+  })) as unknown as SeatView[];
+  const base = { you: 1, myRole: null, myHand: [], seats, current: 0, hints: [], deckCount: 80,
+    discardTop: null, distances: {}, myRange: 1, abilityUsed: false, events: [], winner: null };
+
+  it('lets me draw one of the remaining face-down role cards on my turn', () => {
+    const send = vi.fn();
+    const view = { ...base, pending: { kind: 'drawRole', seat: 1, slots: [1, 2, 3] },
+      events: [{ seq: 1, type: 'roleDrawn', seat: 0, slot: 0, role: null }] } as unknown as PlayerView;
+    render(<DraftScreen view={view} send={send} />);
+    expect(screen.getByText('역할 카드를 뽑으세요')).toBeTruthy();
+    const cards = screen.getAllByRole('button', { name: /^역할 카드 \d+번$/ });
+    expect(cards).toHaveLength(3);
+    expect(screen.getByText('p0')).toBeTruthy(); // 이미 뽑힌 자리에 뽑은 사람 이름
+    fireEvent.click(screen.getByRole('button', { name: '역할 카드 3번' }));
+    expect(send).toHaveBeenCalledWith({ type: 'drawRole', slot: 2 });
+  });
+
+  it('waits while someone else draws, and announces the captain', () => {
+    const withCaptain = seats.map((s) => (s.seat === 0 ? { ...s, role: 'captain' } : s)) as SeatView[];
+    const view = { ...base, seats: withCaptain, pending: { kind: 'drawRole', seat: 0, slots: [0, 1, 2, 3] } } as unknown as PlayerView;
+    render(<DraftScreen view={view} send={vi.fn()} />);
+    expect(screen.getByText('p0이(가) 역할 카드를 고르는 중…')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /^역할 카드/ })).toBeNull();
+    expect(screen.getByText(/선장은 p0/)).toBeTruthy();
+  });
+
+  it('reveals my role card once I have drawn it', () => {
+    const view = { ...base, myRole: 'rebel', pending: { kind: 'drawRole', seat: 2, slots: [0, 3] } } as unknown as PlayerView;
+    render(<DraftScreen view={view} send={vi.fn()} />);
+    expect(screen.getByText('반란 선원')).toBeTruthy();
   });
 });
 

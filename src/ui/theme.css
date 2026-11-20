@@ -273,3 +273,12 @@ h1, h2, h3, .cname, .rname, .opp .nm { font-weight: 800; letter-spacing: -0.01em
 .guide-head { width: 100%; }
 .guide-card .pcard .corner { visibility: hidden; }
 .guide { max-height: calc(100dvh - 32px); }
+/* 역할 카드 뽑기 */
+.captain-call { margin: 6px 0 0; font-weight: 800; color: #7a4e24; }
+.role-spread { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 8px 0; }
+.role-slot { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; padding: 0; font: inherit; font-size: 12px; color: #5b3a20; }
+.role-slot.pick { cursor: pointer; transition: transform 0.15s; }
+.role-slot.pick:hover, .role-slot.pick:focus-visible { transform: translateY(-8px); }
+.role-slot.pick:focus-visible .pcard { outline: 3px solid #d9a441; outline-offset: 2px; }
+.role-slot.taken { opacity: 0.55; min-width: 52px; }
+@media (prefers-reduced-motion: reduce) { .role-slot.pick { transition: none; } }

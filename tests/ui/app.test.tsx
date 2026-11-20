@@ -8,6 +8,8 @@ function startGame(count: number, animations: boolean) {
 }
 
 async function pickCharacter() {
+  const roleCards = await screen.findAllByRole('button', { name: /^역할 카드 \d+번$/ }, { timeout: 3000 });
+  fireEvent.click(roleCards[0]);
   const picks = await screen.findAllByRole('button', { name: /고르기$/ }, { timeout: 3000 });
   fireEvent.click(picks[0]);
 }
