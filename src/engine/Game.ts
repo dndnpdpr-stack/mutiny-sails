@@ -18,6 +18,8 @@ export interface GameConfig {
   characters?: CharacterId[];
   /** 덱 맨 위부터의 순서. 나머지는 일반 덱에서 이 카드들을 뺀 뒤 섞어 뒤에 붙인다 */
   stackDeck?: CardView[];
+  /** 역할 카드를 누구부터 뽑을지 (기본 0번 자리). 1인 플레이는 사람 자리, 멀티플레이는 방장 자리 */
+  firstRoleDrawer?: SeatId;
 }
 
 export interface SeatState {
@@ -62,12 +64,14 @@ export class Game {
   /** 엎어 둔 역할 카드 (역할 뽑기를 할 때만) */
   private roleSlots: Role[] | null = null;
   private takenSlots = new Set<number>();
+  private firstRoleDrawer: SeatId = 0;
 
   constructor(config: GameConfig) {
     const n = config.names.length;
     if (n < 4 || n > 7) throw new Error('인원은 4~7명이어야 해요');
     this.rng = new Rng(config.seed);
     const drawRoles = !config.roles;
+    this.firstRoleDrawer = config.firstRoleDrawer ?? 0;
     if (drawRoles) this.roleSlots = this.rng.shuffle(ROLE_TABLE.slice(0, n));
     // 역할 뽑기를 하면 뽑기 전까지 자리의 역할은 임시값
     const roles: Role[] = config.roles ?? Array.from({ length: n }, () => 'rebel' as Role);
@@ -90,7 +94,7 @@ export class Game {
       return { seat, name, role: roles[seat], character, hp: maxHp, maxHp, hand: [], equipment: [], alive: true, characterChosen: true, roleDrawn: !drawRoles };
     });
     if (forced) this.dealOpeningHands();
-    this.current = drawRoles ? 0 : this.captainSeat();
+    this.current = drawRoles ? this.firstRoleDrawer : this.captainSeat();
   }
 
   // ───────────── 조회 ─────────────
@@ -141,7 +145,7 @@ export class Game {
     else this.draftFrom(0);
   }
 
-  /** 0번 자리부터 시계 방향으로 i번째 사람이 엎어 둔 역할 카드 하나를 뽑는다 */
+  /** firstRoleDrawer부터 시계 방향으로 i번째 사람이 엎어 둔 역할 카드 하나를 뽑는다 */
   private roleDrawFrom(i: number): void {
     const slots = this.roleSlots!;
     if (i >= this.seats.length) {
@@ -155,7 +159,7 @@ export class Game {
       this.afterRoles();
       return;
     }
-    const seat = i;
+    const seat = (this.firstRoleDrawer + i) % this.seats.length;
     const remaining = slots.map((_, k) => k).filter((k) => !this.takenSlots.has(k));
     this.pushInput({ kind: 'drawRole', seat, slots: remaining }, (a) => {
       if (a.type !== 'drawRole') return WRONG_ACTION;

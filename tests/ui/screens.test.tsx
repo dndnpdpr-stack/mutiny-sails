@@ -45,8 +45,17 @@ describe('App draft flow', () => {
     await waitFor(() => expect(screen.getAllByTestId('seat-panel')).toHaveLength(3), { timeout: 3000 });
   });
 
-  it('waits for the captain-first draft when the human is not the captain', async () => {
-    // 4 players, seed 2: human seat = |2*31+7|%4 = 1, captain seat = 2 (verified against the engine shuffle)
+  it('lets me draw my role first even when I am not in seat 0', async () => {
+    // 4명, 시드 2: 내 자리 = |2*31+7|%4 = 1
+    render(<App defaults={{ seed: 2, aiDelayMs: 0, animations: false }} />);
+    fireEvent.click(screen.getByText('4명'));
+    fireEvent.click(screen.getByText('출항'));
+    expect(await screen.findByText('역할 카드를 뽑으세요', {}, { timeout: 3000 })).toBeTruthy();
+    expect(screen.getAllByRole('button', { name: /^역할 카드 \d+번$/ })).toHaveLength(4);
+  });
+
+  it('waits for the captain-first character draft after drawing roles', async () => {
+    // 4명, 시드 2: 내 자리는 1번. 선장은 뽑은 카드에 따라 정해져서 내가 선장일 수도 아닐 수도 있다
     render(<App defaults={{ seed: 2, aiDelayMs: 0, animations: false }} />);
     fireEvent.click(screen.getByText('4명'));
     fireEvent.click(screen.getByText('출항'));

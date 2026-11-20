@@ -34,7 +34,7 @@ export function useLocalGame(setup: LocalSetup | null) {
     const pool = [...NICKNAMES].sort(() => 0.5 - Math.random());
     let k = 0;
     const names = Array.from({ length: n }, (_, i) => (i === mySeat ? setup.myName || '나' : pool[k++ % pool.length]));
-    const game = new Game({ seed, names });
+    const game = new Game({ seed, names, firstRoleDrawer: mySeat });
     const session = new HostSession(game, { timeouts: null });
     const ais: AiPlayer[] = [];
     for (let s = 0; s < n; s++) {

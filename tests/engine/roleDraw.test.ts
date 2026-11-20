@@ -97,4 +97,15 @@ describe('role draw', () => {
     g.start();
     expect(g.pending()?.kind).toBe('chooseCharacter');
   });
+
+  it('can start the draw from a chosen seat and continue clockwise', () => {
+    const g = new Game({ seed: 4, names: names(5), firstRoleDrawer: 3 });
+    g.start();
+    const order: number[] = [];
+    for (let p = g.pending(); p?.kind === 'drawRole'; p = g.pending()) {
+      order.push(p.seat);
+      g.apply(p.seat, { type: 'drawRole', slot: p.slots[0] });
+    }
+    expect(order).toEqual([3, 4, 0, 1, 2]);
+  });
 });
