@@ -245,3 +245,27 @@ h1, h2, h3, .cname, .rname, .opp .nm { font-weight: 800; letter-spacing: -0.01em
 .title-art { display: block; width: 100%; aspect-ratio: 480 / 220; border: 3px solid #1b120a; border-radius: 10px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45); background: #2c4a60; }
 .title-block .logo { margin: -34px 0 0; position: relative; font-size: clamp(34px, 9vw, 52px); font-weight: 900; letter-spacing: 0.04em; color: #f2c14e; -webkit-text-stroke: 2px #1b120a; paint-order: stroke fill; text-shadow: 0 4px 0 #1b120a, 0 8px 16px rgba(0, 0, 0, 0.5); }
 .title-block .subtitle { margin: 6px 0 0; font-weight: 600; color: #5b3a20; }
+/* 게임 방법 */
+.setup-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.scroll-panel .secondary { font-family: var(--font); font-size: 16px; padding: 8px 20px; border: 2px solid #7a4e24; border-radius: 8px; background: #f6ead0; cursor: pointer; }
+.guide-overlay { position: fixed; inset: 0; z-index: 50; background: rgba(20, 12, 6, 0.65); display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; }
+.guide { width: min(880px, 100%); max-height: calc(100vh - 32px); display: flex; flex-direction: column; text-align: left; padding: 16px 18px; box-sizing: border-box; }
+.guide-head { display: flex; align-items: center; justify-content: space-between; }
+.guide-head h2 { margin: 0; }
+.guide-close { font-size: 18px; width: 36px; height: 36px; border: 2px solid #7a4e24; border-radius: 50%; background: #f6ead0; cursor: pointer; }
+.guide-tabs { display: flex; gap: 6px; margin: 10px 0; flex-wrap: wrap; }
+.guide-tabs button { font-family: var(--font); font-size: 14px; font-weight: 700; padding: 6px 14px; border: 2px solid #7a4e24; border-radius: 20px; background: #f6ead0; color: #3b2a14; cursor: pointer; }
+.guide-tabs button.active { background: #7a4e24; color: #f6ead0; }
+.guide-body { overflow-y: auto; min-height: 0; flex: 1; padding-right: 6px; color: #3b2a14; line-height: 1.6; font-size: 14px; }
+.guide-body h3 { margin: 14px 0 4px; font-size: 16px; }
+.guide-body ol { margin: 0; padding-left: 20px; }
+.guide-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.guide-table { border-collapse: collapse; margin: 6px 0; width: 100%; max-width: 420px; }
+.guide-table th, .guide-table td { border: 1px solid #b89a6a; padding: 4px 8px; text-align: center; }
+.guide-table th { background: #ead7ac; }
+.guide-card-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+.guide-card { display: flex; gap: 10px; align-items: flex-start; }
+.guide-card .pcard { flex: none; }
+.guide-count { font-weight: 600; color: #7a4e24; font-size: 12px; }
+.guide-text { font-size: 13px; }
+.guide-note { font-size: 13px; margin: 0 0 6px; }

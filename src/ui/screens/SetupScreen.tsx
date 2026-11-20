@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import titleArt from '../art/title.svg';
+import { HowToPlay } from './HowToPlay';
 
 export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: string) => void }) {
   const [count, setCount] = useState(5);
   const [name, setName] = useState('');
+  const [guide, setGuide] = useState(false);
   return (
     <div className="table-bg screen-center">
       <div className="scroll-panel setup">
@@ -23,10 +25,16 @@ export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: 
             </button>
           ))}
         </div>
-        <button type="button" className="primary" onClick={() => onStart(count, name.trim())}>
-          출항
-        </button>
+        <div className="setup-actions">
+          <button type="button" className="secondary" onClick={() => setGuide(true)}>
+            게임 방법
+          </button>
+          <button type="button" className="primary" onClick={() => onStart(count, name.trim())}>
+            출항
+          </button>
+        </div>
       </div>
+      {guide && <HowToPlay onClose={() => setGuide(false)} />}
     </div>
   );
 }
