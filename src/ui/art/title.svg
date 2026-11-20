@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 220">
+  <!-- 타이틀 그림: 해질녘 바다 위, 칼자국 난 돛을 단 해적선과 해골 깃발. 바꾸려면 이 파일을 덮어쓰면 된다 -->
+  <style>
+    .ship { transform-box: view-box; transform-origin: 232px 176px; animation: bob 4.5s ease-in-out infinite; }
+    .flag { transform-box: view-box; transform-origin: 236px 30px; animation: flap 0.9s ease-in-out infinite alternate; }
+    .waves { animation: drift 7s linear infinite; }
+    .gull { animation: glide 6s ease-in-out infinite; }
+    @keyframes bob { 0%, 100% { transform: translateY(0) rotate(-1.6deg); } 50% { transform: translateY(4px) rotate(1.6deg); } }
+    @keyframes flap { from { transform: skewY(-7deg) scaleX(1); } to { transform: skewY(5deg) scaleX(0.88); } }
+    @keyframes drift { from { transform: translateX(0); } to { transform: translateX(-60px); } }
+    @keyframes glide { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(8px, -5px); } }
+    @media (prefers-reduced-motion: reduce) { .ship, .flag, .waves, .gull { animation: none; } }
+  </style>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a2d4c"/>
+      <stop offset="0.55" stop-color="#b9573a"/>
+      <stop offset="1" stop-color="#f0b45a"/>
+    </linearGradient>
+    <clipPath id="above-sea"><rect x="0" y="0" width="480" height="146"/></clipPath>
+  </defs>
+
+  <!-- 하늘과 해 -->
+  <rect width="480" height="150" fill="url(#sky)"/>
+  <circle cx="352" cy="146" r="50" fill="#f7d77e" clip-path="url(#above-sea)"/>
+  <circle cx="352" cy="146" r="62" fill="#f7d77e" opacity=".25" clip-path="url(#above-sea)"/>
+  <path d="M30 60 Q60 50 96 58 Q120 46 150 58" fill="none" stroke="#e7a06a" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+  <path d="M380 44 Q404 36 430 44 Q446 38 462 46" fill="none" stroke="#e7a06a" stroke-width="5" stroke-linecap="round" opacity=".6"/>
+
+  <!-- 갈매기 -->
+  <g class="gull" fill="none" stroke="#1b120a" stroke-width="3" stroke-linecap="round">
+    <path d="M86 92 q8 -8 14 0 q6 -8 14 0"/>
+    <path d="M122 76 q6 -6 11 0 q5 -6 11 0"/>
+  </g>
+
+  <!-- 바다 -->
+  <rect y="146" width="480" height="74" fill="#2c4a60"/>
+  <path d="M0 146 L480 146" stroke="#1b120a" stroke-width="3"/>
+  <path d="M300 156 L404 156 M318 166 L388 166 M334 176 L372 176" stroke="#f7d77e" stroke-width="4" stroke-linecap="round" opacity=".55"/>
+
+  <!-- 배 -->
+  <g class="ship" stroke="#1b120a" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 돛대 -->
+    <path d="M232 32 L232 160 M170 70 L170 160 M294 82 L294 160" fill="none" stroke-width="6"/>
+    <path d="M232 32 L232 160 M170 70 L170 160 M294 82 L294 160" fill="none" stroke="#7a4e24" stroke-width="3"/>
+    <!-- 돛 (칼자국) -->
+    <path d="M196 46 Q232 40 268 46 Q274 88 266 120 Q232 114 198 120 Q190 88 196 46 Z" fill="#efe3c4" stroke-width="5"/>
+    <path d="M250 50 Q268 84 258 118 L266 120 Q274 88 268 46 Z" fill="#cdbd98" stroke="none"/>
+    <path d="M214 62 L238 96 L230 98 L210 70 Z" fill="#3a2414" stroke-width="3"/>
+    <path d="M246 70 L256 104" fill="none" stroke-width="3.5"/>
+    <path d="M146 82 Q170 78 194 82 Q198 112 192 136 Q170 132 148 136 Q142 112 146 82 Z" fill="#efe3c4" stroke-width="4.5"/>
+    <path d="M156 92 L180 124" fill="none" stroke-width="3.5"/>
+    <path d="M274 94 Q294 90 314 94 Q318 118 312 138 Q294 134 276 138 Q270 118 274 94 Z" fill="#efe3c4" stroke-width="4.5"/>
+    <path d="M298 98 L288 128 L294 130 L304 100 Z" fill="#3a2414" stroke-width="2.5"/>
+    <!-- 줄 -->
+    <path d="M232 36 L120 152 M232 36 L344 152" fill="none" stroke-width="2" opacity=".8"/>
+    <!-- 선체 -->
+    <path d="M112 150 L352 150 Q348 172 326 186 L140 186 Q116 172 112 150 Z" fill="#6b3f22" stroke-width="6"/>
+    <path d="M112 150 L352 150 L350 160 L114 160 Z" fill="#8a5a30" stroke-width="4"/>
+    <path d="M300 162 Q340 160 346 166 Q336 178 326 184 L300 184 Z" fill="#4f2e18" stroke="none"/>
+    <circle cx="164" cy="172" r="5" fill="#1b120a" stroke="none"/><circle cx="200" cy="172" r="5" fill="#1b120a" stroke="none"/>
+    <circle cx="236" cy="172" r="5" fill="#1b120a" stroke="none"/><circle cx="272" cy="172" r="5" fill="#1b120a" stroke="none"/>
+    <path d="M352 150 L392 138" fill="none" stroke-width="5"/>
+    <!-- 해골 깃발 -->
+    <g class="flag">
+      <path d="M234 18 L276 20 Q272 30 278 40 L234 40 Z" fill="#1b120a" stroke-width="3"/>
+      <circle cx="252" cy="27" r="5.5" fill="#f4efe2" stroke="none"/>
+      <rect x="248.5" y="30" width="7" height="4" rx="1" fill="#f4efe2" stroke="none"/>
+      <path d="M244 36 L260 32 M244 32 L260 36" fill="none" stroke="#f4efe2" stroke-width="2.2"/>
+      <circle cx="250" cy="26.5" r="1.4" fill="#1b120a" stroke="none"/><circle cx="254" cy="26.5" r="1.4" fill="#1b120a" stroke="none"/>
+    </g>
+  </g>
+
+  <!-- 앞쪽 물결 -->
+  <g class="waves">
+    <path d="M0 192 Q20 182 40 192 T80 192 T120 192 T160 192 T200 192 T240 192 T280 192 T320 192 T360 192 T400 192 T440 192 T480 192 T520 192 T560 192 L560 220 L0 220 Z" fill="#244055" stroke="#1b120a" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M10 204 Q30 198 50 204 M130 208 Q150 202 170 208 M250 204 Q270 198 290 204 M380 208 Q400 202 420 208 M490 204 Q510 198 530 204" fill="none" stroke="#7fa9bf" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>

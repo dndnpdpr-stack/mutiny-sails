@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import titleArt from '../art/title.svg';
 
 export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: string) => void }) {
   const [count, setCount] = useState(5);
@@ -6,8 +7,11 @@ export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: 
   return (
     <div className="table-bg screen-center">
       <div className="scroll-panel setup">
-        <h1>반란의 돛</h1>
-        <p className="subtitle">정체를 숨긴 해적들의 카드 게임</p>
+        <div className="title-block">
+          <img className="title-art" src={titleArt} alt="반란의 돛 타이틀 그림" draggable={false} />
+          <h1 className="logo">반란의 돛</h1>
+          <p className="subtitle">정체를 숨긴 해적들의 카드 게임</p>
+        </div>
         <label>
           이름
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="나" maxLength={12} />

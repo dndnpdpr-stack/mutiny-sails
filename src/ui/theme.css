@@ -239,3 +239,9 @@ h1, h2, h3, .cname, .rname, .opp .nm { font-weight: 800; letter-spacing: -0.01em
   .opp .face { width: 40px; height: 40px; }
   .char-card .face { width: 110px; }
 }
+/* 타이틀 */
+.setup { max-width: 520px; width: 100%; }
+.title-block { text-align: center; margin: -8px -8px 12px; }
+.title-art { display: block; width: 100%; aspect-ratio: 480 / 220; border: 3px solid #1b120a; border-radius: 10px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45); background: #2c4a60; }
+.title-block .logo { margin: -34px 0 0; position: relative; font-size: clamp(34px, 9vw, 52px); font-weight: 900; letter-spacing: 0.04em; color: #f2c14e; -webkit-text-stroke: 2px #1b120a; paint-order: stroke fill; text-shadow: 0 4px 0 #1b120a, 0 8px 16px rgba(0, 0, 0, 0.5); }
+.title-block .subtitle { margin: 6px 0 0; font-weight: 600; color: #5b3a20; }

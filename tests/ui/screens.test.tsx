@@ -16,6 +16,13 @@ describe('SetupScreen', () => {
     fireEvent.click(screen.getByText('출항'));
     expect(onStart).toHaveBeenCalledWith(5, '잭');
   });
+
+  it('shows the title art with the logo and subtitle', () => {
+    render(<SetupScreen onStart={vi.fn()} />);
+    expect(screen.getByRole('img', { name: '반란의 돛 타이틀 그림' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: '반란의 돛' })).toBeTruthy();
+    expect(screen.getByText('정체를 숨긴 해적들의 카드 게임')).toBeTruthy();
+  });
 });
 
 describe('App draft flow', () => {
