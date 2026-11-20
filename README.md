@@ -46,7 +46,7 @@
 
 ## 실행하기
 
-[Node.js](https://nodejs.org/) 20 이상이 필요해요.
+[Node.js](https://nodejs.org/) 18 이상이 필요해요.
 
 ```bash
 npm install
