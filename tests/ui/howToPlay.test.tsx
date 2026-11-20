@@ -18,6 +18,7 @@ describe('HowToPlay', () => {
     expect(tab('기본 규칙').getAttribute('aria-selected')).toBe('true');
     expect(dialog.textContent).toContain('2장');
     expect(dialog.textContent).toContain('사거리');
+    expect(dialog.textContent).toContain('역할 카드를 골라 뽑고');
   });
 
   it('roles tab lists every role, its goal and the player-count table', () => {
