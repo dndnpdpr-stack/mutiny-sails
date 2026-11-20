@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 166 200">
+  <!-- 노련한 항해사 실라: 삼각모, 눈 위의 흉터, 망원경, 높은 깃의 항해 코트 -->
+  <rect width="166" height="200" fill="#4f6b5a"/>
+  <path d="M0 150 Q83 124 166 150 L166 200 L0 200 Z" fill="#40594a"/>
+  <g stroke="#1b120a" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 200 Q16 152 54 140 L112 140 Q150 152 156 200 Z" fill="#20354f" stroke-width="5"/>
+    <path d="M44 146 L62 128 L83 158 L104 128 L122 146 L104 170 L83 158 L62 170 Z" fill="#2c4566" stroke-width="4"/>
+    <path d="M66 176 L66 196 M100 176 L100 196" fill="none" stroke="#d9a441" stroke-width="6"/>
+    <path d="M72 122 L72 142 L94 142 L94 122 Z" fill="#c98f66" stroke-width="4"/>
+    <path d="M44 84 Q40 126 83 132 Q126 126 122 84 Q120 62 83 62 Q46 62 44 84 Z" fill="#e2ad86" stroke-width="5"/>
+    <path d="M104 66 Q126 72 122 92 Q118 122 94 130 Q114 110 110 80 Z" fill="#c69068" stroke="none"/>
+    <!-- 회색 머리 -->
+    <path d="M40 92 Q36 64 50 60 L52 104 Z M126 92 Q130 64 116 60 L114 104 Z" fill="#b8bcc0" stroke-width="4"/>
+    <!-- 삼각모 -->
+    <path d="M12 62 Q48 46 83 22 Q118 46 154 62 Q118 74 83 66 Q48 74 12 62 Z" fill="#1f1f24" stroke-width="5"/>
+    <path d="M20 62 Q50 54 83 32 Q116 54 146 62" fill="none" stroke="#d9a441" stroke-width="3"/>
+    <circle cx="83" cy="46" r="5" fill="#d9a441" stroke-width="2.5"/>
+    <!-- 흉터 진 눈 -->
+    <path d="M54 84 L72 80 M94 82 L112 84" fill="none" stroke-width="6"/>
+    <path d="M58 92 q6 -5 12 0" fill="none" stroke-width="3.5"/>
+    <path d="M96 92 L108 92" fill="none" stroke-width="4"/>
+    <path d="M104 74 L98 108" fill="none" stroke="#9c3b30" stroke-width="3.5"/>
+    <path d="M98 82 L106 84 M97 92 L105 94 M96 100 L104 102" fill="none" stroke="#9c3b30" stroke-width="2"/>
+    <path d="M82 92 Q76 108 82 112 Q90 114 92 108" fill="#c69068" stroke-width="4"/>
+    <path d="M68 120 Q83 116 98 122" fill="none" stroke-width="4"/>
+    <!-- 망원경 -->
+    <path d="M110 200 L150 128" fill="none" stroke-width="16"/>
+    <path d="M110 200 L150 128" fill="none" stroke="#a5743c" stroke-width="11"/>
+    <path d="M122 178 L128 182 M136 152 L142 156" fill="none" stroke="#d9a441" stroke-width="6"/>
+    <ellipse cx="151" cy="126" rx="8" ry="5" fill="#d9a441" stroke-width="3.5" transform="rotate(-60 151 126)"/>
+  </g>
+  <circle cx="64" cy="91" r="2.6" fill="#1b120a"/>
+</svg>

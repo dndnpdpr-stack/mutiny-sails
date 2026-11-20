@@ -1,4 +1,5 @@
 import { CHARACTER_INFO } from '../../engine/characters/roster';
+import { Portrait } from './Portrait';
 import type { CardView, Role, SeatView } from '../../engine/types';
 import { roleName } from '../format';
 import { CardFace } from './Card';
@@ -27,6 +28,7 @@ export function MyArea(p: {
   return (
     <div className="my-area">
       <div className={cls} data-anchor={`seat:${me.seat}`}>
+        <div className="face me-face"><Portrait id={me.character} variant="face" /></div>
         <div className="me-name">
           <b>{me.name}</b> · {roleName(p.myRole)}
         </div>

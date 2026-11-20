@@ -4,7 +4,7 @@ import type { CardView, SeatView } from '../../engine/types';
 import { CARD_CATALOG } from '../../engine/cards/catalog';
 import { roleName } from '../format';
 import { CardBack, CardFace } from './Card';
-import { CHARACTER_FACE } from './CharacterCard';
+import { Portrait } from './Portrait';
 
 export type SeatFx = 'shake' | 'dying' | 'turn-glow';
 
@@ -46,7 +46,7 @@ export function OpponentPanel(p: {
       onClick={p.targetable ? p.onClick : undefined}
     >
       {s.role === 'captain' && <span className="crown" aria-label="선장">👑</span>}
-      <div className="face">{s.character ? CHARACTER_FACE[s.character] : '❔'}</div>
+      <div className="face"><Portrait id={s.character} variant="face" /></div>
       <div className="nm">
         {s.name}
         {s.isAi ? ' 🤖' : ''}

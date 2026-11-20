@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 166 200">
+  <!-- 고집쟁이 브루노: 각진 턱, 이마 붕대, 일자 눈썹, 거친 수염, 굵게 낀 팔짱 -->
+  <rect width="166" height="200" fill="#8f6e5a"/>
+  <path d="M0 150 Q83 124 166 150 L166 200 L0 200 Z" fill="#7a5c4a"/>
+  <g stroke="#1b120a" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 200 Q8 146 50 134 L116 134 Q158 146 162 200 Z" fill="#e9e1cf" stroke-width="5"/>
+    <path d="M20 154 L146 154 M14 174 L152 174 M10 194 L156 194" fill="none" stroke="#3e5674" stroke-width="7"/>
+    <path d="M68 118 L68 136 L98 136 L98 118 Z" fill="#c48a62" stroke-width="4"/>
+    <!-- 각진 얼굴 -->
+    <path d="M42 70 L42 108 L60 128 L106 128 L124 108 L124 70 Q120 52 83 52 Q46 52 42 70 Z" fill="#dca37a" stroke-width="5"/>
+    <path d="M106 58 Q124 64 124 80 L124 108 L106 128 L100 128 Q116 104 112 66 Z" fill="#bf8862" stroke="none"/>
+    <path d="M44 66 Q50 40 83 38 Q116 40 122 66 Q104 54 83 56 Q62 54 44 66 Z" fill="#2a1a10" stroke-width="5"/>
+    <!-- 붕대 -->
+    <path d="M40 66 Q83 52 126 66 L126 78 Q83 64 40 78 Z" fill="#f4efe2" stroke-width="4"/>
+    <path d="M118 70 L132 62 L128 76 Z" fill="#f4efe2" stroke-width="3"/>
+    <circle cx="58" cy="70" r="3.5" fill="#b8352a" stroke="none"/>
+    <!-- 일자 눈썹, 눈 -->
+    <path d="M50 86 L116 86" fill="none" stroke-width="7"/>
+    <path d="M58 96 L70 96 M96 96 L108 96" fill="none" stroke-width="4"/>
+    <path d="M80 94 Q70 112 78 116 Q92 118 94 108" fill="#bf8862" stroke-width="4.5"/>
+    <path d="M66 120 L100 120" fill="none" stroke-width="5"/>
+    <!-- 팔짱 -->
+    <path d="M14 172 Q30 150 70 156 Q118 162 150 150 Q162 160 156 176 Q120 188 72 182 Q36 182 14 172 Z" fill="#dca37a" stroke-width="5"/>
+    <path d="M20 160 Q60 168 110 166 Q140 166 152 156 Q160 168 150 178 Q120 186 76 182 Q34 182 20 170 Z" fill="#bf8862" stroke="none" opacity=".6"/>
+    <path d="M150 150 Q120 140 96 152 Q76 162 82 174" fill="#dca37a" stroke-width="5"/>
+    <path d="M40 166 Q50 172 62 168" fill="none" stroke-width="3"/>
+  </g>
+  <g fill="#3a2a20" opacity=".5"><circle cx="62" cy="114" r="1.6"/><circle cx="70" cy="122" r="1.6"/><circle cx="83" cy="124" r="1.6"/><circle cx="96" cy="122" r="1.6"/><circle cx="104" cy="114" r="1.6"/></g>
+  <circle cx="64" cy="96" r="2.4" fill="#1b120a"/><circle cx="102" cy="96" r="2.4" fill="#1b120a"/>
+</svg>

@@ -224,3 +224,18 @@ body { margin: 0; background: #3a2412; }
 button, input, select, textarea { font-family: inherit; }
 h1, h2, h3, .cname, .rname, .opp .nm { font-weight: 800; letter-spacing: -0.01em; }
 .pcard .name { font-weight: 700; letter-spacing: -0.02em; }
+/* 캐릭터 초상화 */
+.portrait { display: block; user-select: none; }
+.portrait.card { width: 100%; aspect-ratio: 166 / 200; border: 3px solid #2a1a0c; border-radius: 6px; background: #e9d6ad; }
+.portrait.face { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; object-position: 50% 18%; }
+.portrait-emoji { display: grid; place-items: center; }
+.portrait-emoji.card { aspect-ratio: 166 / 200; font-size: 56px; border: 3px solid #2a1a0c; border-radius: 6px; background: #e9d6ad; }
+.portrait-emoji.face { width: 100%; height: 100%; font-size: 26px; }
+.char-card .face { width: 132px; margin: 0 auto; font-size: inherit; }
+.opp .face, .me-face, .rs-face { width: 56px; height: 56px; margin: 0 auto 4px; border-radius: 50%; border: 2px solid var(--gold); overflow: hidden; background: #e9d6ad; font-size: inherit; }
+.me-face { float: left; margin: 0 8px 0 0; }
+.rs-face { width: 48px; height: 48px; }
+@media (max-width: 520px) {
+  .opp .face { width: 40px; height: 40px; }
+  .char-card .face { width: 110px; }
+}

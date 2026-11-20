@@ -3,6 +3,7 @@ import { CHARACTER_INFO } from '../../engine/characters/roster';
 import type { PlayerView, SeatView } from '../../engine/types';
 import { winnerText } from '../format';
 import { RoleCard } from '../table/RoleCard';
+import { Portrait } from '../table/Portrait';
 
 function ResultSeat({ s, index }: { s: SeatView; index: number }) {
   const [revealed, setRevealed] = useState(false);
@@ -13,6 +14,7 @@ function ResultSeat({ s, index }: { s: SeatView; index: number }) {
   return (
     <li className="result-seat">
       <RoleCard role={s.role} revealed={revealed} />
+      <div className="face rs-face"><Portrait id={s.character} variant="face" /></div>
       <div className="rs-name">{s.name}</div>
       <div className="rs-char">{s.character ? CHARACTER_INFO[s.character].name : '?'}</div>
       {!s.alive && <div className="rs-dead">쓰러짐</div>}

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 166 200">
+  <!-- 갑판장 오르소: 대머리, 굵은 목, 넓은 어깨, 가슴의 닻 문신, 귀걸이, 거친 수염 -->
+  <rect width="166" height="200" fill="#5e7c8f"/>
+  <path d="M0 150 Q83 124 166 150 L166 200 L0 200 Z" fill="#4c6577"/>
+  <g stroke="#1b120a" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M0 200 Q2 140 50 128 L116 128 Q164 140 166 200 Z" fill="#d79e76" stroke-width="5"/>
+    <path d="M118 132 Q160 142 166 200 L122 200 Z" fill="#b98060" stroke="none"/>
+    <path d="M22 200 Q30 160 56 150 M144 200 Q136 160 110 150" fill="none" stroke-width="3"/>
+    <path d="M16 140 Q40 132 56 150 L52 200 L10 200 Z M150 140 Q126 132 110 150 L114 200 L156 200 Z" fill="#7a3530" stroke-width="4"/>
+    <!-- 닻 문신 -->
+    <g fill="none" stroke="#2c4a6e" stroke-width="3.5">
+      <path d="M83 150 L83 186"/><path d="M73 158 L93 158"/><circle cx="83" cy="146" r="4"/>
+      <path d="M68 176 Q74 190 83 186 Q92 190 98 176"/>
+    </g>
+    <path d="M60 104 L60 130 L106 130 L106 104 Z" fill="#c48a62" stroke-width="5"/>
+    <path d="M40 70 Q32 118 83 124 Q134 118 126 70 Q124 30 83 28 Q42 30 40 70 Z" fill="#e3a982" stroke-width="5"/>
+    <path d="M100 34 Q128 46 126 74 Q124 112 96 122 Q118 96 114 62 Z" fill="#c48a62" stroke="none"/>
+    <path d="M58 40 Q66 34 74 38" fill="none" stroke="#f4d3b6" stroke-width="4"/>
+    <path d="M34 78 Q26 82 30 92 Q36 96 40 90 M132 78 Q140 82 136 92 Q130 96 126 90" fill="#e3a982" stroke-width="4"/>
+    <circle cx="132" cy="98" r="5" fill="none" stroke="#e0b13a" stroke-width="3"/>
+    <path d="M50 70 L72 64 M94 64 L116 70" fill="none" stroke-width="8"/>
+    <path d="M58 80 q6 -4 12 0 M96 80 q6 -4 12 0" fill="none" stroke-width="3.5"/>
+    <path d="M78 80 Q68 100 78 104 Q92 106 94 96" fill="#c48a62" stroke-width="4.5"/>
+    <path d="M64 110 L102 110" fill="none" stroke-width="4.5"/>
+  </g>
+  <g fill="#3a2a20" opacity=".45">
+    <circle cx="58" cy="108" r="1.6"/><circle cx="66" cy="114" r="1.6"/><circle cx="76" cy="118" r="1.6"/><circle cx="90" cy="118" r="1.6"/><circle cx="100" cy="114" r="1.6"/><circle cx="108" cy="108" r="1.6"/><circle cx="83" cy="120" r="1.6"/>
+  </g>
+  <circle cx="64" cy="79" r="2.6" fill="#1b120a"/><circle cx="102" cy="79" r="2.6" fill="#1b120a"/>
+</svg>

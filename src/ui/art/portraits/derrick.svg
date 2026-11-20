@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 166 200">
+  <!-- 포수 데릭: 포수 모자, 화약 그을음, 입에 문 도화선, 탄띠 -->
+  <rect width="166" height="200" fill="#8c5450"/>
+  <path d="M0 150 Q83 124 166 150 L166 200 L0 200 Z" fill="#74423f"/>
+  <g stroke="#1b120a" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 200 Q14 150 52 138 L114 138 Q152 150 158 200 Z" fill="#3e5674" stroke-width="5"/>
+    <path d="M120 150 Q152 156 158 200 L118 200 Z" fill="#2f425b" stroke="none"/>
+    <path d="M30 150 L136 200" fill="none" stroke-width="12" stroke="#1b120a"/>
+    <path d="M30 150 L136 200" fill="none" stroke-width="7" stroke="#8a5a2a"/>
+    <rect x="58" y="160" width="10" height="14" rx="2" fill="#d9a441" stroke-width="3" transform="rotate(25 63 167)"/>
+    <rect x="86" y="173" width="10" height="14" rx="2" fill="#d9a441" stroke-width="3" transform="rotate(25 91 180)"/>
+    <path d="M70 122 L70 140 L96 140 L96 122 Z" fill="#c98f66" stroke-width="4"/>
+    <path d="M40 86 Q36 128 83 132 Q130 128 126 86 Q126 62 83 62 Q40 62 40 86 Z" fill="#e8b48a" stroke-width="5"/>
+    <path d="M102 66 Q130 72 126 90 Q124 124 92 130 Q118 110 112 78 Z" fill="#c98f66" stroke="none"/>
+    <!-- 그을음 -->
+    <path d="M48 100 Q54 92 62 98 Q58 108 48 106 Z" fill="#3a2a20" opacity=".55" stroke="none"/>
+    <path d="M104 108 Q114 100 120 110 Q112 118 104 114 Z" fill="#3a2a20" opacity=".55" stroke="none"/>
+    <!-- 포수 모자 -->
+    <path d="M30 66 Q40 28 83 26 Q126 28 136 66 Z" fill="#2a2a2e" stroke-width="5"/>
+    <path d="M24 66 L142 66 Q138 78 83 76 Q28 78 24 66 Z" fill="#1f1f22" stroke-width="5"/>
+    <path d="M40 54 L126 54" fill="none" stroke="#b8352a" stroke-width="6"/>
+    <circle cx="83" cy="42" r="7" fill="#d9a441" stroke-width="3.5"/>
+    <path d="M50 84 L70 80 M96 80 L116 84" fill="none" stroke-width="6"/>
+    <path d="M58 92 q6 -5 12 0 M96 92 q6 -5 12 0" fill="none" stroke-width="3.5"/>
+    <path d="M80 92 Q70 110 78 114 Q90 118 94 108" fill="#c98f66" stroke-width="4.5"/>
+    <path d="M52 118 Q66 108 83 116 Q100 108 114 118 Q104 124 83 120 Q62 124 52 118 Z" fill="#3a2a20" stroke-width="4"/>
+    <!-- 도화선 -->
+    <path d="M100 122 Q118 126 124 116 Q130 106 140 108" fill="none" stroke-width="4"/>
+  </g>
+  <path d="M140 108 l6 -8 l2 8 l8 -2 l-6 8 l6 6 l-9 0 l-2 8 l-3 -8 z" fill="#f5c542" stroke="#b8352a" stroke-width="1.5"/>
+  <circle cx="64" cy="91" r="2.6" fill="#1b120a"/><circle cx="102" cy="91" r="2.6" fill="#1b120a"/>
+</svg>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 166 200">
+  <!-- 닻지기 한나: 양 갈래 땋은 머리, 닻 목걸이, 굳은 눈썹, 가죽 조끼 -->
+  <rect width="166" height="200" fill="#c98f4a"/>
+  <path d="M0 150 Q83 124 166 150 L166 200 L0 200 Z" fill="#b07a3a"/>
+  <g stroke="#1b120a" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 200 Q18 152 54 140 L112 140 Q148 152 154 200 Z" fill="#efe6d2" stroke-width="5"/>
+    <path d="M12 200 Q18 152 54 140 L66 150 L60 200 Z M154 200 Q148 152 112 140 L100 150 L106 200 Z" fill="#7a4a2a" stroke-width="4.5"/>
+    <path d="M72 122 L72 142 L94 142 L94 122 Z" fill="#c98f66" stroke-width="4"/>
+    <!-- 닻 목걸이 -->
+    <path d="M66 140 Q83 160 100 140" fill="none" stroke-width="2.5"/>
+    <g fill="#9aa3ad" stroke-width="3">
+      <path d="M83 156 L83 176" fill="none"/><path d="M76 162 L90 162" fill="none"/>
+      <path d="M74 170 Q78 180 83 176 Q88 180 92 170" fill="none"/><circle cx="83" cy="154" r="3"/>
+    </g>
+    <path d="M44 84 Q40 126 83 132 Q126 126 122 84 Q120 60 83 60 Q46 60 44 84 Z" fill="#efc09a" stroke-width="5"/>
+    <path d="M104 66 Q126 72 122 92 Q118 122 94 130 Q114 110 110 80 Z" fill="#d6a17a" stroke="none"/>
+    <!-- 머리 -->
+    <path d="M40 86 Q34 36 83 34 Q132 36 126 86 Q118 64 100 58 Q84 72 60 66 Q48 72 40 86 Z" fill="#c4772e" stroke-width="5"/>
+    <path d="M60 46 Q76 52 88 44 M96 44 Q110 50 120 62" fill="none" stroke-width="2.5"/>
+    <!-- 땋은 머리 -->
+    <g fill="#c4772e" stroke-width="4">
+      <ellipse cx="34" cy="100" rx="9" ry="11"/><ellipse cx="32" cy="120" rx="8" ry="10"/><ellipse cx="31" cy="138" rx="7" ry="9"/>
+      <ellipse cx="132" cy="100" rx="9" ry="11"/><ellipse cx="134" cy="120" rx="8" ry="10"/><ellipse cx="135" cy="138" rx="7" ry="9"/>
+    </g>
+    <path d="M26 148 L36 148 M130 148 L140 148" fill="none" stroke="#3e5674" stroke-width="5"/>
+    <path d="M54 84 L72 80 M94 80 L112 84" fill="none" stroke-width="6"/>
+    <path d="M58 92 q6 -5 12 0 M96 92 q6 -5 12 0" fill="none" stroke-width="3.5"/>
+    <path d="M82 94 Q76 108 82 110 Q88 112 90 108" fill="none" stroke-width="3.5"/>
+    <path d="M70 118 L96 118" fill="none" stroke-width="4"/>
+  </g>
+  <g fill="#b86a4a" opacity=".55"><circle cx="60" cy="104" r="1.5"/><circle cx="66" cy="106" r="1.5"/><circle cx="100" cy="106" r="1.5"/><circle cx="106" cy="104" r="1.5"/></g>
+  <circle cx="64" cy="91" r="2.6" fill="#1b120a"/><circle cx="102" cy="91" r="2.6" fill="#1b120a"/>
+</svg>
