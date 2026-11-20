@@ -31,6 +31,8 @@ export interface SeatState {
   equipment: Card[];
   alive: boolean;
   characterChosen: boolean;
+  /** 역할 카드를 뽑았는지 (뽑기 전 role 값은 임시) */
+  roleDrawn: boolean;
 }
 
 export type ApplyResult = { ok: true } | { ok: false; reason: string };
@@ -57,12 +59,18 @@ export class Game {
   private stack: Step[] = [];
   private started = false;
   private seq = 0;
+  /** 엎어 둔 역할 카드 (역할 뽑기를 할 때만) */
+  private roleSlots: Role[] | null = null;
+  private takenSlots = new Set<number>();
 
   constructor(config: GameConfig) {
     const n = config.names.length;
     if (n < 4 || n > 7) throw new Error('인원은 4~7명이어야 해요');
     this.rng = new Rng(config.seed);
-    const roles = config.roles ?? this.rng.shuffle(ROLE_TABLE.slice(0, n));
+    const drawRoles = !config.roles;
+    if (drawRoles) this.roleSlots = this.rng.shuffle(ROLE_TABLE.slice(0, n));
+    // 역할 뽑기를 하면 뽑기 전까지 자리의 역할은 임시값
+    const roles: Role[] = config.roles ?? Array.from({ length: n }, () => 'rebel' as Role);
     const forced = config.characters;
 
     let specs = this.rng.shuffle(buildDeckSpec(this.rng));
@@ -75,14 +83,14 @@ export class Game {
     this.seats = config.names.map((name, seat) => {
       if (!forced) {
         // 임시 캐릭터(뽑기 전에는 읽지 않음)
-        return { seat, name, role: roles[seat], character: CHARACTERS[CHARACTER_IDS[0]], hp: 0, maxHp: 0, hand: [], equipment: [], alive: true, characterChosen: false };
+        return { seat, name, role: roles[seat], character: CHARACTERS[CHARACTER_IDS[0]], hp: 0, maxHp: 0, hand: [], equipment: [], alive: true, characterChosen: false, roleDrawn: !drawRoles };
       }
       const character = CHARACTERS[forced[seat]];
       const maxHp = character.maxHp + (roles[seat] === 'captain' ? 1 : 0);
-      return { seat, name, role: roles[seat], character, hp: maxHp, maxHp, hand: [], equipment: [], alive: true, characterChosen: true };
+      return { seat, name, role: roles[seat], character, hp: maxHp, maxHp, hand: [], equipment: [], alive: true, characterChosen: true, roleDrawn: !drawRoles };
     });
     if (forced) this.dealOpeningHands();
-    this.current = this.captainSeat();
+    this.current = drawRoles ? 0 : this.captainSeat();
   }
 
   // ───────────── 조회 ─────────────
@@ -121,9 +129,51 @@ export class Game {
   start(): void {
     if (this.started) return;
     this.started = true;
+    if (this.roleSlots) this.roleDrawFrom(0);
+    else this.afterRoles();
+    this.advance();
+  }
+
+  /** 역할이 다 정해진 뒤: 캐릭터 뽑기 또는 바로 첫 턴 */
+  private afterRoles(): void {
+    this.current = this.captainSeat();
     if (this.seats.every((s) => s.characterChosen)) this.beginTurn(this.captainSeat());
     else this.draftFrom(0);
-    this.advance();
+  }
+
+  /** 0번 자리부터 시계 방향으로 i번째 사람이 엎어 둔 역할 카드 하나를 뽑는다 */
+  private roleDrawFrom(i: number): void {
+    const slots = this.roleSlots!;
+    if (i >= this.seats.length) {
+      // 테스트용으로 캐릭터만 강제한 경우: 선장 체력 +1을 이제 반영
+      if (this.seats.every((s) => s.characterChosen)) {
+        const cap = this.seats[this.captainSeat()];
+        cap.maxHp += 1;
+        cap.hp += 1;
+        cap.hand.push(...this.draw(1));
+      }
+      this.afterRoles();
+      return;
+    }
+    const seat = i;
+    const remaining = slots.map((_, k) => k).filter((k) => !this.takenSlots.has(k));
+    this.pushInput({ kind: 'drawRole', seat, slots: remaining }, (a) => {
+      if (a.type !== 'drawRole') return WRONG_ACTION;
+      if (!remaining.includes(a.slot)) return '남아 있는 역할 카드 중에서 골라 주세요';
+      const s = this.seats[seat];
+      s.role = slots[a.slot];
+      s.roleDrawn = true;
+      this.takenSlots.add(a.slot);
+      if (s.role === 'captain') {
+        this.emit({ type: 'roleDrawn', seat, slot: a.slot, role: 'captain' });
+      } else {
+        const others = this.seats.map((x) => x.seat).filter((x) => x !== seat);
+        this.emit({ type: 'roleDrawn', seat, slot: a.slot, role: null, visibleTo: others });
+        this.emit({ type: 'roleDrawn', seat, slot: a.slot, role: s.role, visibleTo: [seat] });
+      }
+      this.roleDrawFrom(i + 1);
+      return null;
+    });
   }
 
   private dealOpeningHands(): void {

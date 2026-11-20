@@ -58,6 +58,8 @@ export function formatEvent(e: GameEvent, names: (s: SeatId) => string): string 
       return `${names(e.seat)}이(가) ${CHARACTER_INFO[e.character].name}의 능력을 썼어요.`;
     case 'characterChosen':
       return `${names(e.seat)}이(가) ${CHARACTER_INFO[e.character].name}을(를) 골랐어요.`;
+    case 'roleDrawn':
+      return e.role ? `${names(e.seat)}이(가) ${roleName(e.role)} 카드를 뽑았어요.` : `${names(e.seat)}이(가) 역할 카드를 뽑았어요.`;
     case 'gameOver':
       return winnerText(e.winner);
   }

@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { Game } from '../../src/engine/Game';
 import type { CharacterId } from '../../src/engine/types';
+import { startPastRoles } from './helpers';
 
 function fresh(n: number, seed = 1) {
   const g = new Game({ seed, names: Array.from({ length: n }, (_, i) => `p${i}`) });
-  g.start();
+  startPastRoles(g);
   return g;
 }
 
@@ -87,7 +88,7 @@ describe('character draft', () => {
 
   it('forced characters skip the draft', () => {
     const g = new Game({ seed: 1, names: ['a', 'b', 'c', 'd'], characters: ['tom', 'margo', 'lou', 'derrick'] });
-    g.start();
+    startPastRoles(g);
     expect(g.pending()).toEqual({ kind: 'turn', seat: g.captainSeat() });
   });
 });

@@ -1,7 +1,7 @@
 import { Game } from '../../src/engine/Game';
 import { defaultActionFor } from '../../src/engine/defaults';
 import type { CharacterId, PendingView } from '../../src/engine/types';
-import { giveEquip, makeGame, passTurn, pull, setHand } from './helpers';
+import { giveEquip, makeGame, passTurn, pull, setHand, startPastRoles } from './helpers';
 
 function applyDefault(g: Game) {
   const p = g.pending()!;
@@ -77,7 +77,7 @@ describe('defaultActionFor', () => {
 
   it('chooseCharacter', () => {
     const g = new Game({ seed: 1, names: ['a', 'b', 'c', 'd'] });
-    g.start();
+    startPastRoles(g);
     expectDefaultOk(g, 'chooseCharacter');
   });
 

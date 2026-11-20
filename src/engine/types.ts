@@ -34,7 +34,9 @@ export type Action =
   /** 밀수꾼 루 */
   | { type: 'chooseDrawSource'; fromDiscard: boolean }
   /** 캐릭터 뽑기 */
-  | { type: 'chooseCharacter'; character: CharacterId };
+  | { type: 'chooseCharacter'; character: CharacterId }
+  /** 엎어 둔 역할 카드 중 하나 뽑기 */
+  | { type: 'drawRole'; slot: number };
 
 export type PendingView =
   | { kind: 'turn'; seat: SeatId }
@@ -49,7 +51,9 @@ export type PendingView =
   | { kind: 'peekTarget'; seat: SeatId }
   | { kind: 'passKeg'; seat: SeatId }
   | { kind: 'drawSource'; seat: SeatId }
-  | { kind: 'chooseCharacter'; seat: SeatId; options: CharacterId[] };
+  | { kind: 'chooseCharacter'; seat: SeatId; options: CharacterId[] }
+  /** slots: 아직 남은 역할 카드 자리 번호 (내용은 비공개) */
+  | { kind: 'drawRole'; seat: SeatId; slots: number[] };
 
 export type Winner = 'captainTeam' | 'rebels' | 'spy';
 
@@ -71,6 +75,8 @@ export type GameEvent = { visibleTo?: SeatId[]; seq?: number } & (
   | { type: 'ability'; seat: SeatId; character: CharacterId }
   | { type: 'gameOver'; winner: Winner }
   | { type: 'characterChosen'; seat: SeatId; character: CharacterId }
+  /** role: 본인과(선장이면 모두) 볼 때만 채워지고, 나머지에게는 null */
+  | { type: 'roleDrawn'; seat: SeatId; slot: number; role: Role | null }
 );
 
 /** targets null = 대상 불필요. targetCards = 대상의 장비를 고를 수 있음 */
@@ -97,7 +103,8 @@ export interface SeatView {
 /** 방장이 플레이어 한 명에게 보내는 화면 상태. 그 사람이 볼 수 있는 정보만 담는다 */
 export interface PlayerView {
   you: SeatId;
-  myRole: Role;
+  /** 아직 역할 카드를 안 뽑았으면 null */
+  myRole: Role | null;
   myHand: CardView[];
   seats: SeatView[];
   current: SeatId;

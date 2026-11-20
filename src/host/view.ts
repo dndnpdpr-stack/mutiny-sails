@@ -30,7 +30,7 @@ export function buildView(game: Game, seat: SeatId, isAi: (s: SeatId) => boolean
 
   return {
     you: seat,
-    myRole: me.role,
+    myRole: me.roleDrawn ? me.role : null,
     myHand: me.hand.map((c) => c.toView()),
     seats: game.seats.map((s) => ({
       seat: s.seat,
@@ -41,7 +41,7 @@ export function buildView(game: Game, seat: SeatId, isAi: (s: SeatId) => boolean
       alive: s.alive,
       handCount: s.hand.length,
       equipment: s.equipment.map((c) => c.toView()),
-      role: over || s.seat === seat || s.role === 'captain' || !s.alive ? s.role : null,
+      role: s.roleDrawn && (over || s.seat === seat || s.role === 'captain' || !s.alive) ? s.role : null,
       isAi: isAi(s.seat),
     })),
     current: game.current,

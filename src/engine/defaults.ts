@@ -26,6 +26,8 @@ export function defaultActionFor(game: Game, p: PendingView): Action {
     }
     case 'passKeg':
       return { type: 'chooseSeat', target: game.nextAlive(p.seat) };
+    case 'drawRole':
+      return { type: 'drawRole', slot: p.slots[0] };
     case 'drawSource':
       return { type: 'chooseDrawSource', fromDiscard: false };
     case 'chooseCharacter':

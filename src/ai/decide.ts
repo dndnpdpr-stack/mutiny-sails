@@ -31,6 +31,8 @@ function targetScore(view: PlayerView, mem: AiMemory, t: SeatId): number {
     case 'spy':
       if (alive <= 2) return isCaptain ? 20 : 0;
       return (isCaptain ? -5 : 5) + (foe > 0 ? 1 : 0) + weak;
+    default:
+      return weak; // 역할을 아직 모를 때(게임 중에는 오지 않음)
   }
 }
 
@@ -173,6 +175,8 @@ export function fallbackAction(view: PlayerView): Action | null {
       return { type: 'chooseDrawSource', fromDiscard: false };
     case 'chooseCharacter':
       return { type: 'chooseCharacter', character: p.options[0] };
+    case 'drawRole':
+      return { type: 'drawRole', slot: p.slots[0] };
   }
 }
 
@@ -234,6 +238,8 @@ export function decide(view: PlayerView, mem: AiMemory, rng: Rng): Action | null
       const top = p.options.filter((id) => CHARACTER_INFO[id].maxHp === best);
       return { type: 'chooseCharacter', character: top[rng.int(top.length)] };
     }
+    case 'drawRole':
+      return { type: 'drawRole', slot: p.slots[rng.int(p.slots.length)] };
     default:
       return fallbackAction(view);
   }

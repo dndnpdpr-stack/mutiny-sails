@@ -81,3 +81,9 @@ export function passTurn(g: Game) {
 export function passUntil(g: Game, seat: number) {
   while (g.current !== seat) passTurn(g);
 }
+
+/** 역할 카드 뽑기를 첫 남은 카드로 모두 끝낸다 (역할을 강제하지 않은 게임용) */
+export function startPastRoles(g: Game) {
+  g.start();
+  for (let p = g.pending(); p?.kind === 'drawRole'; p = g.pending()) g.apply(p.seat, { type: 'drawRole', slot: p.slots[0] });
+}

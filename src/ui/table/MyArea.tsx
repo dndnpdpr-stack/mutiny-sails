@@ -8,7 +8,7 @@ import { hearts, type SeatFx } from './OpponentPanel';
 
 export function MyArea(p: {
   me: SeatView;
-  myRole: Role;
+  myRole: Role | null;
   myRange: number;
   current: boolean;
   fx: SeatFx[];
@@ -30,7 +30,7 @@ export function MyArea(p: {
       <div className={cls} data-anchor={`seat:${me.seat}`}>
         <div className="face me-face"><Portrait id={me.character} variant="face" /></div>
         <div className="me-name">
-          <b>{me.name}</b> · {roleName(p.myRole)}
+          <b>{me.name}</b> · {p.myRole ? roleName(p.myRole) : '?'}
         </div>
         <div className="me-char">{ch?.name ?? '?'}</div>
         <div className="ability">{ch?.text ?? ''}</div>

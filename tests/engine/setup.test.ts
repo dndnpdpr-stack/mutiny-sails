@@ -1,11 +1,11 @@
 import { Game } from '../../src/engine/Game';
 import type { Role } from '../../src/engine/types';
 import { defaultActionFor } from '../../src/engine/defaults';
-import { makeGame } from './helpers';
+import { makeGame, startPastRoles } from './helpers';
 
-/** 캐릭터 뽑기를 기본 행동으로 끝낸다 */
+/** 역할 뽑기와 캐릭터 뽑기를 기본 행동으로 끝낸다 */
 function finishDraft(g: Game) {
-  g.start();
+  startPastRoles(g);
   while (g.pending()?.kind === 'chooseCharacter') g.apply(g.pending()!.seat, defaultActionFor(g, g.pending()!));
 }
 
@@ -20,6 +20,7 @@ describe('game setup', () => {
     [7, 1, 2, 3, 1],
   ])('%i players role distribution', (n, cap, loy, reb, spy) => {
     const g = new Game({ seed: 5, names: names(n) });
+    startPastRoles(g);
     const roles = g.seats.map((s) => s.role);
     expect(count(roles, 'captain')).toBe(cap);
     expect(count(roles, 'loyalist')).toBe(loy);
@@ -42,6 +43,7 @@ describe('game setup', () => {
 
   it('captain moves first', () => {
     const g = new Game({ seed: 3, names: names(5) });
+    finishDraft(g);
     expect(g.current).toBe(g.captainSeat());
   });
 

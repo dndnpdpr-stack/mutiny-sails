@@ -1,7 +1,7 @@
 import { Game } from '../../src/engine/Game';
 import type { CharacterId } from '../../src/engine/types';
 import { buildView } from '../../src/host/view';
-import { makeGame } from '../engine/helpers';
+import { makeGame, startPastRoles } from '../engine/helpers';
 
 const noAi = () => false;
 
@@ -76,7 +76,7 @@ describe('buildView', () => {
 describe('buildView draft', () => {
   it('masks unchosen characters and hides options from non-choosers', () => {
     const g = new Game({ seed: 3, names: ['A', 'B', 'C', 'D'] });
-    g.start();
+    startPastRoles(g);
     const p = g.pending();
     expect(p?.kind).toBe('chooseCharacter');
     const captain = p!.seat;
