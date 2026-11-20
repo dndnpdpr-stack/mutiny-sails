@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import titleArt from '../art/title.svg';
 import { HowToPlay } from './HowToPlay';
 
@@ -6,9 +6,18 @@ export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: 
   const [count, setCount] = useState(5);
   const [name, setName] = useState('');
   const [guide, setGuide] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const guideButtonRef = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
+  // 게임 방법 창이 열린 동안 뒤 화면은 키보드·클릭 모두 막고, 닫히면 버튼으로 포커스를 돌려준다
+  useEffect(() => {
+    panelRef.current?.toggleAttribute('inert', guide);
+    if (wasOpen.current && !guide) guideButtonRef.current?.focus();
+    wasOpen.current = guide;
+  }, [guide]);
   return (
     <div className="table-bg screen-center">
-      <div className="scroll-panel setup">
+      <div className="scroll-panel setup" ref={panelRef}>
         <div className="title-block">
           <img className="title-art" src={titleArt} alt="반란의 돛 타이틀 그림" draggable={false} />
           <h1 className="logo">반란의 돛</h1>
@@ -26,7 +35,7 @@ export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: 
           ))}
         </div>
         <div className="setup-actions">
-          <button type="button" className="secondary" onClick={() => setGuide(true)}>
+          <button ref={guideButtonRef} type="button" className="secondary" onClick={() => setGuide(true)}>
             게임 방법
           </button>
           <button type="button" className="primary" onClick={() => onStart(count, name.trim())}>

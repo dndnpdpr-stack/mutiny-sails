@@ -63,4 +63,24 @@ describe('HowToPlay', () => {
     expect(onStart).not.toHaveBeenCalled();
     expect(screen.queryByRole('dialog', { name: '게임 방법' })).toBeNull();
   });
+
+  it('moves keyboard focus into the guide and makes the page behind inert', () => {
+    render(<SetupScreen onStart={vi.fn()} />);
+    const opener = screen.getByRole('button', { name: '게임 방법' });
+    opener.focus();
+    fireEvent.click(opener);
+    const dialog = screen.getByRole('dialog', { name: '게임 방법' });
+    expect(dialog.contains(document.activeElement)).toBe(true);
+    expect(document.querySelector('.setup')!.hasAttribute('inert')).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: '닫기' }));
+    expect(document.querySelector('.setup')!.hasAttribute('inert')).toBe(false);
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: '게임 방법' }));
+  });
+
+  it('describes rum and weapon rules the way the engine plays them', () => {
+    const { dialog } = open();
+    expect(dialog.textContent).toContain('필요한 만큼 럼주');
+    fireEvent.click(tab('카드'));
+    expect(dialog.textContent).toContain('새 무기를 내면 이전 무기는 버려져요');
+  });
 });

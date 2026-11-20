@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CARD_CATALOG, type CardInfo } from '../../engine/cards/catalog';
 import { CHARACTER_IDS } from '../../engine/characters/roster';
 import type { Role } from '../../engine/types';
@@ -41,12 +41,12 @@ function Rules() {
       </ol>
       <h3>거리와 사거리</h3>
       <p>
-        옆자리는 거리 1, 한 칸 건너면 거리 2예요(양쪽 중 가까운 쪽). 칼질은 상대까지의 거리가 내 무기 사거리 이하일 때만 쓸 수 있어요. 무기가
+        옆자리는 거리 1, 한 칸 건너면 거리 2예요(양쪽 중 가까운 쪽, 쓰러진 사람은 건너뛰어요). 칼질은 상대까지의 거리가 내 무기 사거리 이하일 때만 쓸 수 있어요. 무기가
         없으면 사거리 1이에요. 망원경은 내가 남을 볼 때 거리 −1, 작은 보트는 남이 나를 볼 때 거리 +1이에요.
       </p>
       <h3>체력과 쓰러짐</h3>
       <p>
-        체력이 0이 되면 럼주를 내서 버틸 수 있어요(두 명만 남으면 불가). 버티지 못하면 쓰러지고 역할이 공개돼요. 반란 선원을 쓰러뜨리면 카드 3장을
+        체력이 0 이하가 되면 체력이 1 이상이 될 때까지 필요한 만큼 럼주를 내서 버틸 수 있어요(두 명만 남으면 불가). 버티지 못하면 쓰러지고 역할이 공개돼요. 반란 선원을 쓰러뜨리면 카드 3장을
         받고, 선장이 충성 선원을 쓰러뜨리면 손패와 장비를 모두 버려요.
       </p>
       <h3>판정</h3>
@@ -115,7 +115,7 @@ function Cards() {
         ))}
       </div>
       <h3>장비 카드</h3>
-      <p className="guide-note">내 앞에 놓아두고 효과가 계속돼요. 같은 장비는 하나만, 무기도 하나만 장착할 수 있어요.</p>
+      <p className="guide-note">내 앞에 놓아두면 효과가 계속돼요(영창은 다른 사람 앞에 놓아요). 같은 장비는 하나만 둘 수 있고, 무기는 하나만 쓸 수 있어서 새 무기를 내면 이전 무기는 버려져요.</p>
       <div className="guide-card-list">
         {all.filter((c) => c.category === 'equipment').map((c) => (
           <CardEntry key={c.kind} info={c} />
@@ -128,6 +128,8 @@ function Cards() {
 /** 시작 화면의 "게임 방법" 창. 캐릭터·카드 설명은 게임 데이터에서 그대로 가져온다 */
 export function HowToPlay(p: { onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('rules');
+  const closeRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => closeRef.current?.focus(), []);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') p.onClose();
@@ -141,7 +143,7 @@ export function HowToPlay(p: { onClose: () => void }) {
       <div className="guide scroll-panel" role="dialog" aria-modal="true" aria-label="게임 방법" onClick={(e) => e.stopPropagation()}>
         <div className="guide-head">
           <h2>게임 방법</h2>
-          <button type="button" className="guide-close" aria-label="닫기" onClick={p.onClose}>
+          <button ref={closeRef} type="button" className="guide-close" aria-label="닫기" onClick={p.onClose}>
             ✕
           </button>
         </div>

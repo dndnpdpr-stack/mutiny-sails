@@ -272,3 +272,4 @@ h1, h2, h3, .cname, .rname, .opp .nm { font-weight: 800; letter-spacing: -0.01em
 .guide > * { align-self: stretch; }
 .guide-head { width: 100%; }
 .guide-card .pcard .corner { visibility: hidden; }
+.guide { max-height: calc(100dvh - 32px); }

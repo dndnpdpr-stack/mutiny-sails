@@ -7,7 +7,7 @@
     .gull { animation: glide 6s ease-in-out infinite; }
     @keyframes bob { 0%, 100% { transform: translateY(0) rotate(-1.6deg); } 50% { transform: translateY(4px) rotate(1.6deg); } }
     @keyframes flap { from { transform: skewY(-7deg) scaleX(1); } to { transform: skewY(5deg) scaleX(0.88); } }
-    @keyframes drift { from { transform: translateX(0); } to { transform: translateX(-60px); } }
+    @keyframes drift { from { transform: translateX(0); } to { transform: translateX(-80px); } }
     @keyframes glide { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(8px, -5px); } }
     @media (prefers-reduced-motion: reduce) { .ship, .flag, .waves, .gull { animation: none; } }
   </style>
@@ -74,6 +74,6 @@
   <!-- 앞쪽 물결 -->
   <g class="waves">
     <path d="M0 192 Q20 182 40 192 T80 192 T120 192 T160 192 T200 192 T240 192 T280 192 T320 192 T360 192 T400 192 T440 192 T480 192 T520 192 T560 192 L560 220 L0 220 Z" fill="#244055" stroke="#1b120a" stroke-width="4" stroke-linejoin="round"/>
-    <path d="M10 204 Q30 198 50 204 M130 208 Q150 202 170 208 M250 204 Q270 198 290 204 M380 208 Q400 202 420 208 M490 204 Q510 198 530 204" fill="none" stroke="#7fa9bf" stroke-width="3" stroke-linecap="round"/>
+    <path d="M10 204 Q30 198 50 204 M90 208 Q110 202 130 208 M170 204 Q190 198 210 204 M250 208 Q270 202 290 208 M330 204 Q350 198 370 204 M410 208 Q430 202 450 208 M490 204 Q510 198 530 204" fill="none" stroke="#7fa9bf" stroke-width="3" stroke-linecap="round"/>
   </g>
 </svg>
