@@ -23,7 +23,7 @@
     <!-- 화약통 -->
     <path d="M44 150 Q83 140 122 150 L118 200 L48 200 Z" fill="#8a5a2a" stroke-width="5"/>
     <path d="M46 164 Q83 156 120 164 M47 184 Q83 178 119 184" fill="none" stroke="#5a3a1a" stroke-width="5"/>
-    <path d="M74 176 L92 176 M83 168 L83 192" fill="none" stroke="#e8d7a8" stroke-width="4"/>
+    <path d="M75 168 L91 192 M91 168 L75 192" fill="none" stroke="#e8d7a8" stroke-width="4"/>
     <path d="M83 146 Q90 130 104 132 Q114 134 116 124" fill="none" stroke-width="3.5"/>
   </g>
   <path d="M116 124 l4 -8 l2 7 l8 -1 l-5 6 l5 5 l-8 0 l-2 7 l-3 -7 z" fill="#f5c542" stroke="#b8352a" stroke-width="1.5"/>
