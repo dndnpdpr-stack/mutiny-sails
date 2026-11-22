@@ -82,8 +82,8 @@ describe('effectsFor', () => {
 });
 
 describe('sea event effect', () => {
-  it('turns a sea event into a 1.2s banner effect', () => {
-    expect(effectsFor([{ type: 'seaEvent', event: 'fog' }], 0)).toEqual([{ kind: 'sea', event: 'fog', at: 0, ms: 1200 }]);
+  it('turns a sea event into a short marker effect (the banner keeps its own timer)', () => {
+    expect(effectsFor([{ type: 'seaEvent', event: 'fog' }], 0)).toEqual([{ kind: 'sea', event: 'fog', at: 0, ms: 300 }]);
   });
 });
 

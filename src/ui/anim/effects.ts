@@ -20,7 +20,8 @@ const FLOAT_MS = 600;
 const JUDGE_MS = 600;
 const DEATH_MS = 600;
 const TURN_MS = 500;
-const SEA_MS = 1200;
+/** 표시만 하는 짧은 표시. 띠는 TableScreen이 자기 타이머로 띄워서 배속·몰아치기에 영향받지 않는다 */
+const SEA_MS = 300;
 
 /** 이벤트 순서대로 STAGGER_MS씩 시작 시각을 늦춰 연출 목록을 만든다 */
 export function effectsFor(events: GameEvent[], you: SeatId): Effect[] {

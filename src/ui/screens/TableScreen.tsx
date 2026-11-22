@@ -9,6 +9,7 @@ import { OpponentPanel, type SeatFx } from '../table/OpponentPanel';
 import { PeekNote, PromptNote, TargetCardNote, responseNeed, responseWith } from '../table/PromptNote';
 import { latestPeek, peekMemos } from '../table/peek';
 import { seaEventTitle } from '../format';
+import type { SeaEventId } from '../../engine/seaEvents';
 
 type Flags = Record<string, number>;
 
@@ -43,7 +44,6 @@ function useEffectFlags(effects: Effect[], speed: 1 | 2, key: number): Flags {
       const names: string[] = [];
       if (e.kind === 'shake') names.push(`${e.seat}:shake`);
       if (e.kind === 'death') names.push(`${e.seat}:dying`);
-      if (e.kind === 'sea') names.push('sea');
       if (e.kind === 'turn') {
         names.push(`${e.seat}:turn-glow`);
         if (e.mine) names.push('banner');
@@ -66,6 +66,24 @@ function useEffectFlags(effects: Effect[], speed: 1 | 2, key: number): Flags {
 }
 
 const FX: SeatFx[] = ['shake', 'dying', 'turn-glow'];
+/** 바다 이벤트 띠는 배속과 상관없이 이 시간(실제 시간) 동안 보인다 */
+export const SEA_BANNER_MS = 1600;
+
+/** 새 묶음에 바다 이벤트가 있으면 띠를 띄운다. 같은 묶음에 내 차례가 오면 함께 알린다 */
+function useSeaBanner(effects: Effect[], key: number) {
+  const [banner, setBanner] = useState<{ event: SeaEventId; mine: boolean } | null>(null);
+  const effectsRef = useRef(effects);
+  effectsRef.current = effects;
+  useEffect(() => {
+    const sea = [...effectsRef.current].reverse().find((e) => e.kind === 'sea');
+    if (!sea || sea.kind !== 'sea') return;
+    const mine = effectsRef.current.some((e) => e.kind === 'turn' && e.mine);
+    setBanner({ event: sea.event, mine });
+    const t = setTimeout(() => setBanner(null), SEA_BANNER_MS);
+    return () => clearTimeout(t);
+  }, [key]);
+  return banner;
+}
 
 /** 그리기는 shown, 조작은 latest */
 export function TableScreen(p: {
@@ -85,7 +103,7 @@ export function TableScreen(p: {
   const memos = peekMemos(latest.events, latest.you);
 
   const flags = useEffectFlags(p.effects, p.speed, p.batchKey);
-  const seaBanner = p.effects.find((e) => e.kind === 'sea') as Extract<Effect, { kind: 'sea' }> | undefined;
+  const seaBanner = useSeaBanner(p.effects, p.batchKey);
   const fxOf = (s: SeatId) => FX.filter((c) => (flags[`${s}:${c}`] ?? 0) > 0);
 
   const hint = selectedId ? latest.hints.find((h) => h.cardId === selectedId && latest.myHand.some((c) => c.id === h.cardId)) ?? null : null;
@@ -210,8 +228,13 @@ export function TableScreen(p: {
         />
       )}
 
-      {seaBanner && (flags.sea ?? 0) > 0 && <div className="turn-banner sea-banner">{seaEventTitle(seaBanner.event)}!</div>}
-      {(flags.banner ?? 0) > 0 && !((flags.sea ?? 0) > 0) && <div className="turn-banner">내 차례!</div>}
+      {seaBanner && (
+        <div className="turn-banner sea-banner">
+          <div>{seaEventTitle(seaBanner.event)}!</div>
+          {seaBanner.mine && <div className="sea-banner-turn">내 차례!</div>}
+        </div>
+      )}
+      {(flags.banner ?? 0) > 0 && !seaBanner && <div className="turn-banner">내 차례!</div>}
       {p.lastRejection && <div className="toast note">{p.lastRejection}</div>}
       <EffectLayer effects={p.effects} speed={p.speed} batchKey={p.batchKey} />
     </div>

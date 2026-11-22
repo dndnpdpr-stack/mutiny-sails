@@ -228,6 +228,24 @@ describe('TableScreen', () => {
     expect(await screen.findByText('🌪️ 폭풍!')).toBeTruthy();
   });
 
+  it('keeps the sea banner up for its own time even at double speed, and still says it is my turn', () => {
+    vi.useFakeTimers();
+    try {
+      const effects: Effect[] = [
+        { kind: 'sea', event: 'storm', at: 0, ms: 300 },
+        { kind: 'turn', seat: 1, mine: true, at: 120, ms: 500 },
+      ];
+      render(<TableScreen latest={makeView()} shown={makeView()} effects={effects} speed={2} batchKey={1} send={vi.fn()} lastRejection={null} />);
+      act(() => void vi.advanceTimersByTime(1000));
+      expect(screen.getByText('🌪️ 폭풍!')).toBeTruthy();
+      expect(screen.getByText('내 차례!')).toBeTruthy();
+      act(() => void vi.advanceTimersByTime(1000));
+      expect(screen.queryByText('🌪️ 폭풍!')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('shows the current sea event card next to the deck only when events are on', () => {
     const { unmount } = renderTable(makeView({ seaEventsOn: true, seaEvent: 'storm' }));
     const slot = screen.getByTestId('sea-event');
