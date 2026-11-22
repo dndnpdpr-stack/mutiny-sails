@@ -1,5 +1,6 @@
 import { CARD_CATALOG } from '../../engine/cards/catalog';
 import type { CardView, GameEvent, SeatId } from '../../engine/types';
+import type { SeaEventId } from '../../engine/seaEvents';
 
 export type Anchor = 'deck' | 'discard' | 'judge' | 'hand' | `seat:${number}` | `equip:${number}`;
 
@@ -9,7 +10,8 @@ export type Effect =
   | { kind: 'float'; seat: SeatId; text: string; tone: 'damage' | 'heal'; at: number; ms: number }
   | { kind: 'judge'; card: CardView; success: boolean; at: number; ms: number }
   | { kind: 'death'; seat: SeatId; at: number; ms: number }
-  | { kind: 'turn'; seat: SeatId; mine: boolean; at: number; ms: number };
+  | { kind: 'turn'; seat: SeatId; mine: boolean; at: number; ms: number }
+  | { kind: 'sea'; event: SeaEventId; at: number; ms: number };
 
 export const STAGGER_MS = 120;
 const FLY_MS = 450;
@@ -18,6 +20,7 @@ const FLOAT_MS = 600;
 const JUDGE_MS = 600;
 const DEATH_MS = 600;
 const TURN_MS = 500;
+const SEA_MS = 1200;
 
 /** 이벤트 순서대로 STAGGER_MS씩 시작 시각을 늦춰 연출 목록을 만든다 */
 export function effectsFor(events: GameEvent[], you: SeatId): Effect[] {
@@ -74,6 +77,9 @@ export function effectsFor(events: GameEvent[], you: SeatId): Effect[] {
         break;
       case 'death':
         out.push({ kind: 'death', seat: e.seat, at: at(), ms: DEATH_MS });
+        break;
+      case 'seaEvent':
+        out.push({ kind: 'sea', event: e.event, at: at(), ms: SEA_MS });
         break;
       case 'turnStart':
         out.push({ kind: 'turn', seat: e.seat, mine: e.seat === you, at: at(), ms: TURN_MS });

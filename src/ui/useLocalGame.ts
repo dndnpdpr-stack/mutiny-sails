@@ -13,6 +13,8 @@ export interface LocalSetup {
   seed?: number;
   /** 기본 700 */
   aiDelayMs?: number;
+  /** 바다 이벤트 사용 (기본 켜짐) */
+  seaEvents?: boolean;
 }
 
 const NICKNAMES = ['붉은수염', '애꾸눈 잭', '검은 메리', '폭풍의 핀', '소금 샐리', '철갈고리', '바다쥐 로코', '황금이빨', '안개 속 아나', '녹슨 닻 칼'];
@@ -34,7 +36,7 @@ export function useLocalGame(setup: LocalSetup | null) {
     const pool = [...NICKNAMES].sort(() => 0.5 - Math.random());
     let k = 0;
     const names = Array.from({ length: n }, (_, i) => (i === mySeat ? setup.myName || '나' : pool[k++ % pool.length]));
-    const game = new Game({ seed, names, firstRoleDrawer: mySeat });
+    const game = new Game({ seed, names, firstRoleDrawer: mySeat, seaEvents: setup.seaEvents ?? true });
     const session = new HostSession(game, { timeouts: null });
     const ais: AiPlayer[] = [];
     for (let s = 0; s < n; s++) {

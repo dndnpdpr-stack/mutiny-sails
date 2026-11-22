@@ -14,7 +14,17 @@ describe('SetupScreen', () => {
     expect(screen.getByText('5명').closest('button')?.className).toMatch(/selected/);
     fireEvent.change(screen.getByRole('textbox'), { target: { value: '잭' } });
     fireEvent.click(screen.getByText('출항'));
-    expect(onStart).toHaveBeenCalledWith(5, '잭');
+    expect(onStart).toHaveBeenCalledWith(5, '잭', true);
+  });
+
+  it('can turn sea events off', () => {
+    const onStart = vi.fn();
+    render(<SetupScreen onStart={onStart} />);
+    const toggle = screen.getByRole('checkbox', { name: /바다 이벤트/ }) as HTMLInputElement;
+    expect(toggle.checked).toBe(true);
+    fireEvent.click(toggle);
+    fireEvent.click(screen.getByText('출항'));
+    expect(onStart).toHaveBeenCalledWith(5, '', false);
   });
 
   it('shows the title art with the logo and subtitle', () => {

@@ -223,6 +223,24 @@ describe('TableScreen', () => {
     expect(await screen.findByText('내 차례!')).toBeTruthy();
   });
 
+  it('shows the sea event banner during its effect', async () => {
+    renderTable(makeView({ seaEventsOn: true, seaEvent: 'storm' }), { effects: [{ kind: 'sea', event: 'storm', at: 0, ms: 1200 }] });
+    expect(await screen.findByText('🌪️ 폭풍!')).toBeTruthy();
+  });
+
+  it('shows the current sea event card next to the deck only when events are on', () => {
+    const { unmount } = renderTable(makeView({ seaEventsOn: true, seaEvent: 'storm' }));
+    const slot = screen.getByTestId('sea-event');
+    expect(slot.textContent).toContain('폭풍');
+    expect(slot.textContent).toContain('모든 거리 +1');
+    unmount();
+    const r2 = renderTable(makeView({ seaEventsOn: true, seaEvent: null }));
+    expect(screen.getByTestId('sea-event').textContent).toContain('바다 이벤트');
+    r2.unmount();
+    renderTable(makeView());
+    expect(screen.queryByTestId('sea-event')).toBeNull();
+  });
+
   it('shows the rejection toast', () => {
     renderTable(makeView(), { lastRejection: '지금은 낼 수 없어요' });
     expect(screen.getByText('지금은 낼 수 없어요')).toBeTruthy();

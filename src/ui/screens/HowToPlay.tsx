@@ -2,17 +2,39 @@ import { useEffect, useRef, useState } from 'react';
 import { CARD_CATALOG, type CardInfo } from '../../engine/cards/catalog';
 import { CHARACTER_IDS } from '../../engine/characters/roster';
 import type { Role } from '../../engine/types';
+import { SEA_EVENTS, SEA_EVENT_IDS } from '../../engine/seaEvents';
 import { CardFace } from '../table/Card';
 import { CharacterCard } from '../table/CharacterCard';
 import { RoleCard } from '../table/RoleCard';
 
-type Tab = 'rules' | 'roles' | 'characters' | 'cards';
+type Tab = 'rules' | 'roles' | 'characters' | 'cards' | 'sea';
 const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'rules', label: '기본 규칙' },
   { id: 'roles', label: '역할' },
   { id: 'characters', label: '캐릭터' },
   { id: 'cards', label: '카드' },
+  { id: 'sea', label: '바다 이벤트' },
 ];
+
+function SeaEvents() {
+  return (
+    <div className="guide-sea">
+      <p>
+        시작 화면에서 켜 두면, 두 번째 라운드부터 선장의 턴이 시작될 때마다 바다 이벤트 카드 1장을 펼쳐요. 다음 이벤트가 나올 때까지 모두에게 적용되고,
+        "펼쳐질 때"라고 적힌 효과는 그 순간 한 번만 일어나요. 12장을 다 쓰면 다시 섞어요.
+      </p>
+      <ul className="guide-sea-list">
+        {SEA_EVENT_IDS.map((id) => (
+          <li key={id}>
+            <span className="sea-icon" aria-hidden="true">{SEA_EVENTS[id].icon}</span>
+            <b>{SEA_EVENTS[id].name}</b>
+            <span className="guide-text">{SEA_EVENTS[id].text}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 const ROLES: Role[] = ['captain', 'loyalist', 'rebel', 'spy'];
 /** 인원별 역할 구성 (선장, 충성 선원, 반란 선원, 첩자) */
@@ -165,6 +187,7 @@ export function HowToPlay(p: { onClose: () => void }) {
             </div>
           )}
           {tab === 'cards' && <Cards />}
+          {tab === 'sea' && <SeaEvents />}
         </div>
       </div>
     </div>

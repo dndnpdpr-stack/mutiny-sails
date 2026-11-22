@@ -3,6 +3,7 @@ import { SetupScreen } from '../../src/ui/screens/SetupScreen';
 import { CARD_CATALOG } from '../../src/engine/cards/catalog';
 import { CHARACTER_IDS, CHARACTER_INFO } from '../../src/engine/characters/roster';
 import { ROLE_GOAL } from '../../src/ui/table/RoleCard';
+import { SEA_EVENTS, SEA_EVENT_IDS } from '../../src/engine/seaEvents';
 
 function open() {
   const onStart = vi.fn();
@@ -19,6 +20,16 @@ describe('HowToPlay', () => {
     expect(dialog.textContent).toContain('2장');
     expect(dialog.textContent).toContain('사거리');
     expect(dialog.textContent).toContain('역할 카드를 골라 뽑고');
+  });
+
+  it('sea events tab lists every event with its effect', () => {
+    const { dialog } = open();
+    fireEvent.click(tab('바다 이벤트'));
+    for (const id of SEA_EVENT_IDS) {
+      expect(dialog.textContent).toContain(SEA_EVENTS[id].name);
+      expect(dialog.textContent).toContain(SEA_EVENTS[id].text);
+    }
+    expect(dialog.textContent).toContain('두 번째 라운드');
   });
 
   it('roles tab lists every role, its goal and the player-count table', () => {

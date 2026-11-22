@@ -81,6 +81,12 @@ describe('effectsFor', () => {
   });
 });
 
+describe('sea event effect', () => {
+  it('turns a sea event into a 1.2s banner effect', () => {
+    expect(effectsFor([{ type: 'seaEvent', event: 'fog' }], 0)).toEqual([{ kind: 'sea', event: 'fog', at: 0, ms: 1200 }]);
+  });
+});
+
 describe('totalMs', () => {
   it('is 0 for empty and max(at+ms) otherwise', () => {
     expect(totalMs([])).toBe(0);

@@ -8,6 +8,7 @@ import { MyArea } from '../table/MyArea';
 import { OpponentPanel, type SeatFx } from '../table/OpponentPanel';
 import { PeekNote, PromptNote, TargetCardNote, responseNeed, responseWith } from '../table/PromptNote';
 import { latestPeek, peekMemos } from '../table/peek';
+import { seaEventTitle } from '../format';
 
 type Flags = Record<string, number>;
 
@@ -42,6 +43,7 @@ function useEffectFlags(effects: Effect[], speed: 1 | 2, key: number): Flags {
       const names: string[] = [];
       if (e.kind === 'shake') names.push(`${e.seat}:shake`);
       if (e.kind === 'death') names.push(`${e.seat}:dying`);
+      if (e.kind === 'sea') names.push('sea');
       if (e.kind === 'turn') {
         names.push(`${e.seat}:turn-glow`);
         if (e.mine) names.push('banner');
@@ -83,6 +85,7 @@ export function TableScreen(p: {
   const memos = peekMemos(latest.events, latest.you);
 
   const flags = useEffectFlags(p.effects, p.speed, p.batchKey);
+  const seaBanner = p.effects.find((e) => e.kind === 'sea') as Extract<Effect, { kind: 'sea' }> | undefined;
   const fxOf = (s: SeatId) => FX.filter((c) => (flags[`${s}:${c}`] ?? 0) > 0);
 
   const hint = selectedId ? latest.hints.find((h) => h.cardId === selectedId && latest.myHand.some((c) => c.id === h.cardId)) ?? null : null;
@@ -165,7 +168,7 @@ export function TableScreen(p: {
       </div>
 
       <div className="table-middle">
-        <CenterPile deckCount={shown.deckCount} discardTop={shown.discardTop} />
+        <CenterPile deckCount={shown.deckCount} discardTop={shown.discardTop} seaEventsOn={shown.seaEventsOn} seaEvent={shown.seaEvent} />
         <GameLog events={shown.events} name={name} />
       </div>
 
@@ -207,7 +210,8 @@ export function TableScreen(p: {
         />
       )}
 
-      {(flags.banner ?? 0) > 0 && <div className="turn-banner">내 차례!</div>}
+      {seaBanner && (flags.sea ?? 0) > 0 && <div className="turn-banner sea-banner">{seaEventTitle(seaBanner.event)}!</div>}
+      {(flags.banner ?? 0) > 0 && !((flags.sea ?? 0) > 0) && <div className="turn-banner">내 차례!</div>}
       {p.lastRejection && <div className="toast note">{p.lastRejection}</div>}
       <EffectLayer effects={p.effects} speed={p.speed} batchKey={p.batchKey} />
     </div>
