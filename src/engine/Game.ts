@@ -9,6 +9,7 @@ import type { Character } from './characters/Character';
 import { CHARACTERS, CHARACTER_IDS } from './characters/roster';
 import { drawCount, handLimit, type RuleModifier } from './rules';
 import { isHeart, isKegBlast, judge } from './judge';
+import { SEA_EVENTS, SEA_EVENT_IDS, type SeaEventId } from './seaEvents';
 
 export interface GameConfig {
   seed: number;
@@ -20,6 +21,10 @@ export interface GameConfig {
   stackDeck?: CardView[];
   /** 역할 카드를 누구부터 뽑을지 (기본 0번 자리). 1인 플레이는 사람 자리, 멀티플레이는 방장 자리 */
   firstRoleDrawer?: SeatId;
+  /** 두 번째 라운드부터 선장 턴마다 바다 이벤트를 펼친다 (기본 꺼짐) */
+  seaEvents?: boolean;
+  /** 테스트용: 이벤트가 나올 순서. 다 쓰면 전체를 섞어 이어 간다 */
+  seaEventOrder?: SeaEventId[];
 }
 
 export interface SeatState {
@@ -65,11 +70,21 @@ export class Game {
   private roleSlots: Role[] | null = null;
   private takenSlots = new Set<number>();
   private firstRoleDrawer: SeatId = 0;
+  readonly seaEventsOn: boolean;
+  seaEvent: SeaEventId | null = null;
+  /** 배열 끝이 다음에 펼칠 이벤트 */
+  private seaDeck: SeaEventId[] = [];
+  /** 카드 덱 순서를 바꾸지 않도록 이벤트 덱은 따로 섞는다 */
+  private seaRng: Rng;
+  private captainTurns = 0;
 
   constructor(config: GameConfig) {
     const n = config.names.length;
     if (n < 4 || n > 7) throw new Error('인원은 4~7명이어야 해요');
     this.rng = new Rng(config.seed);
+    this.seaRng = new Rng((config.seed ^ 0x5ea5ea) >>> 0);
+    this.seaEventsOn = config.seaEvents ?? false;
+    if (config.seaEventOrder) this.seaDeck = [...config.seaEventOrder].reverse();
     const drawRoles = !config.roles;
     this.firstRoleDrawer = config.firstRoleDrawer ?? 0;
     if (drawRoles) this.roleSlots = this.rng.shuffle(ROLE_TABLE.slice(0, n));
@@ -254,8 +269,22 @@ export class Game {
     this.current = seat;
     this.slashesPlayedThisTurn = 0;
     this.abilityUsedThisTurn = false;
+    const reveal = this.seaEventsOn && seat === this.captainSeat() && ++this.captainTurns >= 2;
+    const event = reveal ? this.revealSeaEvent() : null;
     this.emit({ type: 'turnStart', seat });
     this.pushStep(() => this.kegPhase(seat));
+    if (event?.onReveal) this.pushStep(() => event.onReveal!(this));
+  }
+
+  /** 다음 바다 이벤트를 펼쳐 규칙을 바꾼다. 덱을 다 쓰면 다시 섞는다 */
+  private revealSeaEvent() {
+    if (this.seaDeck.length === 0) this.seaDeck = this.seaRng.shuffle([...SEA_EVENT_IDS]);
+    const id = this.seaDeck.pop()!;
+    const info = SEA_EVENTS[id];
+    this.seaEvent = id;
+    this.modifiers = info.modifier ? [info.modifier] : [];
+    this.emit({ type: 'seaEvent', event: id });
+    return info;
   }
 
   private findEquip(seat: SeatId, kind: CardKind): Card | undefined {

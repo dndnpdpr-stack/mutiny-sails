@@ -5,7 +5,7 @@ import type { GameEvent, PlayerView } from '../../src/engine/types';
 function view(events: GameEvent[], extra: Partial<PlayerView> = {}): PlayerView {
   return {
     you: 0, myRole: 'rebel', myHand: [], seats: [], current: 0, pending: null, hints: [],
-    deckCount: 10, discardTop: null, distances: {}, myRange: 1, abilityUsed: false, events, winner: null, ...extra,
+    deckCount: 10, discardTop: null, distances: {}, myRange: 1, abilityUsed: false, events, winner: null, seaEventsOn: false, seaEvent: null, ...extra,
   };
 }
 const dmg = (seq: number): GameEvent => ({ type: 'damage', seat: 1, amount: 1, source: 0, seq });

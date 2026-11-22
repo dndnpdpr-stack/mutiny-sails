@@ -1,4 +1,4 @@
-import type { CardKind, CardView, SeatId } from './types';
+import type { CardView, JudgeReason, SeatId } from './types';
 import type { Game } from './Game';
 import type { Card } from './cards/Card';
 
@@ -7,7 +7,7 @@ import type { Card } from './cards/Card';
  * 캐릭터가 2장을 뒤집으면 judgeChoice 입력을 받아 하나를 고른다.
  * 뒤집을 카드가 없으면 실패.
  */
-export function judge(game: Game, seat: SeatId, reason: CardKind, success: (c: CardView) => boolean, then: (ok: boolean) => void): void {
+export function judge(game: Game, seat: SeatId, reason: JudgeReason, success: (c: CardView) => boolean, then: (ok: boolean) => void): void {
   const flipped = game.draw(game.seats[seat].character.judgeFlipCount());
   for (const c of flipped) game.discardCard(c);
   const finish = (c: Card | undefined) => {

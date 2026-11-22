@@ -17,7 +17,7 @@ function makeView(extra: Partial<PlayerView> = {}, seats?: SeatView[]): PlayerVi
   return {
     you: 1, myRole: 'rebel', myHand: [], seats: seats ?? [0, 1, 2, 3, 4].map((i) => seat(i)), current: 1,
     pending: { kind: 'turn', seat: 1 }, hints: [], deckCount: 40, discardTop: card('d0', 'rum', 'hearts', 9),
-    distances: { 0: 1, 2: 1, 3: 2, 4: 2 }, myRange: 1, abilityUsed: false, events: [], winner: null, ...extra,
+    distances: { 0: 1, 2: 1, 3: 2, 4: 2 }, myRange: 1, abilityUsed: false, events: [], winner: null, seaEventsOn: false, seaEvent: null, ...extra,
   };
 }
 

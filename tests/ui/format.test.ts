@@ -5,6 +5,11 @@ const card = { id: 'c1', kind: 'slash', suit: 'spades', rank: 5 } as const;
 const names = (s: number) => `P${s}`;
 
 describe('format', () => {
+  it('names the sea event and the sea monster judgment', () => {
+    expect(formatEvent({ type: 'seaEvent', event: 'storm' }, names)).toBe('바다 이벤트: 🌪️ 폭풍 — 모든 거리 +1');
+    expect(formatEvent({ type: 'judge', seat: 1, card, success: false, reason: 'seaMonster' }, names)).toBe('P1의 바다 괴물 판정: 실패');
+  });
+
   it('formats damage with name and amount', () => {
     const s = formatEvent({ type: 'damage', seat: 2, amount: 3, source: null }, names);
     expect(s).toContain('P2');

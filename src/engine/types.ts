@@ -10,6 +10,10 @@ export type CardKind =
   | 'supplyShip' | 'merchantRaid' | 'feast' | 'loot'
   | 'pistol' | 'musket' | 'longMusket' | 'deckCannon' | 'twinPistols'
   | 'spyglass' | 'dinghy' | 'barrel' | 'powderKeg' | 'brig';
+import type { SeaEventId } from './seaEvents';
+
+/** 판정 이유: 장비 카드 또는 바다 이벤트 */
+export type JudgeReason = CardKind | 'seaMonster';
 export type CharacterId = 'tom' | 'margo' | 'lou' | 'derrick' | 'orso' | 'nico' | 'hanna' | 'sila' | 'bibi' | 'bruno';
 
 export interface CardView {
@@ -67,7 +71,7 @@ export type GameEvent = { visibleTo?: SeatId[]; seq?: number } & (
   | { type: 'respond'; seat: SeatId; cards: CardView[] }
   | { type: 'damage'; seat: SeatId; amount: number; source: SeatId | null }
   | { type: 'heal'; seat: SeatId; amount: number }
-  | { type: 'judge'; seat: SeatId; card: CardView; success: boolean; reason: CardKind }
+  | { type: 'judge'; seat: SeatId; card: CardView; success: boolean; reason: JudgeReason }
   | { type: 'steal'; from: SeatId; to: SeatId; card: CardView | null }
   | { type: 'discardCards'; seat: SeatId; cards: CardView[] }
   | { type: 'peek'; seat: SeatId; target: SeatId; card: CardView }
@@ -77,6 +81,7 @@ export type GameEvent = { visibleTo?: SeatId[]; seq?: number } & (
   | { type: 'characterChosen'; seat: SeatId; character: CharacterId }
   /** role: 본인과(선장이면 모두) 볼 때만 채워지고, 나머지에게는 null */
   | { type: 'roleDrawn'; seat: SeatId; slot: number; role: Role | null }
+  | { type: 'seaEvent'; event: SeaEventId }
 );
 
 /** targets null = 대상 불필요. targetCards = 대상의 장비를 고를 수 있음 */
@@ -120,4 +125,7 @@ export interface PlayerView {
   /** 내게 보이는 것만, 최근 100개 */
   events: GameEvent[];
   winner: Winner | null;
+  /** 바다 이벤트를 쓰는 게임인지, 지금 펼쳐진 이벤트 */
+  seaEventsOn: boolean;
+  seaEvent: SeaEventId | null;
 }

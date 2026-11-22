@@ -1,6 +1,7 @@
 import type { GameEvent, Role, SeatId, Winner } from '../engine/types';
 import { CARD_CATALOG } from '../engine/cards/catalog';
 import { CHARACTER_INFO } from '../engine/characters/roster';
+import { SEA_EVENTS, type SeaEventId } from '../engine/seaEvents';
 
 const ROLE_NAMES: Record<Role, string> = { captain: '선장', loyalist: '충성 선원', rebel: '반란 선원', spy: '첩자' };
 
@@ -20,6 +21,8 @@ export function winnerText(w: Winner): string {
 }
 
 export const cardName = (kind: keyof typeof CARD_CATALOG): string => CARD_CATALOG[kind].name;
+
+export const seaEventTitle = (id: SeaEventId): string => `${SEA_EVENTS[id].icon} ${SEA_EVENTS[id].name}`;
 
 export function formatEvent(e: GameEvent, names: (s: SeatId) => string): string {
   const cards = (list: { kind: keyof typeof CARD_CATALOG }[]) => list.map((c) => cardName(c.kind)).join(', ');
@@ -43,7 +46,7 @@ export function formatEvent(e: GameEvent, names: (s: SeatId) => string): string 
     case 'heal':
       return `${names(e.seat)}이(가) 체력 ${e.amount}을(를) 회복했어요.`;
     case 'judge':
-      return `${names(e.seat)}의 ${cardName(e.reason)} 판정: ${e.success ? '성공' : '실패'}`;
+      return `${names(e.seat)}의 ${e.reason === 'seaMonster' ? '바다 괴물' : cardName(e.reason)} 판정: ${e.success ? '성공' : '실패'}`;
     case 'steal':
       return e.card
         ? `${names(e.to)}이(가) ${names(e.from)}의 ${cardName(e.card.kind)}을(를) 가져갔어요.`
@@ -62,5 +65,7 @@ export function formatEvent(e: GameEvent, names: (s: SeatId) => string): string 
       return e.role ? `${names(e.seat)}이(가) ${roleName(e.role)} 카드를 뽑았어요.` : `${names(e.seat)}이(가) 역할 카드를 뽑았어요.`;
     case 'gameOver':
       return winnerText(e.winner);
+    case 'seaEvent':
+      return `바다 이벤트: ${seaEventTitle(e.event)} — ${SEA_EVENTS[e.event].text}`;
   }
 }
