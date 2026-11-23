@@ -107,3 +107,38 @@ describe('fire ship targeting', () => {
     expect(a).not.toEqual({ type: 'playCard', cardId: fire.id, target: 1 });
   });
 });
+
+describe('new character abilities', () => {
+  const chars = (first: CharacterId): CharacterId[] => [first, 'bruno', 'hanna', 'orso', 'tom'];
+
+  it('ori keeps a valuable top card and sends a weak one to the bottom', () => {
+    const g = makeGame(5, { characters: chars('ori') });
+    g.deck.push(...[giveHand(g, 1, 'rum')].map((c) => g.seats[1].hand.splice(g.seats[1].hand.indexOf(c), 1)[0]));
+    g.start();
+    expect(decide(buildView(g, 0, () => true), new AiMemory(), rng())).toEqual({ type: 'fortune', toBottom: false });
+    const g2 = makeGame(5, { characters: chars('ori') });
+    g2.deck.push(...[giveHand(g2, 1, 'powderKeg')].map((c) => g2.seats[1].hand.splice(g2.seats[1].hand.indexOf(c), 1)[0]));
+    g2.start();
+    expect(decide(buildView(g2, 0, () => true), new AiMemory(), rng())).toEqual({ type: 'fortune', toBottom: true });
+  });
+
+  it('dorothy, as captain, heals a hurt crew member who looks loyal', () => {
+    const g = makeGame(5, { characters: chars('dorothy') });
+    g.start();
+    const [rum] = setHand(g, 0, ['rum']);
+    g.seats[4].hp = 2;
+    const mem = new AiMemory();
+    mem.captainFoe[4] = -3;
+    expect(decide(buildView(g, 0, () => true), mem, rng())).toEqual({ type: 'useAbility', cardIds: [rum.id], target: 4 });
+  });
+
+  it('kiki trades a weak card for an enemy barrel', () => {
+    const g = makeGame(5, { characters: chars('kiki') });
+    g.start();
+    const [feast] = setHand(g, 0, ['feast']);
+    const barrel = giveEquipFor(g, 1, 'barrel');
+    const mem = new AiMemory();
+    mem.captainFoe[1] = 4;
+    expect(decide(buildView(g, 0, () => true), mem, rng())).toEqual({ type: 'useAbility', cardIds: [feast.id], target: 1, targetCardId: barrel.id });
+  });
+});

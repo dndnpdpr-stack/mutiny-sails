@@ -93,6 +93,10 @@ function decideTurn(view: PlayerView, mem: AiMemory): Action {
     if (h) return play(h);
   }
 
+  // 캐릭터 능력
+  const ability = abilityAction(view, mem);
+  if (ability) return ability;
+
   // 카드 뽑기
   for (const k of ['supplyShip', 'merchantRaid', 'loot', 'treasureMap'] as const) {
     const h = hintsOf(k)[0];
@@ -169,6 +173,35 @@ function fireVictims(view: PlayerView, target: SeatId): SeatId[] {
   return [...new Set([target, right, left])].filter((s) => s !== view.you);
 }
 
+const GEAR_TO_REMOVE: CardKind[] = ['barrel', 'leatherCoat', 'deckCannon', 'longMusket', 'musket', 'harpoon', 'pistol', 'twinPistols', 'dinghy', 'spyglass', 'luckyCoin', 'compass', 'blackFlag'];
+
+/** 도로시·키키처럼 턴에 직접 쓰는 능력 */
+function abilityAction(view: PlayerView, mem: AiMemory): Action | null {
+  const me = view.seats[view.you];
+  if (view.abilityUsed) return null;
+  const others = othersAlive(view);
+  if (me.character === 'dorothy') {
+    const rum = byKind(view.myHand, 'rum')[0];
+    if (!rum || others.length < 2 || view.seaEvent === 'shortage') return null;
+    const allies = others.filter((t) => view.seats[t].hp < view.seats[t].maxHp && targetScore(view, mem, t) < 0);
+    if (allies.length === 0) return null;
+    const t = allies.sort((a, b) => targetScore(view, mem, a) - targetScore(view, mem, b))[0];
+    return { type: 'useAbility', cardIds: [rum.id], target: t };
+  }
+  if (me.character === 'kiki') {
+    const junk = [...view.myHand].sort((a, b) => KEEP_VALUE[a.kind] - KEEP_VALUE[b.kind])[0];
+    if (!junk || KEEP_VALUE[junk.kind] > 4) return null;
+    const withGear = others.filter((t) => view.seats[t].equipment.some((c) => GEAR_TO_REMOVE.includes(c.kind)));
+    const t = bestTarget(view, mem, withGear, 1);
+    if (t === null) return null;
+    const gear = [...view.seats[t].equipment]
+      .filter((c) => GEAR_TO_REMOVE.includes(c.kind))
+      .sort((a, b) => GEAR_TO_REMOVE.indexOf(a.kind) - GEAR_TO_REMOVE.indexOf(b.kind))[0];
+    return { type: 'useAbility', cardIds: [junk.id], target: t, targetCardId: gear.id };
+  }
+  return null;
+}
+
 function lowestValue(cards: CardView[], count: number): string[] {
   return [...cards].sort((a, b) => KEEP_VALUE[a.kind] - KEEP_VALUE[b.kind]).slice(0, count).map((c) => c.id);
 }
@@ -224,6 +257,8 @@ export function fallbackAction(view: PlayerView): Action | null {
       return { type: 'chooseCharacter', character: p.options[0] };
     case 'drawRole':
       return { type: 'drawRole', slot: p.slots[0] };
+    case 'fortune':
+      return { type: 'fortune', toBottom: false };
   }
 }
 
@@ -288,6 +323,8 @@ export function decide(view: PlayerView, mem: AiMemory, rng: Rng): Action | null
     }
     case 'drawRole':
       return { type: 'drawRole', slot: p.slots[rng.int(p.slots.length)] };
+    case 'fortune':
+      return { type: 'fortune', toBottom: !!p.card && KEEP_VALUE[p.card.kind] < 5 };
     default:
       return fallbackAction(view);
   }
