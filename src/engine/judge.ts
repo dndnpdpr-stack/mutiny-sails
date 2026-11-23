@@ -21,6 +21,12 @@ export function judge(game: Game, seat: SeatId, reason: JudgeReason, success: (c
       }
     }
     if (c) game.emit({ type: 'judge', seat, card: c.toView(), success: ok, reason });
+    // 노름꾼 루카: ♣이 나오면 1장
+    const ch = game.seats[seat].character;
+    if (c && c.suit === 'clubs' && ch.drawsOnClubJudge() && game.seats[seat].alive) {
+      game.emit({ type: 'ability', seat, character: ch.id });
+      game.giveCards(seat, game.draw(1));
+    }
     then(ok);
   };
   if (flipped.length < 2) {

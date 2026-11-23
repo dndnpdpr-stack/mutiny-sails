@@ -12,6 +12,7 @@ function visible(e: GameEvent, seat: SeatId): boolean {
 function maskPending(p: PendingView | null, seat: SeatId): PendingView | null {
   if (p && p.kind === 'chooseCharacter' && p.seat !== seat) return { ...p, options: [] };
   if (p && p.kind === 'treasureMap' && p.seat !== seat) return { ...p, revealed: [] };
+  if (p && p.kind === 'fortune' && p.seat !== seat) return { ...p, card: null };
   return p;
 }
 

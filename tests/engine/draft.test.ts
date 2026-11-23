@@ -18,12 +18,12 @@ function pick(g: Game, index = 0): CharacterId {
 }
 
 describe('character draft', () => {
-  it('starts with captain choosing between two distinct characters', () => {
+  it('starts with captain choosing between three distinct characters', () => {
     const g = fresh(5);
     const p = g.pending();
     expect(p).toMatchObject({ kind: 'chooseCharacter', seat: g.captainSeat() });
     if (p?.kind !== 'chooseCharacter') throw new Error();
-    expect(p.options).toHaveLength(2);
+    expect(p.options).toHaveLength(3);
     expect(p.options[0]).not.toBe(p.options[1]);
   });
 
@@ -45,7 +45,7 @@ describe('character draft', () => {
       const p = g.pending();
       if (p?.kind !== 'chooseCharacter') throw new Error('expected draft');
       expect(p.seat).toBe((cap + i) % n);
-      expect(p.options).toHaveLength(2);
+      expect(p.options).toHaveLength(3);
       for (const o of p.options) expect(chosen).not.toContain(o);
       chosen.push(pick(g, i % 2));
     }
@@ -66,7 +66,12 @@ describe('character draft', () => {
   it('after everyone chooses: hp, hands and captain turn', () => {
     const n = 5;
     const g = fresh(n);
-    for (let i = 0; i < n; i++) pick(g);
+    // 턴 시작에 따로 묻는 캐릭터(마고·오르)는 피해서 고른다
+    for (let i = 0; i < n; i++) {
+      const p = g.pending();
+      if (p?.kind !== 'chooseCharacter') throw new Error('not drafting');
+      pick(g, Math.max(0, p.options.findIndex((c) => c !== 'margo' && c !== 'ori')));
+    }
     const cap = g.captainSeat();
     for (const s of g.seats) {
       expect(s.maxHp).toBe(s.character.maxHp + (s.seat === cap ? 1 : 0));

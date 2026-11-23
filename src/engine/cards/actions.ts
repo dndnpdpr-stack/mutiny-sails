@@ -104,6 +104,9 @@ export class Pickpocket extends ActionCard {
     return null;
   }
   play(game: Game, actor: SeatId, p: PlayParams): void {
+    game.unlessResisted(p.target!, 'pickpocket', () => this.take(game, actor, p));
+  }
+  private take(game: Game, actor: SeatId, p: PlayParams): void {
     const { card, fromHand } = takeFrom(game, p);
     game.seats[actor].hand.push(card);
     if (fromHand) {
@@ -122,6 +125,9 @@ export class CutRope extends ActionCard {
     return validateTakeTarget(game, actor, p);
   }
   play(game: Game, _actor: SeatId, p: PlayParams): void {
+    game.unlessResisted(p.target!, 'cutRope', () => this.cut(game, p));
+  }
+  private cut(game: Game, p: PlayParams): void {
     const { card } = takeFrom(game, p);
     game.discardCard(card);
     game.emit({ type: 'discardCards', seat: p.target!, cards: [card.toView()] });

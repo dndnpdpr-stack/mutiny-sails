@@ -53,7 +53,7 @@ export function drawCount(game: Game, _seat: SeatId): number {
 }
 
 export function slashLimit(game: Game, seat: SeatId): number {
-  let n = weapon(game, seat)?.unlimitedSlash ? Infinity : 1;
+  let n = weapon(game, seat)?.unlimitedSlash ? Infinity : Math.max(1, game.seats[seat].character.minSlashes(game, seat));
   for (const m of game.modifiers) if (m.slashLimit) n = m.slashLimit(n);
   return n;
 }

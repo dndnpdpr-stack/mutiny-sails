@@ -18,7 +18,9 @@ import type { SeaEventId } from './seaEvents';
 
 /** 판정 이유: 장비 카드 또는 바다 이벤트 */
 export type JudgeReason = CardKind | 'seaMonster';
-export type CharacterId = 'tom' | 'margo' | 'lou' | 'derrick' | 'orso' | 'nico' | 'hanna' | 'sila' | 'bibi' | 'bruno';
+export type CharacterId =
+  | 'tom' | 'margo' | 'lou' | 'derrick' | 'orso' | 'nico' | 'hanna' | 'sila' | 'bibi' | 'bruno'
+  | 'dorothy' | 'ori' | 'felix' | 'tara' | 'luca' | 'gordon' | 'kiki' | 'morgan';
 
 export interface CardView {
   id: CardId;
@@ -29,8 +31,10 @@ export interface CardView {
 
 export type Action =
   | { type: 'playCard'; cardId: CardId; target?: SeatId; targetCardId?: CardId }
-  /** 포수 데릭 */
-  | { type: 'useAbility'; cardIds: CardId[] }
+  /** 캐릭터 능력: 데릭(칼질 2장), 도로시(럼주 + 대상), 키키(손패 1장 + 대상 + 대상 장비) */
+  | { type: 'useAbility'; cardIds: CardId[]; target?: SeatId; targetCardId?: CardId }
+  /** 점쟁이 오르: 덱 맨 위를 맨 밑으로 보낼지 */
+  | { type: 'fortune'; toBottom: boolean }
   | { type: 'endTurn' }
   /** 피하기/칼질/럼주 내기. [] = 안 냄(맞기·포기) */
   | { type: 'respond'; cardIds: CardId[] }
@@ -61,6 +65,8 @@ export type PendingView =
   | { kind: 'peekTarget'; seat: SeatId }
   | { kind: 'passKeg'; seat: SeatId }
   | { kind: 'drawSource'; seat: SeatId }
+  /** 점쟁이 오르: card는 본인에게만 채워진다 */
+  | { kind: 'fortune'; seat: SeatId; card: CardView | null }
   | { kind: 'chooseCharacter'; seat: SeatId; options: CharacterId[] }
   /** slots: 아직 남은 역할 카드 자리 번호 (내용은 비공개) */
   | { kind: 'drawRole'; seat: SeatId; slots: number[] };

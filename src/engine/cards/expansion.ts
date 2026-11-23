@@ -50,7 +50,9 @@ export class DiceWager extends ActionCard {
     return checkOtherTarget(game, actor, p);
   }
   play(game: Game, actor: SeatId, p: PlayParams): void {
-    const target = p.target!;
+    game.unlessResisted(p.target!, 'diceWager', () => this.wager(game, actor, p.target!));
+  }
+  private wager(game: Game, actor: SeatId, target: SeatId): void {
     const flipped = game.draw(2);
     for (const c of flipped) game.discardCard(c);
     if (flipped.length < 2) return;

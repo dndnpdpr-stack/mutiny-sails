@@ -31,6 +31,8 @@ export function defaultActionFor(game: Game, p: PendingView): Action {
       return { type: 'drawRole', slot: p.slots[0] };
     case 'drawSource':
       return { type: 'chooseDrawSource', fromDiscard: false };
+    case 'fortune':
+      return { type: 'fortune', toBottom: false };
     case 'chooseCharacter':
       return { type: 'chooseCharacter', character: p.options[0] };
   }

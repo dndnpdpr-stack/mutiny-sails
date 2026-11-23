@@ -154,6 +154,22 @@ export class Game {
     this.emit({ type: 'roleRevealed', seat: viewer, target, role: this.seats[target].role, visibleTo: [viewer] });
   }
 
+  /** 덱 맨 위 카드 (비었으면 버린 카드를 섞어 채운다). 꺼내지 않는다 */
+  peekTop(): Card | undefined {
+    if (this.deck.length === 0 && this.discard.length > 0) this.deck = this.rng.shuffle(this.discard.splice(0));
+    return this.deck.at(-1);
+  }
+
+  /** 고든처럼 빼앗기 카드에 버티는 캐릭터면 판정(♥·♦이면 무효), 아니면 바로 effect */
+  unlessResisted(target: SeatId, kind: CardKind, effect: () => void): void {
+    const ch = this.seats[target].character;
+    if (!ch.resistsTakes()) return effect();
+    judge(this, target, kind, (c) => c.suit === 'hearts' || c.suit === 'diamonds', (resisted) => {
+      if (resisted) this.emit({ type: 'ability', seat: target, character: ch.id });
+      else effect();
+    });
+  }
+
   /** 판정 때 뒤집을 장수: 캐릭터 능력 또는 나침반 */
   judgeFlipCount(seat: SeatId): 1 | 2 {
     return this.findEquip(seat, 'compass') ? 2 : this.seats[seat].character.judgeFlipCount();
@@ -261,7 +277,7 @@ export class Game {
     }
     const seat = (this.captainSeat() + i) % n;
     const taken = new Set(this.seats.filter((s) => s.characterChosen).map((s) => s.character.id));
-    const options = this.rng.shuffle(CHARACTER_IDS.filter((c) => !taken.has(c))).slice(0, 2);
+    const options = this.rng.shuffle(CHARACTER_IDS.filter((c) => !taken.has(c))).slice(0, 3);
     this.pushInput({ kind: 'chooseCharacter', seat, options }, (a) => {
       if (a.type !== 'chooseCharacter') return WRONG_ACTION;
       if (!options.includes(a.character)) return '제시된 캐릭터 중에서 골라 주세요';
@@ -422,11 +438,11 @@ export class Game {
     }
     if (a.type === 'useAbility') {
       const ch = this.seats[seat].character;
-      const err = ch.canUseAbility(this, seat, a.cardIds);
+      const err = ch.canUseAbility(this, seat, a);
       if (err) return err;
       this.pushTurnInput(seat);
       this.emit({ type: 'ability', seat, character: ch.id });
-      ch.useAbility(this, seat, a.cardIds);
+      ch.useAbility(this, seat, a);
       return null;
     }
     if (a.type !== 'playCard') return WRONG_ACTION;
@@ -464,6 +480,11 @@ export class Game {
   }
 
   private endPhase(seat: SeatId): void {
+    const ch = this.seats[seat].character;
+    if (ch.drawsOnQuietTurn() && this.slashesPlayedThisTurn === 0) {
+      this.emit({ type: 'ability', seat, character: ch.id });
+      this.giveCards(seat, this.draw(1));
+    }
     const excess = this.seats[seat].hand.length - handLimit(this, seat);
     this.pushStep(() => this.nextTurn());
     this.forceDiscard(seat, excess);
@@ -549,6 +570,11 @@ export class Game {
 
   /** 칼질·포격 공격 1회. afterHit: 피해를 준 뒤(쓰러짐 처리 후) 실행 */
   attack(target: SeatId, attacker: SeatId, source: AttackSource, afterHit?: () => void): void {
+    const ch = this.seats[target].character;
+    if (ch.autoDodges(source)) {
+      this.emit({ type: 'ability', seat: target, character: ch.id });
+      return;
+    }
     if (this.findEquip(target, 'barrel')) {
       judge(this, target, 'barrel', isHeart, (dodged) => {
         if (!dodged) this.attackResponse(target, attacker, source, afterHit);
