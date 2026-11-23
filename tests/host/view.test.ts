@@ -81,7 +81,7 @@ describe('buildView draft', () => {
     expect(p?.kind).toBe('chooseCharacter');
     const captain = p!.seat;
     const mine = buildView(g, captain, noAi);
-    expect(mine.pending?.kind === 'chooseCharacter' && mine.pending.options.length).toBe(2);
+    expect(mine.pending?.kind === 'chooseCharacter' && mine.pending.options.length).toBe(3);
     expect(mine.seats.every((s) => s.character === null)).toBe(true);
     const other = (captain + 1) % 4;
     const theirs = buildView(g, other, noAi);

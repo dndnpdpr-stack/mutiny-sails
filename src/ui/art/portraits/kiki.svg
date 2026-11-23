@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 166 200">
+  <!-- 원숭이 조련사 키키: 곱슬머리, 장난스러운 웃음, 어깨 위 원숭이 -->
+  <rect width="166" height="200" fill="#a9b84a"/>
+  <path d="M0 150 Q83 124 166 150 L166 200 L0 200 Z" fill="#8e9c3c"/>
+  <g stroke="#1b120a" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 200 Q18 154 52 142 L104 142 Q140 154 146 200 Z" fill="#e2913a" stroke-width="5"/>
+    <path d="M58 142 L74 166 L90 142" fill="#f4efe2" stroke-width="4"/>
+    <path d="M62 124 L62 144 L86 144 L86 124 Z" fill="#a8704a" stroke-width="4"/>
+    <path d="M30 86 Q26 128 74 134 Q118 128 114 86 Q112 62 74 62 Q34 62 30 86 Z" fill="#c68a5e" stroke-width="5"/>
+    <path d="M94 66 Q118 72 114 92 Q110 122 86 130 Q106 110 102 80 Z" fill="#a8704a" stroke="none"/>
+    <!-- 곱슬머리 -->
+    <g fill="#2a1a12" stroke-width="4">
+      <circle cx="38" cy="66" r="11"/><circle cx="54" cy="52" r="12"/><circle cx="74" cy="46" r="12"/><circle cx="94" cy="52" r="12"/><circle cx="108" cy="66" r="11"/>
+      <circle cx="30" cy="82" r="8"/><circle cx="116" cy="82" r="8"/>
+    </g>
+    <path d="M44 82 L60 78 M86 78 L102 80" fill="none" stroke-width="5"/>
+    <path d="M70 94 Q64 106 70 108 Q76 110 78 106" fill="none" stroke-width="3.5"/>
+    <path d="M52 114 Q74 132 96 112 Q74 120 52 114 Z" fill="#ffffff" stroke-width="4"/>
+    <!-- 원숭이 -->
+    <path d="M118 140 Q112 120 128 112 Q146 108 152 124 Q156 140 142 146 Z" fill="#7a4a2a" stroke-width="4.5"/>
+    <path d="M150 140 Q166 150 156 170 Q150 178 160 184" fill="none" stroke="#7a4a2a" stroke-width="6"/>
+    <path d="M150 140 Q166 150 156 170 Q150 178 160 184" fill="none" stroke-width="1.5"/>
+    <circle cx="132" cy="92" r="17" fill="#7a4a2a" stroke-width="4.5"/>
+    <circle cx="114" cy="88" r="7" fill="#d9a37a" stroke-width="3.5"/><circle cx="150" cy="88" r="7" fill="#d9a37a" stroke-width="3.5"/>
+    <path d="M120 96 Q120 84 132 86 Q144 84 144 96 Q144 108 132 108 Q120 108 120 96 Z" fill="#d9a37a" stroke-width="3.5"/>
+    <path d="M126 102 Q132 106 138 102" fill="none" stroke-width="2.5"/>
+  </g>
+  <circle cx="54" cy="90" r="2.6" fill="#1b120a"/><circle cx="92" cy="90" r="2.6" fill="#1b120a"/>
+  <circle cx="127" cy="94" r="2.2" fill="#1b120a"/><circle cx="137" cy="94" r="2.2" fill="#1b120a"/>
+</svg>

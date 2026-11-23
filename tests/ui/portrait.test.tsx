@@ -23,6 +23,14 @@ describe('Portrait', () => {
     expect(container.textContent).toContain('👨‍🍳');
   });
 
+  it('every character has a registered picture and a fallback emoji', async () => {
+    const { CHARACTER_FACE } = await import('../../src/ui/art/portraits');
+    for (const id of CHARACTER_IDS) {
+      expect(PORTRAITS[id], id).toBeTruthy();
+      expect(CHARACTER_FACE[id], id).toBeTruthy();
+    }
+  });
+
   it('shows a question mark before a character is chosen', () => {
     const { container } = render(<Portrait id={null} variant="face" />);
     expect(container.querySelector('img')).toBeNull();
@@ -36,7 +44,7 @@ describe('Portrait', () => {
     expect(container.textContent).toContain('👨‍🍳');
   });
 
-  it('has a picture for all ten characters', () => {
+  it('has a picture for every character', () => {
     expect(CHARACTER_IDS.filter((id) => !PORTRAITS[id])).toEqual([]);
   });
 

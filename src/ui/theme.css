@@ -306,3 +306,12 @@ h1, h2, h3, .cname, .rname, .opp .nm { font-weight: 800; letter-spacing: -0.01em
 }
 .sea-banner .sea-banner-turn { font-size: 20px; margin-top: 4px; color: #ffe08a; }
 .guide-tag { margin-left: 6px; padding: 0 6px; border-radius: 6px; font-size: 11px; font-weight: normal; color: #f3e3b8; background: #7a4e24; vertical-align: 1px; }
+@media (max-width: 520px) {
+  /* 캐릭터 3장을 한 줄에 놓고 비교할 수 있게 */
+  .draft-options { gap: 6px; flex-wrap: nowrap; }
+  .draft-options .char-card { width: auto; flex: 1 1 0; min-width: 0; padding: 5px; }
+  .draft-options .char-card .face { width: 100%; }
+  .draft-options .char-card .cname { font-size: 12px; word-break: keep-all; }
+  .draft-options .char-card .ctext { font-size: 10.5px; min-height: 0; word-break: keep-all; }
+  .draft-options .char-card .pick { padding: 4px 8px; font-size: 13px; }
+}

@@ -19,7 +19,7 @@ export function MyArea(p: {
   onCardClick: (id: string) => void;
   canEndTurn: boolean;
   onEndTurn: () => void;
-  /** 데릭이 아니면 null */
+  /** 직접 쓰는 능력이 없는 캐릭터면 null (데릭·도로시·키키만) */
   ability: { enabled: boolean; onUse: () => void } | null;
 }) {
   const me = p.me;

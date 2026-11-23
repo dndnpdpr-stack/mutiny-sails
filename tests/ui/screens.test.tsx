@@ -56,7 +56,7 @@ describe('App draft flow', () => {
     fireEvent.click(screen.getByText('출항'));
     await drawMyRole();
     const picks = await screen.findAllByRole('button', { name: /고르기$/ }, { timeout: 3000 });
-    expect(picks).toHaveLength(2);
+    expect(picks).toHaveLength(3);
     expect(screen.getAllByText(ROLES).length).toBeGreaterThan(0);
     expect(screen.getByText(/반란 선원과 첩자를|선장을 지켜|선장을 쓰러뜨리세요|마지막까지/)).toBeTruthy();
     fireEvent.click(picks[0]);
@@ -81,7 +81,7 @@ describe('App draft flow', () => {
     await waitFor(() =>
       expect(screen.queryByText(/다른 선원들이 캐릭터를 고르는 중/) ?? screen.queryAllByRole('button', { name: /고르기$/ })[0]).toBeTruthy(),
     );
-    expect(await screen.findAllByRole('button', { name: /고르기$/ }, { timeout: 3000 })).toHaveLength(2);
+    expect(await screen.findAllByRole('button', { name: /고르기$/ }, { timeout: 3000 })).toHaveLength(3);
   });
 });
 

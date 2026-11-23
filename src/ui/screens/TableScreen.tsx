@@ -8,6 +8,7 @@ import { MyArea } from '../table/MyArea';
 import { OpponentPanel, type SeatFx } from '../table/OpponentPanel';
 import { PeekNote, PromptNote, TargetCardNote, responseNeed, responseWith } from '../table/PromptNote';
 import { latestPeek, peekMemos } from '../table/peek';
+import { DorothyNote, KikiNote, dorothyTargets, kikiTargets } from '../table/AbilityNote';
 import { seaEventTitle } from '../format';
 import type { SeaEventId } from '../../engine/seaEvents';
 
@@ -99,6 +100,7 @@ export function TableScreen(p: {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [pickFor, setPickFor] = useState<{ cardId: string; target: SeatId } | null>(null);
   const [peekAck, setPeekAck] = useState(0);
+  const [abilityOpen, setAbilityOpen] = useState(false);
   const newPeek = latestPeek(latest.events, latest.you, peekAck);
   const memos = peekMemos(latest.events, latest.you);
 
@@ -162,6 +164,19 @@ export function TableScreen(p: {
   const myTurn = latest.pending?.kind === 'turn' && latest.pending.seat === latest.you;
   const latestMe = latest.seats[latest.you];
   const slashes = latest.myHand.filter((c) => c.kind === 'slash');
+  const canAct = myTurn && !latest.abilityUsed;
+  const openAbility = () => (cancel(), setAbilityOpen(true));
+  const ability =
+    latestMe.character === 'derrick'
+      ? {
+          enabled: canAct && slashes.length >= 2,
+          onUse: () => (cancel(), send({ type: 'useAbility', cardIds: slashes.slice(0, 2).map((c) => c.id) })),
+        }
+      : latestMe.character === 'dorothy'
+        ? { enabled: canAct && latest.myHand.some((c) => c.kind === 'rum') && dorothyTargets(latest).length > 0, onUse: openAbility }
+        : latestMe.character === 'kiki'
+          ? { enabled: canAct && latest.myHand.length > 0 && kikiTargets(latest).length > 0, onUse: openAbility }
+          : null;
 
   return (
     <div className="table-bg table-screen">
@@ -203,17 +218,12 @@ export function TableScreen(p: {
         onCardClick={onCardClick}
         canEndTurn={myTurn}
         onEndTurn={() => (cancel(), send({ type: 'endTurn' }))}
-        ability={
-          latestMe.character === 'derrick'
-            ? {
-                enabled: myTurn && !latest.abilityUsed && slashes.length >= 2,
-                onUse: () => (cancel(), send({ type: 'useAbility', cardIds: slashes.slice(0, 2).map((c) => c.id) })),
-              }
-            : null
-        }
+        ability={ability}
       />
 
       <PromptNote view={latest} send={send} />
+      {abilityOpen && myTurn && latestMe.character === 'dorothy' && <DorothyNote view={latest} send={send} onClose={() => setAbilityOpen(false)} />}
+      {abilityOpen && myTurn && latestMe.character === 'kiki' && <KikiNote view={latest} send={send} onClose={() => setAbilityOpen(false)} />}
       {newPeek && <PeekNote targetName={latest.seats[newPeek.target].name} card={newPeek.card} onClose={() => setPeekAck(newPeek.seq ?? 0)} />}
       {pick && (
         <TargetCardNote

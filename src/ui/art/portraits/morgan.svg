@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 166 200">
+  <!-- 상어 사냥꾼 모건: 뺨의 흉터, 거친 수염, 젖은 머리, 상어 이빨 목걸이 -->
+  <rect width="166" height="200" fill="#2f4f6e"/>
+  <path d="M0 150 Q83 124 166 150 L166 200 L0 200 Z" fill="#26415c"/>
+  <g stroke="#1b120a" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 200 Q14 150 52 138 L114 138 Q152 150 158 200 Z" fill="#8a7a5e" stroke-width="5"/>
+    <path d="M60 140 L70 172 L83 150 L96 172 L106 140" fill="#c98f66" stroke-width="4"/>
+    <!-- 이빨 목걸이 -->
+    <path d="M60 142 Q83 168 106 142" fill="none" stroke-width="2.5"/>
+    <path d="M76 154 L80 168 L84 156 Z M86 156 L90 168 L94 154 Z" fill="#f4efe2" stroke-width="2.5"/>
+    <path d="M70 122 L70 140 L96 140 L96 122 Z" fill="#b8805a" stroke-width="4"/>
+    <path d="M40 86 Q34 128 83 132 Q132 128 126 86 Q126 62 83 62 Q40 62 40 86 Z" fill="#d49e76" stroke-width="5"/>
+    <path d="M102 66 Q130 72 126 90 Q124 124 92 130 Q118 110 112 78 Z" fill="#b8805a" stroke="none"/>
+    <!-- 젖은 머리 -->
+    <path d="M36 92 Q26 40 80 36 Q138 36 130 90 Q126 70 116 64 L110 76 L100 60 L88 72 L80 58 L68 72 L58 60 L50 78 Q42 80 36 92 Z" fill="#3b2a1e" stroke-width="5"/>
+    <path d="M36 92 Q34 104 40 110 M130 90 Q134 104 126 110" fill="none" stroke-width="4"/>
+    <!-- 흉터 -->
+    <path d="M100 96 L114 116 M103 102 L108 100 M107 108 L112 106" fill="none" stroke="#8f3a2c" stroke-width="3"/>
+    <path d="M52 80 L72 84 M94 84 L114 80" fill="none" stroke-width="6"/>
+    <path d="M58 92 q6 -4 12 0 M96 92 q6 -4 12 0" fill="none" stroke-width="3.5"/>
+    <path d="M80 94 Q72 108 80 110 Q90 114 94 104" fill="#b8805a" stroke-width="4.5"/>
+    <path d="M66 120 L100 120" fill="none" stroke-width="4.5"/>
+  </g>
+  <g fill="#3b2a1e" opacity=".45">
+    <circle cx="58" cy="118" r="1.6"/><circle cx="64" cy="124" r="1.6"/><circle cx="72" cy="128" r="1.6"/><circle cx="94" cy="128" r="1.6"/><circle cx="102" cy="124" r="1.6"/><circle cx="108" cy="118" r="1.6"/><circle cx="83" cy="130" r="1.6"/>
+  </g>
+  <circle cx="64" cy="93" r="2.6" fill="#1b120a"/><circle cx="102" cy="93" r="2.6" fill="#1b120a"/>
+</svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 166 200">
+  <!-- 밧줄꾼 고든: 대머리, 덥수룩한 수염, 굵은 눈썹, 몸에 두른 밧줄 -->
+  <rect width="166" height="200" fill="#b89a6a"/>
+  <path d="M0 150 Q83 124 166 150 L166 200 L0 200 Z" fill="#9e8256"/>
+  <g stroke="#1b120a" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 200 Q8 146 50 134 L116 134 Q158 146 162 200 Z" fill="#5d6e4a" stroke-width="5"/>
+    <!-- 두른 밧줄 -->
+    <path d="M20 160 Q83 196 146 160 M12 182 Q83 214 154 182" fill="none" stroke="#c49a58" stroke-width="10"/>
+    <path d="M20 160 Q83 196 146 160 M12 182 Q83 214 154 182" fill="none" stroke-width="2" stroke-dasharray="4 6"/>
+    <path d="M40 82 Q34 128 83 134 Q132 128 126 82 Q126 52 83 52 Q40 52 40 82 Z" fill="#dda57e" stroke-width="5"/>
+    <path d="M104 58 Q130 66 126 88 Q122 120 94 130 Q116 108 112 74 Z" fill="#c28a63" stroke="none"/>
+    <path d="M58 62 Q66 56 76 60" fill="none" stroke="#ffffff" stroke-width="4" opacity=".6"/>
+    <!-- 귀 -->
+    <path d="M40 88 Q28 86 30 98 Q32 108 42 106 M126 88 Q138 86 136 98 Q134 108 124 106" fill="#dda57e" stroke-width="4"/>
+    <!-- 수염 -->
+    <path d="M40 98 Q38 150 83 156 Q128 150 126 98 Q118 112 104 110 Q83 122 62 110 Q48 112 40 98 Z" fill="#7a4a2a" stroke-width="5"/>
+    <path d="M64 130 Q72 140 70 148 M83 128 L83 150 M102 130 Q94 140 96 148" fill="none" stroke-width="2.5"/>
+    <path d="M66 114 Q83 124 100 114" fill="#8f3a2c" stroke-width="3.5"/>
+    <path d="M50 76 Q62 68 74 76 M92 76 Q104 68 116 76" fill="none" stroke-width="7"/>
+    <path d="M58 88 q6 -5 12 0 M96 88 q6 -5 12 0" fill="none" stroke-width="3.5"/>
+    <path d="M78 86 Q68 104 78 108 Q92 112 94 100" fill="#c28a63" stroke-width="4.5"/>
+  </g>
+  <circle cx="64" cy="89" r="2.6" fill="#1b120a"/><circle cx="102" cy="89" r="2.6" fill="#1b120a"/>
+</svg>

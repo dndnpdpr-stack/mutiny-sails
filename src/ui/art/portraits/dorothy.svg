@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 166 200">
+  <!-- 선의 도로시: 올린 머리, 동그란 안경, 앞치마, 약병 -->
+  <rect width="166" height="200" fill="#6fa38f"/>
+  <path d="M0 150 Q83 124 166 150 L166 200 L0 200 Z" fill="#5a8a77"/>
+  <g stroke="#1b120a" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 200 Q18 152 54 140 L112 140 Q148 152 154 200 Z" fill="#3e5674" stroke-width="5"/>
+    <path d="M56 142 L60 200 L106 200 L110 142 Q83 154 56 142 Z" fill="#f4efe2" stroke-width="4.5"/>
+    <path d="M64 168 L102 168" fill="none" stroke-width="3"/>
+    <path d="M72 122 L72 142 L94 142 L94 122 Z" fill="#e3ae8a" stroke-width="4"/>
+    <path d="M44 84 Q40 126 83 132 Q126 126 122 84 Q120 60 83 60 Q46 60 44 84 Z" fill="#f2c7a4" stroke-width="5"/>
+    <path d="M104 66 Q126 72 122 92 Q118 122 94 130 Q114 110 110 80 Z" fill="#dcab86" stroke="none"/>
+    <!-- 올린 머리 -->
+    <circle cx="83" cy="26" r="17" fill="#6b4126" stroke-width="5"/>
+    <path d="M40 88 Q34 40 83 40 Q132 40 126 88 Q122 66 104 60 Q84 70 62 62 Q46 70 40 88 Z" fill="#6b4126" stroke-width="5"/>
+    <path d="M58 50 Q72 56 84 48 M92 48 Q108 54 116 64" fill="none" stroke-width="2.5"/>
+    <!-- 안경 -->
+    <circle cx="64" cy="92" r="11" fill="#ffffff" fill-opacity=".35" stroke-width="3.5"/>
+    <circle cx="102" cy="92" r="11" fill="#ffffff" fill-opacity=".35" stroke-width="3.5"/>
+    <path d="M75 92 L91 92 M53 90 L44 86 M113 90 L122 86" fill="none" stroke-width="3"/>
+    <path d="M56 76 L72 74 M94 74 L110 76" fill="none" stroke-width="4"/>
+    <path d="M82 96 Q76 108 82 110 Q88 112 90 108" fill="none" stroke-width="3.5"/>
+    <path d="M68 116 Q83 126 98 116" fill="none" stroke-width="4"/>
+    <!-- 약병 -->
+    <path d="M126 200 L126 168 Q126 160 134 158 L134 150 L146 150 L146 158 Q154 160 154 168 L154 200 Z" fill="#7fb6c9" stroke-width="4"/>
+    <path d="M132 148 L148 148 L148 140 L132 140 Z" fill="#8a5a33" stroke-width="3.5"/>
+    <path d="M140 172 L140 188 M132 180 L148 180" fill="none" stroke="#f4efe2" stroke-width="4"/>
+  </g>
+  <circle cx="64" cy="93" r="2.6" fill="#1b120a"/><circle cx="102" cy="93" r="2.6" fill="#1b120a"/>
+  <circle cx="58" cy="108" r="6" fill="#e0846a" opacity=".45"/><circle cx="108" cy="108" r="6" fill="#e0846a" opacity=".45"/>
+</svg>

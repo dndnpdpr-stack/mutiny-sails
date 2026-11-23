@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 166 200">
+  <!-- 점쟁이 오르: 머릿수건, 큰 귀걸이, 반쯤 감은 눈, 수정 구슬 -->
+  <rect width="166" height="200" fill="#6a4c8c"/>
+  <path d="M0 150 Q83 124 166 150 L166 200 L0 200 Z" fill="#573c75"/>
+  <g stroke="#1b120a" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 200 Q18 152 54 140 L112 140 Q148 152 154 200 Z" fill="#a23a5a" stroke-width="5"/>
+    <path d="M40 200 Q60 170 83 176 Q106 170 126 200" fill="none" stroke="#e8c35a" stroke-width="4"/>
+    <path d="M72 122 L72 142 L94 142 L94 122 Z" fill="#b98560" stroke-width="4"/>
+    <path d="M44 84 Q40 128 83 134 Q126 128 122 84 Q120 60 83 60 Q46 60 44 84 Z" fill="#d49e76" stroke-width="5"/>
+    <path d="M104 66 Q126 72 122 92 Q118 124 94 132 Q114 112 110 80 Z" fill="#bb8660" stroke="none"/>
+    <!-- 머릿수건 -->
+    <path d="M38 88 Q30 34 83 32 Q136 34 128 88 Q118 70 83 68 Q48 70 38 88 Z" fill="#e8c35a" stroke-width="5"/>
+    <path d="M126 70 Q148 80 142 112 Q134 96 124 92 Z" fill="#e8c35a" stroke-width="4.5"/>
+    <g fill="#a23a5a" stroke="none"><circle cx="62" cy="50" r="4"/><circle cx="84" cy="44" r="4"/><circle cx="106" cy="50" r="4"/></g>
+    <!-- 귀걸이 -->
+    <circle cx="42" cy="112" r="9" fill="none" stroke="#e8c35a" stroke-width="4"/>
+    <!-- 눈: 반쯤 감음 -->
+    <path d="M54 82 L72 84 M94 84 L112 82" fill="none" stroke-width="5"/>
+    <path d="M56 94 Q64 88 72 94 M94 94 Q102 88 110 94" fill="#ffffff" stroke-width="3.5"/>
+    <path d="M58 94 L70 94 M96 94 L108 94" fill="none" stroke-width="4"/>
+    <path d="M80 98 Q72 112 80 114 Q88 116 92 110" fill="#bb8660" stroke-width="4"/>
+    <path d="M70 122 Q83 116 96 124" fill="none" stroke-width="4"/>
+    <!-- 수정 구슬 -->
+    <path d="M100 200 L106 186 L146 186 L152 200 Z" fill="#8a5a33" stroke-width="4"/>
+    <circle cx="126" cy="166" r="22" fill="#a9d6e8" stroke-width="4.5"/>
+    <path d="M114 158 Q118 150 126 150" fill="none" stroke="#ffffff" stroke-width="4"/>
+  </g>
+  <g fill="#ffffff" opacity=".7"><circle cx="134" cy="172" r="2"/><circle cx="122" cy="176" r="1.5"/></g>
+</svg>

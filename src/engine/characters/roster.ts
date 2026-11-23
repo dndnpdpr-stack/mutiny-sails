@@ -164,7 +164,7 @@ class Ori extends Character {
 
 class Felix extends Character {
   readonly id = 'felix';
-  readonly name = '화약공 펠릭스';
+  readonly name = '냄비투구 펠릭스';
   readonly maxHp = 4;
   readonly text = '포격과 불붙은 배를 자동으로 피해요.';
   autoDodges(source: AttackSource): boolean {

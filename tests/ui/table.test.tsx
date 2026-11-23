@@ -173,6 +173,45 @@ describe('TableScreen', () => {
     expect(within(screen.getByRole('dialog')).getByText('p0의 불붙은 배!')).toBeTruthy();
   });
 
+  it('fortune shows the top card only to me and sends it to the bottom on request', () => {
+    const v = makeView({ pending: { kind: 'fortune', seat: 1, card: card('t', 'rum', 'hearts', 9) } });
+    const { send } = renderTable(v);
+    const note = screen.getByRole('dialog');
+    expect(within(note).getByRole('button', { name: '럼주' })).toBeTruthy();
+    fireEvent.click(within(note).getByText('맨 밑으로'));
+    expect(send).toHaveBeenCalledWith({ type: 'fortune', toBottom: true });
+  });
+
+  it('dorothy heals a hurt player with a rum through the ability note', () => {
+    const seats = [0, 1, 2, 3, 4].map((i) => seat(i, i === 1 ? { character: 'dorothy' } : i === 3 ? { hp: 4, maxHp: 4 } : {}));
+    const v = makeView({ myHand: [card('r1', 'rum'), card('s1', 'slash')] }, seats);
+    const { send } = renderTable(v);
+    fireEvent.click(screen.getByText('능력 사용'));
+    const note = screen.getByRole('dialog', { name: /도로시/ });
+    expect(within(note).queryByRole('button', { name: 'p3' })).toBeNull(); // 체력이 가득한 사람은 제외
+    fireEvent.click(within(note).getByRole('button', { name: 'p2' }));
+    expect(send).toHaveBeenCalledWith({ type: 'useAbility', cardIds: ['r1'], target: 2 });
+  });
+
+  it('dorothy cannot use the ability without a rum', () => {
+    const seats = [0, 1, 2, 3, 4].map((i) => seat(i, i === 1 ? { character: 'dorothy' } : {}));
+    renderTable(makeView({ myHand: [card('s1', 'slash')] }, seats));
+    expect((screen.getByText('능력 사용') as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('kiki picks a hand card to throw away and an equipment card to remove', () => {
+    const seats = [0, 1, 2, 3, 4].map((i) =>
+      seat(i, i === 1 ? { character: 'kiki' } : i === 3 ? { equipment: [card('b3', 'barrel', 'hearts', 4)] } : {}),
+    );
+    const v = makeView({ myHand: [card('f1', 'feast'), card('s1', 'slash')] }, seats);
+    const { send } = renderTable(v);
+    fireEvent.click(screen.getByText('능력 사용'));
+    const note = screen.getByRole('dialog', { name: /키키/ });
+    fireEvent.click(within(note).getByRole('button', { name: '선상 잔치' }));
+    fireEvent.click(within(note).getByRole('button', { name: '엄폐용 나무통' }));
+    expect(send).toHaveBeenCalledWith({ type: 'useAbility', cardIds: ['f1'], target: 3, targetCardId: 'b3' });
+  });
+
   it('drawSource offers deck and discard', () => {
     const v = makeView({ pending: { kind: 'drawSource', seat: 1 } });
     const { send } = renderTable(v);

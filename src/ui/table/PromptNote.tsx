@@ -195,6 +195,20 @@ export function PromptNote({ view, send }: { view: PlayerView; send: (a: Action)
         </button>
       ));
       break;
+    case 'fortune':
+      title = '🔮 덱 맨 위 카드예요';
+      body = (
+        <>
+          {p.card && (
+            <div className="note-cards">
+              <CardFace card={p.card} />
+            </div>
+          )}
+          <button type="button" onClick={() => send({ type: 'fortune', toBottom: false })}>그대로 두기</button>
+          <button type="button" onClick={() => send({ type: 'fortune', toBottom: true })}>맨 밑으로</button>
+        </>
+      );
+      break;
     case 'drawSource':
       title = '첫 장을 어디서 뽑을까요?';
       body = (

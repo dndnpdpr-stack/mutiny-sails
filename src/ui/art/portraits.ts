@@ -15,8 +15,19 @@ import hanna from './portraits/hanna.svg';
 import sila from './portraits/sila.svg';
 import bibi from './portraits/bibi.svg';
 import bruno from './portraits/bruno.svg';
+import dorothy from './portraits/dorothy.svg';
+import ori from './portraits/ori.svg';
+import felix from './portraits/felix.svg';
+import tara from './portraits/tara.svg';
+import luca from './portraits/luca.svg';
+import gordon from './portraits/gordon.svg';
+import kiki from './portraits/kiki.svg';
+import morgan from './portraits/morgan.svg';
 
-export const PORTRAITS: Partial<Record<CharacterId, string>> = { tom, margo, lou, derrick, orso, nico, hanna, sila, bibi, bruno };
+export const PORTRAITS: Partial<Record<CharacterId, string>> = {
+  tom, margo, lou, derrick, orso, nico, hanna, sila, bibi, bruno,
+  dorothy, ori, felix, tara, luca, gordon, kiki, morgan,
+};
 
 /** 그림이 없을 때 대신 보여줄 이모지 */
 export const CHARACTER_FACE: Record<CharacterId, string> = {
@@ -30,4 +41,12 @@ export const CHARACTER_FACE: Record<CharacterId, string> = {
   sila: '🔭',
   bibi: '🧨',
   bruno: '💪',
+  dorothy: '🩺',
+  ori: '🔮',
+  felix: '🪖',
+  tara: '⛵',
+  luca: '🎲',
+  gordon: '🪢',
+  kiki: '🐒',
+  morgan: '🦈',
 };

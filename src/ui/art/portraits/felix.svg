@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 166 200">
+  <!-- 냄비투구 펠릭스: 찌그러진 냄비 투구, 볼의 반창고, 이 빠진 함박웃음, 냄비 뚜껑 방패 -->
+  <rect width="166" height="200" fill="#c8603a"/>
+  <path d="M0 150 Q83 124 166 150 L166 200 L0 200 Z" fill="#a84d2d"/>
+  <g stroke="#1b120a" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 200 Q16 150 54 138 L112 138 Q150 150 156 200 Z" fill="#4d6b8a" stroke-width="5"/>
+    <path d="M30 200 L36 160 M136 200 L130 160" fill="none" stroke-width="3"/>
+    <path d="M70 122 L70 140 L96 140 L96 122 Z" fill="#c98f66" stroke-width="4"/>
+    <path d="M40 88 Q34 130 83 134 Q132 130 126 88 Q126 64 83 64 Q40 64 40 88 Z" fill="#e5b088" stroke-width="5"/>
+    <path d="M102 68 Q130 74 126 92 Q124 126 92 132 Q118 112 112 80 Z" fill="#c98f66" stroke="none"/>
+    <!-- 냄비 투구 -->
+    <path d="M32 76 Q30 30 83 28 Q136 30 134 76 Z" fill="#9aa3ad" stroke-width="5"/>
+    <path d="M24 76 L142 76" fill="none" stroke-width="7"/>
+    <path d="M110 40 Q118 50 112 58" fill="none" stroke-width="3"/>
+    <path d="M50 42 Q60 36 72 38" fill="none" stroke="#ffffff" stroke-width="4" opacity=".7"/>
+    <path d="M134 60 L156 54 Q160 60 156 66 L134 68" fill="#5b3a20" stroke-width="4"/>
+    <path d="M52 84 L70 88 M96 88 L114 84" fill="none" stroke-width="6"/>
+    <path d="M58 96 q6 -5 12 0 M96 96 q6 -5 12 0" fill="none" stroke-width="3.5"/>
+    <path d="M80 98 Q72 112 80 114 Q90 118 94 108" fill="#c98f66" stroke-width="4.5"/>
+    <path d="M58 118 Q83 140 108 118 Z" fill="#ffffff" stroke-width="4"/>
+    <path d="M76 119 L76 127 L86 127 L86 120" fill="#1b120a" stroke="none"/>
+    <!-- 반창고 -->
+    <path d="M42 100 L56 108 L52 114 L38 106 Z" fill="#f2d7a8" stroke-width="3"/>
+    <!-- 냄비 뚜껑 방패 -->
+    <ellipse cx="138" cy="176" rx="24" ry="20" fill="#b9c0c8" stroke-width="4.5"/>
+    <ellipse cx="138" cy="176" rx="14" ry="11" fill="none" stroke-width="2.5"/>
+    <path d="M132 160 L144 160" fill="none" stroke-width="6"/>
+  </g>
+  <circle cx="64" cy="97" r="2.6" fill="#1b120a"/><circle cx="102" cy="97" r="2.6" fill="#1b120a"/>
+  <circle cx="108" cy="110" r="6" fill="#d98a6a" opacity=".45"/>
+</svg>

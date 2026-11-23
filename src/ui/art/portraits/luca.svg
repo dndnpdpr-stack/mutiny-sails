@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 166 200">
+  <!-- 노름꾼 루카: 넘긴 머리, 가는 콧수염, 한쪽 눈 찡긋, 빨간 조끼, 주사위 -->
+  <rect width="166" height="200" fill="#3f7a55"/>
+  <path d="M0 150 Q83 124 166 150 L166 200 L0 200 Z" fill="#336646"/>
+  <g stroke="#1b120a" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 200 Q16 150 54 138 L112 138 Q150 150 156 200 Z" fill="#f4efe2" stroke-width="5"/>
+    <path d="M10 200 Q16 150 54 138 L70 160 L62 200 Z M156 200 Q150 150 112 138 L96 160 L104 200 Z" fill="#a8322a" stroke-width="4.5"/>
+    <path d="M70 140 L83 152 L96 140" fill="none" stroke-width="4"/>
+    <path d="M78 152 L88 152 L83 162 Z" fill="#1b120a" stroke-width="3"/>
+    <path d="M70 122 L70 140 L96 140 L96 122 Z" fill="#c98f66" stroke-width="4"/>
+    <path d="M42 86 Q38 128 83 132 Q128 128 124 86 Q124 62 83 62 Q42 62 42 86 Z" fill="#e8b48a" stroke-width="5"/>
+    <path d="M102 66 Q128 72 124 90 Q122 124 92 130 Q116 110 110 78 Z" fill="#c98f66" stroke="none"/>
+    <!-- 넘긴 머리 -->
+    <path d="M38 84 Q30 34 86 34 Q136 38 128 84 Q122 58 100 54 Q70 64 46 60 Q40 70 38 84 Z" fill="#1f1a16" stroke-width="5"/>
+    <path d="M56 46 Q84 40 116 52 M60 54 Q84 48 112 60" fill="none" stroke="#5a5048" stroke-width="2.5"/>
+    <path d="M52 80 L70 80 M96 78 L114 74" fill="none" stroke-width="5"/>
+    <!-- 찡긋 -->
+    <path d="M56 92 Q64 86 72 92" fill="none" stroke-width="4"/>
+    <circle cx="104" cy="90" r="3" fill="#1b120a" stroke="none"/>
+    <path d="M80 92 Q72 106 80 108 Q90 112 94 102" fill="#c98f66" stroke-width="4.5"/>
+    <path d="M58 116 Q70 108 83 114 Q96 108 108 116" fill="none" stroke-width="4"/>
+    <path d="M70 122 Q86 128 100 120" fill="none" stroke-width="3.5"/>
+    <!-- 주사위 -->
+    <path d="M118 158 L146 152 L152 180 L124 186 Z" fill="#f4efe2" stroke-width="4.5"/>
+  </g>
+  <g fill="#1b120a"><circle cx="128" cy="164" r="2.6"/><circle cx="135" cy="169" r="2.6"/><circle cx="142" cy="174" r="2.6"/></g>
+</svg>
