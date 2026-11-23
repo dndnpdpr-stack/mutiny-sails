@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { TableScreen } from '../../src/ui/screens/TableScreen';
 import type { Effect } from '../../src/ui/anim/effects';
 import type { Action, CardView, PlayerView, SeatView } from '../../src/engine/types';
+import { CARD_CATALOG } from '../../src/engine/cards/catalog';
 
 const card = (id: string, kind: CardView['kind'], suit: CardView['suit'] = 'spades', rank: CardView['rank'] = 5): CardView => ({ id, kind, suit, rank });
 
@@ -95,11 +96,78 @@ describe('TableScreen', () => {
     expect(panel(2).classList.contains('targetable')).toBe(false);
   });
 
-  it('plays a no-target card immediately', () => {
-    const v = makeView({ myHand: [card('r1', 'rum')], hints: [{ cardId: 'r1', targets: null, targetCards: false }] });
-    const { send } = renderTable(v);
-    fireEvent.click(handCard('럼주'));
-    expect(send).toHaveBeenCalledWith({ type: 'playCard', cardId: 'r1' });
+  describe('card info', () => {
+    const info = () => screen.queryByRole('dialog', { name: '카드 설명' });
+    const rumHint = { cardId: 'r1', targets: null, targetCards: false };
+
+    it('first click on a no-target card shows its text, second click plays it', () => {
+      const { send } = renderTable(makeView({ myHand: [card('r1', 'rum')], hints: [rumHint] }));
+      fireEvent.click(handCard('럼주'));
+      expect(send).not.toHaveBeenCalled();
+      expect(within(info()!).getByText(CARD_CATALOG.rum.text)).toBeTruthy();
+      fireEvent.click(handCard('럼주'));
+      expect(send).toHaveBeenCalledWith({ type: 'playCard', cardId: 'r1' });
+    });
+
+    it('the play button in the card info plays a no-target card', () => {
+      const { send } = renderTable(makeView({ myHand: [card('r1', 'rum')], hints: [rumHint] }));
+      fireEvent.click(handCard('럼주'));
+      fireEvent.click(within(info()!).getByRole('button', { name: '내기' }));
+      expect(send).toHaveBeenCalledWith({ type: 'playCard', cardId: 'r1' });
+      expect(info()).toBeNull();
+    });
+
+    it('an unplayable card shows its text without a play button', () => {
+      const { send } = renderTable(makeView({ myHand: [card('d1', 'dodge')] }));
+      fireEvent.click(handCard('피하기'));
+      expect(within(info()!).getByText(CARD_CATALOG.dodge.text)).toBeTruthy();
+      expect(within(info()!).queryByRole('button', { name: '내기' })).toBeNull();
+      fireEvent.click(handCard('피하기'));
+      expect(send).not.toHaveBeenCalled();
+      expect(info()).toBeNull();
+    });
+
+    it('a target card shows its text while targets are marked', () => {
+      const { send } = renderTable(makeView({ myHand: [card('s1', 'slash')], hints: [{ cardId: 's1', targets: [2], targetCards: false }] }));
+      fireEvent.click(handCard('칼질'));
+      expect(within(info()!).getByText(CARD_CATALOG.slash.text)).toBeTruthy();
+      expect(within(info()!).queryByRole('button', { name: '내기' })).toBeNull();
+      expect(panel(2).classList.contains('targetable')).toBe(true);
+      fireEvent.click(panel(2));
+      expect(send).toHaveBeenCalledWith({ type: 'playCard', cardId: 's1', target: 2 });
+    });
+
+    it('expansion cards are tagged', () => {
+      renderTable(makeView({ myHand: [card('f1', 'fireShip')] }));
+      fireEvent.click(handCard('불붙은 배'));
+      expect(within(info()!).getByText('확장')).toBeTruthy();
+    });
+
+    it('responding still plays at once', () => {
+      const v = makeView({ current: 0, pending: { kind: 'respondAttack', seat: 1, attacker: 0, source: 'slash' }, myHand: [card('d1', 'dodge')] });
+      const { send } = renderTable(v);
+      fireEvent.click(handCard('피하기'));
+      expect(send).toHaveBeenCalledWith({ type: 'respond', cardIds: ['d1'] });
+      expect(info()).toBeNull();
+    });
+
+    it('the card info closes when my turn passes', () => {
+      const v = makeView({ myHand: [card('r1', 'rum')], hints: [rumHint] });
+      const { rerender, send } = renderTable(v);
+      fireEvent.click(handCard('럼주'));
+      const next = makeView({ myHand: [card('r1', 'rum')], current: 2, pending: { kind: 'turn', seat: 2 } });
+      rerender(<TableScreen latest={next} shown={next} effects={[]} speed={1} batchKey={0} send={send} lastRejection={null} />);
+      expect(info()).toBeNull();
+    });
+
+    it('the card info closes once the card left my hand', () => {
+      const v = makeView({ myHand: [card('s1', 'slash')], hints: [{ cardId: 's1', targets: [2], targetCards: false }] });
+      const { rerender, send } = renderTable(v);
+      fireEvent.click(handCard('칼질'));
+      const next = makeView({ myHand: [] });
+      rerender(<TableScreen latest={next} shown={next} effects={[]} speed={1} batchKey={0} send={send} lastRejection={null} />);
+      expect(info()).toBeNull();
+    });
   });
 
   it('pickpocket on a target with no hand: only equipment choices', () => {

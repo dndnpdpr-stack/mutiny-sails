@@ -30,9 +30,7 @@ export function FanHand(p: {
               dim={!playable}
               selected={selected}
               highlight={p.highlight(c.id)}
-              onClick={() => {
-                if (playable) p.onCardClick(c.id);
-              }}
+              onClick={() => p.onCardClick(c.id)}
             />
           </motion.div>
         );
