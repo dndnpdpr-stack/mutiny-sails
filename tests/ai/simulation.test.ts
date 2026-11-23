@@ -4,9 +4,9 @@ import { Game } from '../../src/engine/Game';
 import { Rng } from '../../src/engine/rng';
 import { buildView } from '../../src/host/view';
 
-function playOut(seed: number) {
+function playOut(seed: number, extras = false) {
   const n = 4 + (seed % 4);
-  const game = new Game({ seed, names: Array.from({ length: n }, (_, i) => `P${i}`) });
+  const game = new Game({ seed, names: Array.from({ length: n }, (_, i) => `P${i}`), seaEvents: extras, expansionCards: extras });
   game.start();
   const mems = game.seats.map(() => new AiMemory());
   const rng = new Rng(seed * 7 + 1);
@@ -41,6 +41,19 @@ describe('AI simulation', () => {
       rejected += r.rejected;
     }
     console.log('winners', tally, 'steps', steps, 'rejected', rejected);
+    expect(rejected / steps).toBeLessThan(0.01);
+  }, 120000);
+
+  it('300 games with sea events and expansion cards all finish with few rejected actions', () => {
+    let steps = 0;
+    let rejected = 0;
+    for (let seed = 1; seed <= 300; seed++) {
+      const r = playOut(seed, true);
+      expect(r.winner, `seed ${seed}`).not.toBeNull();
+      steps += r.steps;
+      rejected += r.rejected;
+    }
+    console.log('extras steps', steps, 'rejected', rejected);
     expect(rejected / steps).toBeLessThan(0.01);
   }, 120000);
 });

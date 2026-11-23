@@ -11,6 +11,7 @@ function visible(e: GameEvent, seat: SeatId): boolean {
 
 function maskPending(p: PendingView | null, seat: SeatId): PendingView | null {
   if (p && p.kind === 'chooseCharacter' && p.seat !== seat) return { ...p, options: [] };
+  if (p && p.kind === 'treasureMap' && p.seat !== seat) return { ...p, revealed: [] };
   return p;
 }
 
@@ -41,7 +42,7 @@ export function buildView(game: Game, seat: SeatId, isAi: (s: SeatId) => boolean
       alive: s.alive,
       handCount: s.hand.length,
       equipment: s.equipment.map((c) => c.toView()),
-      role: s.roleDrawn && (over || s.seat === seat || s.role === 'captain' || !s.alive) ? s.role : null,
+      role: s.roleDrawn && (over || s.seat === seat || s.role === 'captain' || !s.alive || game.knowsRole(seat, s.seat)) ? s.role : null,
       isAi: isAi(s.seat),
     })),
     current: game.current,

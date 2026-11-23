@@ -3,7 +3,7 @@ import type { Action, CardKind, CardView, PendingView, PlayerView, PlayHint, Sea
 import type { AiMemory } from './memory';
 import { CHARACTER_INFO } from '../engine/characters/roster';
 
-const WEAPON_RANGE: Partial<Record<CardKind, number>> = { pistol: 2, musket: 3, longMusket: 4, deckCannon: 5, twinPistols: 1 };
+const WEAPON_RANGE: Partial<Record<CardKind, number>> = { pistol: 2, musket: 3, longMusket: 4, deckCannon: 5, twinPistols: 1, harpoon: 2 };
 const WEAPONS = Object.keys(WEAPON_RANGE) as CardKind[];
 
 /** 낮을수록 먼저 버린다 */
@@ -11,6 +11,8 @@ const KEEP_VALUE: Record<CardKind, number> = {
   rum: 9, dodge: 8, slash: 7, duel: 6, brig: 6, pickpocket: 6, cutRope: 5, cannonade: 5, brawl: 4,
   supplyShip: 5, merchantRaid: 5, feast: 3, loot: 5, pistol: 3, musket: 3, longMusket: 3, deckCannon: 3,
   twinPistols: 2, spyglass: 4, dinghy: 4, barrel: 5, powderKeg: 0,
+  parrotTattle: 4, treasureMap: 5, diceWager: 4, fireShip: 5, walkPlank: 3,
+  leatherCoat: 6, harpoon: 3, compass: 4, luckyCoin: 5, blackFlag: 3,
 };
 
 const isTurnOf = (view: PlayerView): boolean => view.pending?.seat === view.you;
@@ -21,13 +23,20 @@ function targetScore(view: PlayerView, mem: AiMemory, t: SeatId): number {
   const weak = (5 - seat.hp) * 0.3;
   const foe = mem.foe(t);
   const isCaptain = seat.role === 'captain';
+  // 고자질 등으로 역할을 알게 된 상대
+  const known = seat.alive ? seat.role : null;
+  const captainSide = known === 'loyalist';
+  const enemyOfCaptain = known === 'rebel' || known === 'spy';
   switch (view.myRole) {
     case 'captain':
-      return foe * 2 + 1 + weak;
+      if (captainSide) return -100;
+      return foe * 2 + 1 + weak + (enemyOfCaptain ? 5 : 0);
     case 'loyalist':
-      return isCaptain ? -100 : foe * 2 + weak;
+      if (isCaptain || captainSide) return -100;
+      return foe * 2 + weak + (enemyOfCaptain ? 5 : 0);
     case 'rebel':
-      return isCaptain ? 20 : -foe * 2 + weak;
+      if (known === 'rebel') return -100;
+      return isCaptain ? 20 : -foe * 2 + weak + (captainSide ? 3 : 0);
     case 'spy':
       if (alive <= 2) return isCaptain ? 20 : 0;
       return (isCaptain ? -5 : 5) + (foe > 0 ? 1 : 0) + weak;
@@ -64,14 +73,14 @@ function decideTurn(view: PlayerView, mem: AiMemory): Action {
     target === undefined ? { type: 'playCard', cardId: h.cardId } : { type: 'playCard', cardId: h.cardId, target };
 
   // 장비
-  for (const h of hintsOf('pistol', 'musket', 'longMusket', 'deckCannon')) {
+  for (const h of hintsOf('pistol', 'musket', 'longMusket', 'deckCannon', 'harpoon')) {
     if (WEAPON_RANGE[kindOf(h)!]! > view.myRange) return play(h);
   }
   if (!hasWeapon && byKind(hand, 'slash').length >= 2) {
     const twin = hintsOf('twinPistols')[0];
     if (twin) return play(twin);
   }
-  for (const k of ['spyglass', 'dinghy', 'barrel'] as const) {
+  for (const k of ['spyglass', 'dinghy', 'barrel', 'leatherCoat', 'compass', 'luckyCoin', 'blackFlag'] as const) {
     if (!equipped(k)) {
       const h = hintsOf(k)[0];
       if (h) return play(h);
@@ -85,13 +94,19 @@ function decideTurn(view: PlayerView, mem: AiMemory): Action {
   }
 
   // 카드 뽑기
-  for (const k of ['supplyShip', 'merchantRaid', 'loot'] as const) {
+  for (const k of ['supplyShip', 'merchantRaid', 'loot', 'treasureMap'] as const) {
     const h = hintsOf(k)[0];
     if (h) return play(h);
   }
   if (me.hp < me.maxHp) {
     const h = hintsOf('feast')[0];
     if (h) return play(h);
+  }
+
+  // 정보: 역할을 모르는 사람의 역할 알아내기
+  for (const h of hintsOf('parrotTattle')) {
+    const unknown = (h.targets ?? []).filter((t) => view.seats[t].role === null);
+    if (unknown.length) return play(h, [...unknown].sort((a, b) => Math.abs(mem.foe(b)) - Math.abs(mem.foe(a)))[0]);
   }
 
   // 공격
@@ -115,6 +130,20 @@ function decideTurn(view: PlayerView, mem: AiMemory): Action {
     const seat = view.seats[t];
     if (seat.handCount === 0) return { type: 'playCard', cardId: h.cardId, target: t, targetCardId: seat.equipment[0].id };
     return play(h, t);
+  }
+  if (me.hp >= 2) {
+    for (const h of hintsOf('fireShip')) {
+      const t = bestTarget(view, mem, h.targets ?? [], 1);
+      if (t !== null) return play(h, t);
+    }
+  }
+  for (const h of hintsOf('diceWager')) {
+    const t = bestTarget(view, mem, (h.targets ?? []).filter((s) => view.seats[s].handCount > 0), 0);
+    if (t !== null) return play(h, t);
+  }
+  for (const h of hintsOf('walkPlank')) {
+    const most = Math.max(...othersAlive(view).map((s) => view.seats[s].handCount));
+    if (hand.length - 1 < most) return play(h);
   }
   for (const h of hintsOf('brig')) {
     const t = bestTarget(view, mem, h.targets ?? [], 1);
@@ -162,6 +191,7 @@ export function fallbackAction(view: PlayerView): Action | null {
     case 'discardExcess':
       return { type: 'discard', cardIds: view.myHand.slice(0, p.count).map((c) => c.id) };
     case 'loot':
+    case 'treasureMap':
       return { type: 'chooseCard', cardId: p.revealed[0].id };
     case 'judgeChoice':
       return { type: 'chooseCard', cardId: p.options[0].id };
@@ -218,7 +248,8 @@ export function decide(view: PlayerView, mem: AiMemory, rng: Rng): Action | null
       return decideTurn(view, mem);
     case 'discardExcess':
       return { type: 'discard', cardIds: lowestValue(view.myHand, p.count) };
-    case 'loot': {
+    case 'loot':
+    case 'treasureMap': {
       const best = [...p.revealed].sort((a, b) => KEEP_VALUE[b.kind] - KEEP_VALUE[a.kind])[0];
       return { type: 'chooseCard', cardId: best.id };
     }

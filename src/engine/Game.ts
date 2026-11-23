@@ -1,13 +1,14 @@
-import type { Action, CardId, CardKind, CardView, CharacterId, GameEvent, PendingView, Role, SeatId, Winner } from './types';
+import type { Action, AttackSource, CardId, CardKind, CardView, CharacterId, GameEvent, PendingView, Role, SeatId, Winner } from './types';
 import { Rng } from './rng';
 import { buildDeckSpec } from './cards/deck';
 import { CARD_CATALOG } from './cards/catalog';
 import { ActionCard, EquipmentCard, WeaponCard, createCard, type Card } from './cards/Card';
 import './cards/actions';
 import './cards/equipment';
+import './cards/expansion';
 import type { Character } from './characters/Character';
 import { CHARACTERS, CHARACTER_IDS } from './characters/roster';
-import { drawCount, handLimit, type RuleModifier } from './rules';
+import { drawCount, handLimit, weapon, type RuleModifier } from './rules';
 import { isHeart, isKegBlast, judge } from './judge';
 import { SEA_EVENTS, SEA_EVENT_IDS, type SeaEventId } from './seaEvents';
 
@@ -25,6 +26,8 @@ export interface GameConfig {
   seaEvents?: boolean;
   /** 테스트용: 이벤트가 나올 순서. 다 쓰면 전체를 섞어 이어 간다 */
   seaEventOrder?: SeaEventId[];
+  /** 확장 카드 10종(16장)을 덱에 넣는다 (기본 꺼짐) */
+  expansionCards?: boolean;
 }
 
 export interface SeatState {
@@ -77,6 +80,8 @@ export class Game {
   /** 카드 덱 순서를 바꾸지 않도록 이벤트 덱은 따로 섞는다 */
   private seaRng: Rng;
   private captainTurns = 0;
+  /** 앵무새의 고자질로 알게 된 역할: 보는 사람 → 알게 된 자리들 */
+  private knownRoles = new Map<SeatId, Set<SeatId>>();
 
   constructor(config: GameConfig) {
     const n = config.names.length;
@@ -92,7 +97,7 @@ export class Game {
     const roles: Role[] = config.roles ?? Array.from({ length: n }, () => 'rebel' as Role);
     const forced = config.characters;
 
-    let specs = this.rng.shuffle(buildDeckSpec(this.rng));
+    let specs = this.rng.shuffle(buildDeckSpec(this.rng, config.expansionCards ?? false));
     if (config.stackDeck) {
       const stackIds = new Set(config.stackDeck.map((c) => c.id));
       specs = [...specs.filter((c) => !stackIds.has(c.id)), ...[...config.stackDeck].reverse()];
@@ -136,6 +141,49 @@ export class Game {
 
   nextAlive(from: SeatId): SeatId {
     return this.othersFrom(from)[0] ?? from;
+  }
+
+  /** viewer가 고자질로 target의 역할을 알고 있는지 */
+  knowsRole(viewer: SeatId, target: SeatId): boolean {
+    return this.knownRoles.get(viewer)?.has(target) ?? false;
+  }
+
+  revealRoleTo(viewer: SeatId, target: SeatId): void {
+    if (!this.knownRoles.has(viewer)) this.knownRoles.set(viewer, new Set());
+    this.knownRoles.get(viewer)!.add(target);
+    this.emit({ type: 'roleRevealed', seat: viewer, target, role: this.seats[target].role, visibleTo: [viewer] });
+  }
+
+  /** 판정 때 뒤집을 장수: 캐릭터 능력 또는 나침반 */
+  judgeFlipCount(seat: SeatId): 1 | 2 {
+    return this.findEquip(seat, 'compass') ? 2 : this.seats[seat].character.judgeFlipCount();
+  }
+
+  hasEquip(seat: SeatId, kind: CardKind): boolean {
+    return this.findEquip(seat, kind) !== undefined;
+  }
+
+  /** 스스로 버려지며 효과를 내는 장비를 쓴다 */
+  useUpGear(seat: SeatId, kind: CardKind): void {
+    const c = this.findEquip(seat, kind);
+    if (!c) return;
+    this.removeEquipment(seat, c.id);
+    this.discardCard(c);
+    this.emit({ type: 'gearUsed', seat, card: c.toView() });
+  }
+
+  /** seat가 손패 count장을 골라 버리게 한다 */
+  forceDiscard(seat: SeatId, count: number): void {
+    if (count <= 0 || !this.seats[seat].alive) return;
+    this.pushInput({ kind: 'discardExcess', seat, count }, (a) => {
+      if (a.type !== 'discard') return WRONG_ACTION;
+      const cards = this.cardsInHand(seat, a.cardIds);
+      if (!cards || cards.length !== count) return `${count}장을 골라 버려 주세요`;
+      for (const c of cards) this.removeFromHand(seat, c.id);
+      for (const c of cards) this.discardCard(c);
+      this.emit({ type: 'discardCards', seat, cards: cards.map((c) => c.toView()) });
+      return null;
+    });
   }
 
   pending(): PendingView | null {
@@ -287,7 +335,7 @@ export class Game {
     return info;
   }
 
-  private findEquip(seat: SeatId, kind: CardKind): Card | undefined {
+  findEquip(seat: SeatId, kind: CardKind): Card | undefined {
     return this.seats[seat].equipment.find((c) => c.kind === kind);
   }
 
@@ -418,17 +466,7 @@ export class Game {
   private endPhase(seat: SeatId): void {
     const excess = this.seats[seat].hand.length - handLimit(this, seat);
     this.pushStep(() => this.nextTurn());
-    if (excess > 0) {
-      this.pushInput({ kind: 'discardExcess', seat, count: excess }, (a) => {
-        if (a.type !== 'discard') return WRONG_ACTION;
-        const cards = this.cardsInHand(seat, a.cardIds);
-        if (!cards || cards.length !== excess) return `${excess}장을 골라 버려 주세요`;
-        for (const c of cards) this.removeFromHand(seat, c.id);
-        for (const c of cards) this.discardCard(c);
-        this.emit({ type: 'discardCards', seat, cards: cards.map((c) => c.toView()) });
-        return null;
-      });
-    }
+    this.forceDiscard(seat, excess);
   }
 
   private nextTurn(): void {
@@ -510,7 +548,7 @@ export class Game {
   }
 
   /** 칼질·포격 공격 1회. afterHit: 피해를 준 뒤(쓰러짐 처리 후) 실행 */
-  attack(target: SeatId, attacker: SeatId, source: 'slash' | 'cannonade', afterHit?: () => void): void {
+  attack(target: SeatId, attacker: SeatId, source: AttackSource, afterHit?: () => void): void {
     if (this.findEquip(target, 'barrel')) {
       judge(this, target, 'barrel', isHeart, (dodged) => {
         if (!dodged) this.attackResponse(target, attacker, source, afterHit);
@@ -520,13 +558,17 @@ export class Game {
     this.attackResponse(target, attacker, source, afterHit);
   }
 
-  private attackResponse(target: SeatId, attacker: SeatId, source: 'slash' | 'cannonade', afterHit?: () => void): void {
+  private attackResponse(target: SeatId, attacker: SeatId, source: AttackSource, afterHit?: () => void): void {
     this.pushCardResponse(
       { kind: 'respondAttack', seat: target, attacker, source },
       'dodge',
       1,
       () => {},
       () => {
+        if (this.hasEquip(target, 'leatherCoat')) {
+          this.useUpGear(target, 'leatherCoat');
+          return;
+        }
         if (afterHit) this.pushStep(afterHit);
         this.dealDamage(target, 1, attacker);
       },
@@ -574,7 +616,10 @@ export class Game {
 
   /** 칼질 카드로 하는 공격 */
   slashAttack(target: SeatId, attacker: SeatId): void {
-    this.attack(target, attacker, 'slash', () => this.seats[attacker].character.onSlashDamageDealt(this, attacker, target));
+    this.attack(target, attacker, 'slash', () => {
+      weapon(this, attacker)?.onSlashHit(this, attacker, target);
+      this.seats[attacker].character.onSlashDamageDealt(this, attacker, target);
+    });
   }
 
   dealDamage(target: SeatId, amount: number, source: SeatId | null): void {
@@ -621,6 +666,7 @@ export class Game {
       return;
     }
     if (killer !== null && killer !== seat && this.seats[killer].alive) {
+      const flag = this.hasEquip(killer, 'blackFlag');
       if (s.role === 'rebel') this.giveCards(killer, this.draw(3));
       if (s.role === 'loyalist' && this.seats[killer].role === 'captain') {
         const k = this.seats[killer];
@@ -628,6 +674,8 @@ export class Game {
         for (const c of lost) this.discardCard(c);
         if (lost.length) this.emit({ type: 'discardCards', seat: killer, cards: lost.map((c) => c.toView()) });
       }
+      // 검은 깃발: 쓰러뜨린 순간 갖고 있었으면 (선장 벌칙으로 버려져도) 2장
+      if (flag) this.giveCards(killer, this.draw(2));
     }
     if (seat === this.current) {
       // 자기 턴에 쓰러지면 남은 턴 단계를 버리고 다음 사람에게

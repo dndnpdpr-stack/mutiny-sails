@@ -8,10 +8,18 @@ import type { Card } from './cards/Card';
  * 뒤집을 카드가 없으면 실패.
  */
 export function judge(game: Game, seat: SeatId, reason: JudgeReason, success: (c: CardView) => boolean, then: (ok: boolean) => void): void {
-  const flipped = game.draw(game.seats[seat].character.judgeFlipCount());
+  const flipped = game.draw(game.judgeFlipCount(seat));
   for (const c of flipped) game.discardCard(c);
   const finish = (c: Card | undefined) => {
-    const ok = c ? success(c.toView()) : false;
+    let ok = c ? success(c.toView()) : false;
+    // 행운의 동전: 같은 숫자의 ♥였다면 결과가 달라질 때(♥는 모든 판정에서 좋은 쪽) 바꾸고 버린다
+    if (c && game.hasEquip(seat, 'luckyCoin')) {
+      const asHeart = success({ ...c.toView(), suit: 'hearts' });
+      if (asHeart !== ok) {
+        game.useUpGear(seat, 'luckyCoin');
+        ok = asHeart;
+      }
+    }
     if (c) game.emit({ type: 'judge', seat, card: c.toView(), success: ok, reason });
     then(ok);
   };

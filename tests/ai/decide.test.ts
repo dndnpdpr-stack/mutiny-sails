@@ -49,3 +49,47 @@ describe('decide draft', () => {
     expect(decide(view, new AiMemory(), rng())).toEqual({ type: 'chooseCharacter', character: 'orso' });
   });
 });
+
+describe('decide with expansion cards', () => {
+  const ai = (g: ReturnType<typeof makeGame>, seat: number, mem = new AiMemory()) => decide(buildView(g, seat, () => true), mem, rng());
+
+  it('uses a parrot tattle on someone whose role it does not know', () => {
+    const g = makeGame(5, { expansionCards: true });
+    g.start();
+    const [card] = setHand(g, 0, ['parrotTattle']);
+    const a = ai(g, 0);
+    expect(a).toMatchObject({ type: 'playCard', cardId: card.id });
+    expect([1, 2, 3, 4]).toContain((a as { target: number }).target);
+  });
+
+  it('a captain does not slash a crew member it knows is loyal', () => {
+    const g = makeGame(5, { expansionCards: true }); // 0 선장, 1 반란, 4 충성 (둘 다 거리 1)
+    g.start();
+    const [slash] = setHand(g, 0, ['slash']);
+    const mem = new AiMemory();
+    mem.captainFoe[4] = 5;
+    expect(ai(g, 0, mem)).toEqual({ type: 'playCard', cardId: slash.id, target: 4 });
+    g.revealRoleTo(0, 4);
+    expect(ai(g, 0, mem)).toEqual({ type: 'playCard', cardId: slash.id, target: 1 });
+  });
+
+  it('keeps the most valuable card from a treasure map', () => {
+    const g = makeGame(5, { expansionCards: true });
+    g.start();
+    const [map] = setHand(g, 0, ['treasureMap']);
+    g.apply(0, { type: 'playCard', cardId: map.id });
+    const p = g.pending();
+    if (p?.kind !== 'treasureMap') throw new Error('no map');
+    const best = [...p.revealed].sort((a, b) => (a.kind === 'rum' ? -1 : b.kind === 'rum' ? 1 : 0))[0];
+    const a = ai(g, 0);
+    expect(a?.type).toBe('chooseCard');
+    if (p.revealed.some((c) => c.kind === 'rum')) expect(a).toEqual({ type: 'chooseCard', cardId: best.id });
+  });
+
+  it('equips a compass, coat, coin or flag it does not have yet', () => {
+    const g = makeGame(5, { expansionCards: true });
+    g.start();
+    const [coat] = setHand(g, 0, ['leatherCoat']);
+    expect(ai(g, 0)).toEqual({ type: 'playCard', cardId: coat.id });
+  });
+});

@@ -43,6 +43,8 @@ export abstract class EquipmentCard extends Card {
 export abstract class WeaponCard extends EquipmentCard {
   abstract readonly range: number;
   readonly unlimitedSlash: boolean = false;
+  /** 이 무기로 낸 칼질이 피해를 줬을 때 */
+  onSlashHit(_game: Game, _attacker: SeatId, _victim: SeatId): void {}
   /** 무기는 교체 가능 */
   validate(): string | null {
     return null;

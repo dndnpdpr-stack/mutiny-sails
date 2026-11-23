@@ -18,8 +18,9 @@ export function defaultActionFor(game: Game, p: PendingView): Action {
       return { type: 'discard', cardIds: picked };
     }
     case 'loot':
+    case 'treasureMap':
     case 'judgeChoice':
-      return { type: 'chooseCard', cardId: (p.kind === 'loot' ? p.revealed : p.options)[0].id };
+      return { type: 'chooseCard', cardId: (p.kind === 'judgeChoice' ? p.options : p.revealed)[0].id };
     case 'peekTarget': {
       const others = game.othersFrom(p.seat);
       return { type: 'chooseSeat', target: others.find((s) => game.seats[s].hand.length > 0) ?? others[0] };

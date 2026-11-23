@@ -9,7 +9,11 @@ export type CardKind =
   | 'slash' | 'dodge' | 'rum' | 'cannonade' | 'brawl' | 'duel' | 'pickpocket' | 'cutRope'
   | 'supplyShip' | 'merchantRaid' | 'feast' | 'loot'
   | 'pistol' | 'musket' | 'longMusket' | 'deckCannon' | 'twinPistols'
-  | 'spyglass' | 'dinghy' | 'barrel' | 'powderKeg' | 'brig';
+  | 'spyglass' | 'dinghy' | 'barrel' | 'powderKeg' | 'brig'
+  // 확장 카드
+  | 'parrotTattle' | 'treasureMap' | 'diceWager' | 'fireShip' | 'walkPlank'
+  | 'leatherCoat' | 'harpoon' | 'compass' | 'luckyCoin' | 'blackFlag';
+export type AttackSource = 'slash' | 'cannonade' | 'fireShip';
 import type { SeaEventId } from './seaEvents';
 
 /** 판정 이유: 장비 카드 또는 바다 이벤트 */
@@ -44,13 +48,15 @@ export type Action =
 
 export type PendingView =
   | { kind: 'turn'; seat: SeatId }
-  | { kind: 'respondAttack'; seat: SeatId; attacker: SeatId; source: 'slash' | 'cannonade' }
+  | { kind: 'respondAttack'; seat: SeatId; attacker: SeatId; source: AttackSource }
   | { kind: 'respondBrawl'; seat: SeatId; attacker: SeatId }
   | { kind: 'respondDuel'; seat: SeatId; opponent: SeatId; required: number }
   /** need = 살아나려면 내야 할 럼주 장수 */
   | { kind: 'dying'; seat: SeatId; need: number }
   | { kind: 'discardExcess'; seat: SeatId; count: number }
   | { kind: 'loot'; seat: SeatId; revealed: CardView[] }
+  /** 보물 지도: 본인에게만 revealed가 채워진다 */
+  | { kind: 'treasureMap'; seat: SeatId; revealed: CardView[] }
   | { kind: 'judgeChoice'; seat: SeatId; options: CardView[] }
   | { kind: 'peekTarget'; seat: SeatId }
   | { kind: 'passKeg'; seat: SeatId }
@@ -82,6 +88,12 @@ export type GameEvent = { visibleTo?: SeatId[]; seq?: number } & (
   /** role: 본인과(선장이면 모두) 볼 때만 채워지고, 나머지에게는 null */
   | { type: 'roleDrawn'; seat: SeatId; slot: number; role: Role | null }
   | { type: 'seaEvent'; event: SeaEventId }
+  /** 앵무새의 고자질: 낸 사람에게만 */
+  | { type: 'roleRevealed'; seat: SeatId; target: SeatId; role: Role }
+  /** 주사위 내기: cards = [낸 사람, 대상] 순서로 뒤집은 카드 */
+  | { type: 'wager'; seat: SeatId; target: SeatId; cards: [CardView, CardView] }
+  /** 가죽 코트·행운의 동전처럼 스스로 버려지며 효과를 낸 장비 */
+  | { type: 'gearUsed'; seat: SeatId; card: CardView }
 );
 
 /** targets null = 대상 불필요. targetCards = 대상의 장비를 고를 수 있음 */

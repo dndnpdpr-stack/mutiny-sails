@@ -10,9 +10,9 @@ describe('buildDeckSpec', () => {
     expect(new Set(deck.map((c) => c.id)).size).toBe(80);
   });
   it('matches catalog counts', () => {
-    const total = Object.values(CARD_CATALOG).reduce((s, i) => s + i.count, 0);
-    expect(total).toBe(80);
-    for (const kind of Object.keys(CARD_CATALOG) as CardKind[]) {
+    const base = Object.values(CARD_CATALOG).filter((i) => !i.expansion);
+    expect(base.reduce((s, i) => s + i.count, 0)).toBe(80);
+    for (const { kind } of base) {
       expect(deck.filter((c) => c.kind === kind).length).toBe(CARD_CATALOG[kind].count);
     }
   });
