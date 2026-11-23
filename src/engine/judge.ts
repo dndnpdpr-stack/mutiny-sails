@@ -33,7 +33,7 @@ export function judge(game: Game, seat: SeatId, reason: JudgeReason, success: (c
     finish(flipped[0]);
     return;
   }
-  game.pushInput({ kind: 'judgeChoice', seat, options: flipped.map((c) => c.toView()) }, (a) => {
+  game.pushInput({ kind: 'judgeChoice', seat, options: flipped.map((c) => c.toView()), reason }, (a) => {
     if (a.type !== 'chooseCard') return '판정에 쓸 카드를 골라 주세요';
     const c = flipped.find((x) => x.id === a.cardId);
     if (!c) return '뒤집은 카드 중에서 골라 주세요';

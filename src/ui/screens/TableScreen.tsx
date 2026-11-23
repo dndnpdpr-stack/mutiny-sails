@@ -165,6 +165,10 @@ export function TableScreen(p: {
   const latestMe = latest.seats[latest.you];
   const slashes = latest.myHand.filter((c) => c.kind === 'slash');
   const canAct = myTurn && !latest.abilityUsed;
+  // 턴이 넘어가면 열어 둔 능력 창을 닫는다 (다음 턴에 저절로 다시 뜨지 않게)
+  useEffect(() => {
+    if (!myTurn) setAbilityOpen(false);
+  }, [myTurn]);
   const openAbility = () => (cancel(), setAbilityOpen(true));
   const ability =
     latestMe.character === 'derrick'

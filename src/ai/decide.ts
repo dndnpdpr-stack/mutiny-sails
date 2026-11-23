@@ -1,5 +1,5 @@
 import type { Rng } from '../engine/rng';
-import type { Action, CardKind, CardView, PendingView, PlayerView, PlayHint, SeatId } from '../engine/types';
+import type { Action, CardKind, CardView, JudgeReason, PendingView, PlayerView, PlayHint, SeatId } from '../engine/types';
 import type { AiMemory } from './memory';
 import { CHARACTER_INFO } from '../engine/characters/roster';
 
@@ -219,11 +219,28 @@ function othersAlive(view: PlayerView): SeatId[] {
   return view.seats.filter((s) => s.alive && s.seat !== view.you).map((s) => s.seat);
 }
 
-function chooseJudgeCard(view: PlayerView, options: CardView[]): CardView {
-  const me = view.seats[view.you];
-  const isKegHit = (c: CardView) => c.suit === 'spades' && c.rank >= 2 && c.rank <= 9;
-  if (me.equipment.some((c) => c.kind === 'powderKeg')) return options.find((c) => !isKegHit(c)) ?? options[0];
-  return options.find((c) => c.suit === 'hearts') ?? options[0];
+/** 판정 이유별로 나에게 좋은 결과인지 */
+function goodJudge(c: CardView, reason: JudgeReason): boolean {
+  switch (reason) {
+    case 'powderKeg':
+      return !(c.suit === 'spades' && c.rank >= 2 && c.rank <= 9);
+    case 'seaMonster':
+      return c.suit !== 'spades';
+    case 'pickpocket':
+    case 'cutRope':
+    case 'diceWager':
+      return c.suit === 'hearts' || c.suit === 'diamonds';
+    default:
+      return c.suit === 'hearts';
+  }
+}
+
+function chooseJudgeCard(view: PlayerView, options: CardView[], reason: JudgeReason): CardView {
+  const good = options.filter((c) => goodJudge(c, reason));
+  const pool = good.length ? good : options;
+  // 노름꾼 루카는 결과가 같으면 ♣을 골라 카드 1장을 더 받는다
+  if (view.seats[view.you].character === 'luca') return pool.find((c) => c.suit === 'clubs') ?? pool[0];
+  return pool[0];
 }
 
 /** 판단이 서지 않을 때의 기본 행동 (엔진의 시간 초과 규칙과 같다) */
@@ -306,7 +323,7 @@ export function decide(view: PlayerView, mem: AiMemory, rng: Rng): Action | null
       return { type: 'chooseCard', cardId: best.id };
     }
     case 'judgeChoice':
-      return { type: 'chooseCard', cardId: chooseJudgeCard(view, p.options).id };
+      return { type: 'chooseCard', cardId: chooseJudgeCard(view, p.options, p.reason).id };
     case 'peekTarget': {
       const others = othersAlive(view).filter((s) => view.seats[s].handCount > 0);
       const pool = others.length ? others : othersAlive(view);

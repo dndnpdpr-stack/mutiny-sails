@@ -61,7 +61,8 @@ export type PendingView =
   | { kind: 'loot'; seat: SeatId; revealed: CardView[] }
   /** 보물 지도: 본인에게만 revealed가 채워진다 */
   | { kind: 'treasureMap'; seat: SeatId; revealed: CardView[] }
-  | { kind: 'judgeChoice'; seat: SeatId; options: CardView[] }
+  /** reason: 무슨 판정인지 (고를 때 참고) */
+  | { kind: 'judgeChoice'; seat: SeatId; options: CardView[]; reason: JudgeReason }
   | { kind: 'peekTarget'; seat: SeatId }
   | { kind: 'passKeg'; seat: SeatId }
   | { kind: 'drawSource'; seat: SeatId }

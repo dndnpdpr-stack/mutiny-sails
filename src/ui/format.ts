@@ -1,4 +1,4 @@
-import type { GameEvent, Role, SeatId, Winner } from '../engine/types';
+import type { GameEvent, JudgeReason, Role, SeatId, Winner } from '../engine/types';
 import { CARD_CATALOG } from '../engine/cards/catalog';
 import { rankLabel } from './table/Card';
 import { CHARACTER_INFO } from '../engine/characters/roster';
@@ -30,6 +30,8 @@ const ieyo = (word: string) => (hasBatchim(word) ? '이에요' : '예요');
 
 export const cardName = (kind: keyof typeof CARD_CATALOG): string => CARD_CATALOG[kind].name;
 
+export const judgeReasonName = (r: JudgeReason): string => (r === 'seaMonster' ? '바다 괴물' : cardName(r));
+
 export const seaEventTitle = (id: SeaEventId): string => `${SEA_EVENTS[id].icon} ${SEA_EVENTS[id].name}`;
 
 export function formatEvent(e: GameEvent, names: (s: SeatId) => string): string {
@@ -54,7 +56,7 @@ export function formatEvent(e: GameEvent, names: (s: SeatId) => string): string 
     case 'heal':
       return `${names(e.seat)}이(가) 체력 ${e.amount}을(를) 회복했어요.`;
     case 'judge':
-      return `${names(e.seat)}의 ${e.reason === 'seaMonster' ? '바다 괴물' : cardName(e.reason)} 판정: ${e.success ? '성공' : '실패'}`;
+      return `${names(e.seat)}의 ${judgeReasonName(e.reason)} 판정: ${e.success ? '성공' : '실패'}`;
     case 'steal':
       return e.card
         ? `${names(e.to)}이(가) ${names(e.from)}의 ${cardName(e.card.kind)}을(를) 가져갔어요.`

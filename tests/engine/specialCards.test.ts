@@ -189,7 +189,7 @@ describe('compass and lucky coin', () => {
     const [slash] = setHand(g, 0, ['slash']);
     stackTop(g, [{ suit: 'clubs' }, { suit: 'hearts' }]);
     g.apply(0, { type: 'playCard', cardId: slash.id, target: 1 });
-    expect(g.pending()).toMatchObject({ kind: 'judgeChoice', seat: 1 });
+    expect(g.pending()).toMatchObject({ kind: 'judgeChoice', seat: 1, reason: 'barrel' });
   });
 
   it('lucky coin turns a bad judgment good and is discarded', () => {

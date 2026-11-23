@@ -1,5 +1,5 @@
 import { Game } from '../../src/engine/Game';
-import type { CharacterId } from '../../src/engine/types';
+import type { CardView, CharacterId, JudgeReason } from '../../src/engine/types';
 import { AiMemory } from '../../src/ai/memory';
 import { decide } from '../../src/ai/decide';
 import { Rng } from '../../src/engine/rng';
@@ -140,5 +140,31 @@ describe('new character abilities', () => {
     const mem = new AiMemory();
     mem.captainFoe[1] = 4;
     expect(decide(buildView(g, 0, () => true), mem, rng())).toEqual({ type: 'useAbility', cardIds: [feast.id], target: 1, targetCardId: barrel.id });
+  });
+});
+
+describe('judge choice by reason', () => {
+  const choose = (reason: JudgeReason, options: CardView[], equipment: CardView[] = []) => {
+    const g = makeGame(4);
+    g.start();
+    const base = buildView(g, 1, () => true);
+    const seats = base.seats.map((s) => (s.seat === 1 ? { ...s, equipment } : s));
+    const view = { ...base, seats, pending: { kind: 'judgeChoice' as const, seat: 1, options, reason } };
+    return decide(view, new AiMemory(), rng());
+  };
+  const c = (id: string, suit: CardView['suit'], rank: CardView['rank'] = 5): CardView => ({ id, kind: 'slash', suit, rank });
+
+  it('resisting a pickpocket prefers a red card', () => {
+    expect(choose('pickpocket', [c('a', 'clubs'), c('b', 'diamonds')])).toEqual({ type: 'chooseCard', cardId: 'b' });
+  });
+
+  it('a barrel judgment prefers hearts even with a powder keg in front', () => {
+    const keg: CardView = { id: 'k', kind: 'powderKeg', suit: 'spades', rank: 3 };
+    expect(choose('barrel', [c('a', 'clubs'), c('b', 'hearts')], [keg])).toEqual({ type: 'chooseCard', cardId: 'b' });
+  });
+
+  it('a powder keg judgment avoids spades 2-9; a sea monster avoids spades', () => {
+    expect(choose('powderKeg', [c('a', 'spades', 4), c('b', 'spades', 12)])).toEqual({ type: 'chooseCard', cardId: 'b' });
+    expect(choose('seaMonster', [c('a', 'spades', 12), c('b', 'clubs')])).toEqual({ type: 'chooseCard', cardId: 'b' });
   });
 });

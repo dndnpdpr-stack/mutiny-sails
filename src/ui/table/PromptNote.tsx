@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import type { Action, CardKind, CardView, PlayerView } from '../../engine/types';
 import { CardFace } from './Card';
+import { judgeReasonName } from '../format';
 import type { AttackSource } from '../../engine/types';
 
 const ATTACK_NAME: Record<AttackSource, string> = { slash: '칼질', cannonade: '포격', fireShip: '불붙은 배' };
@@ -176,7 +177,12 @@ export function PromptNote({ view, send }: { view: PlayerView; send: (a: Action)
     case 'treasureMap':
     case 'judgeChoice': {
       const list = p.kind === 'judgeChoice' ? p.options : p.revealed;
-      title = p.kind === 'loot' ? '가져갈 전리품을 고르세요' : p.kind === 'treasureMap' ? '🗺️ 보물 지도: 가져갈 1장을 고르세요 (나머지는 버려져요)' : '판정에 쓸 카드를 고르세요';
+      title =
+        p.kind === 'loot'
+          ? '가져갈 전리품을 고르세요'
+          : p.kind === 'treasureMap'
+            ? '🗺️ 보물 지도: 가져갈 1장을 고르세요 (나머지는 버려져요)'
+            : `${judgeReasonName(p.reason)} 판정에 쓸 카드를 고르세요`;
       body = (
         <div className="note-cards">
           {list.map((c) => (

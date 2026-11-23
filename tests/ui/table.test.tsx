@@ -212,6 +212,23 @@ describe('TableScreen', () => {
     expect(send).toHaveBeenCalledWith({ type: 'useAbility', cardIds: ['f1'], target: 3, targetCardId: 'b3' });
   });
 
+  it('judge choice says what the judgment is for', () => {
+    renderTable(makeView({ pending: { kind: 'judgeChoice', seat: 1, options: [card('j1', 'rum', 'hearts'), card('j2', 'dodge', 'clubs')], reason: 'barrel' } }));
+    expect(within(screen.getByRole('dialog')).getByText(/엄폐용 나무통 판정/)).toBeTruthy();
+  });
+
+  it('the ability note does not come back by itself on my next turn', () => {
+    const seats = [0, 1, 2, 3, 4].map((i) => seat(i, i === 1 ? { character: 'dorothy' } : {}));
+    const mine = makeView({ myHand: [card('r1', 'rum')] }, seats);
+    const r = renderTable(mine);
+    fireEvent.click(screen.getByText('능력 사용'));
+    expect(screen.getByRole('dialog', { name: /도로시/ })).toBeTruthy();
+    const others = { ...mine, current: 2, pending: { kind: 'turn' as const, seat: 2 } };
+    r.rerender(<TableScreen latest={others} shown={others} effects={[]} speed={1} batchKey={0} send={vi.fn()} lastRejection={null} />);
+    r.rerender(<TableScreen latest={mine} shown={mine} effects={[]} speed={1} batchKey={0} send={vi.fn()} lastRejection={null} />);
+    expect(screen.queryByRole('dialog', { name: /도로시/ })).toBeNull();
+  });
+
   it('drawSource offers deck and discard', () => {
     const v = makeView({ pending: { kind: 'drawSource', seat: 1 } });
     const { send } = renderTable(v);
