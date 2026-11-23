@@ -133,8 +133,16 @@ function decideTurn(view: PlayerView, mem: AiMemory): Action {
   }
   if (me.hp >= 2) {
     for (const h of hintsOf('fireShip')) {
-      const t = bestTarget(view, mem, h.targets ?? [], 1);
-      if (t !== null) return play(h, t);
+      // 대상 양옆도 맞으므로 맞는 사람 모두의 점수를 더하고, 우리 편이 끼면 쓰지 않는다
+      let best: SeatId | null = null;
+      let bestScore = 1;
+      for (const t of h.targets ?? []) {
+        const scores = fireVictims(view, t).map((v) => targetScore(view, mem, v));
+        if (scores.some((s) => s <= -50)) continue;
+        const sum = scores.reduce((a, b) => a + b, 0);
+        if (sum >= bestScore) [best, bestScore] = [t, sum];
+      }
+      if (best !== null) return play(h, best);
     }
   }
   for (const h of hintsOf('diceWager')) {
@@ -150,6 +158,15 @@ function decideTurn(view: PlayerView, mem: AiMemory): Action {
     if (t !== null) return play(h, t);
   }
   return { type: 'endTurn' };
+}
+
+/** 엔진의 불붙은 배와 같은 규칙: 대상과 그 양옆(나 제외) */
+function fireVictims(view: PlayerView, target: SeatId): SeatId[] {
+  const alive = view.seats.filter((s) => s.alive).map((s) => s.seat);
+  const i = alive.indexOf(target);
+  const left = alive[(i - 1 + alive.length) % alive.length];
+  const right = alive[(i + 1) % alive.length];
+  return [...new Set([target, right, left])].filter((s) => s !== view.you);
 }
 
 function lowestValue(cards: CardView[], count: number): string[] {

@@ -4,7 +4,7 @@ import { AiMemory } from '../../src/ai/memory';
 import { decide } from '../../src/ai/decide';
 import { Rng } from '../../src/engine/rng';
 import { buildView } from '../../src/host/view';
-import { giveHand, makeGame, passUntil, setHand } from '../engine/helpers';
+import { giveEquip as giveEquipFor, giveHand, makeGame, passUntil, setHand } from '../engine/helpers';
 
 const rng = () => new Rng(5);
 
@@ -91,5 +91,19 @@ describe('decide with expansion cards', () => {
     g.start();
     const [coat] = setHand(g, 0, ['leatherCoat']);
     expect(ai(g, 0)).toEqual({ type: 'playCard', cardId: coat.id });
+  });
+});
+
+describe('fire ship targeting', () => {
+  it('a loyalist does not set fire next to the captain', () => {
+    const g = makeGame(5, { expansionCards: true }); // 0 선장, 1 반란, 4 충성
+    g.start();
+    passUntil(g, 4);
+    giveEquipFor(g, 4, 'pistol');
+    const [fire] = setHand(g, 4, ['fireShip']);
+    const mem = new AiMemory();
+    mem.captainFoe[1] = 5;
+    const a = decide(buildView(g, 4, () => true), mem, rng());
+    expect(a).not.toEqual({ type: 'playCard', cardId: fire.id, target: 1 });
   });
 });

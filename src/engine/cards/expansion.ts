@@ -37,7 +37,8 @@ export class TreasureMap extends ActionCard {
       game.giveCards(actor, [picked]);
       const rest = cards.filter((c) => c !== picked);
       for (const c of rest) game.discardCard(c);
-      game.emit({ type: 'discardCards', seat: actor, cards: rest.map((c) => c.toView()) });
+      // 지도에 나온 카드는 나만 본다
+      game.emit({ type: 'discardCards', seat: actor, cards: rest.map((c) => c.toView()), visibleTo: [actor] });
       return null;
     });
   }
@@ -83,7 +84,7 @@ export class FireShip extends ActionCard {
     const left = alive[(i - 1 + alive.length) % alive.length];
     const right = alive[(i + 1) % alive.length];
     const victims = [...new Set([target, right, left])].filter((s) => s !== actor);
-    for (const v of [...victims].reverse()) game.pushStep(() => game.attack(v, actor, 'fireShip'));
+    for (const v of [...victims].reverse()) game.pushStep(() => game.seats[v].alive && game.attack(v, actor, 'fireShip'));
   }
 }
 

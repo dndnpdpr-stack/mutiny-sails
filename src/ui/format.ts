@@ -21,11 +21,12 @@ export function winnerText(w: Winner): string {
   }
 }
 
-/** 받침이 있으면 '이에요', 없으면 '예요' */
-function ieyo(word: string): string {
+function hasBatchim(word: string): boolean {
   const code = word.charCodeAt(word.length - 1) - 0xac00;
-  return code >= 0 && code <= 11171 && code % 28 !== 0 ? '이에요' : '예요';
+  return code >= 0 && code <= 11171 && code % 28 !== 0;
 }
+/** 받침이 있으면 '이에요', 없으면 '예요' */
+const ieyo = (word: string) => (hasBatchim(word) ? '이에요' : '예요');
 
 export const cardName = (kind: keyof typeof CARD_CATALOG): string => CARD_CATALOG[kind].name;
 
@@ -79,7 +80,7 @@ export function formatEvent(e: GameEvent, names: (s: SeatId) => string): string 
     case 'wager':
       return `${names(e.seat)}과(와) ${names(e.target)}의 주사위 내기: ${rankLabel(e.cards[0].rank)} 대 ${rankLabel(e.cards[1].rank)}`;
     case 'gearUsed':
-      return `${names(e.seat)}의 ${cardName(e.card.kind)}가 효과를 내고 버려졌어요.`;
+      return `${names(e.seat)}의 ${cardName(e.card.kind)}${hasBatchim(cardName(e.card.kind)) ? '이' : '가'} 효과를 내고 버려졌어요.`;
     case 'seaEvent':
       return `바다 이벤트: ${seaEventTitle(e.event)} — ${SEA_EVENTS[e.event].text}`;
   }

@@ -73,6 +73,8 @@ describe('treasure map', () => {
     expect(g.apply(0, { type: 'chooseCard', cardId: top[1].id }).ok).toBe(true);
     expect(ids(g.seats[0].hand)).toEqual([top[1].id]);
     expect(ids(g.discard)).toEqual(expect.arrayContaining([top[0].id, top[2].id]));
+    // 버린 2장도 나만 안다
+    expect(g.events.filter((e) => e.type === 'discardCards' && e.seat === 0).every((e) => e.visibleTo?.length === 1 && e.visibleTo[0] === 0)).toBe(true);
     expect(g.pending()).toEqual({ kind: 'turn', seat: 0 });
   });
 
