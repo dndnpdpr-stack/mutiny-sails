@@ -1,6 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import type { Action, CardKind, CardView, PlayerView } from '../../engine/types';
 import { CardFace } from './Card';
+import type { AttackSource } from '../../engine/types';
+
+const ATTACK_NAME: Record<AttackSource, string> = { slash: '칼질', cannonade: '포격', fireShip: '불붙은 배' };
 
 /** 지금 내 응답에 낼 수 있는 카드 종류와 장수. 응답 차례가 아니면 null */
 export function responseNeed(view: PlayerView): { kind: CardKind; count: number } | null {
@@ -95,7 +98,7 @@ export function PromptNote({ view, send }: { view: PlayerView; send: (a: Action)
   switch (p.kind) {
     case 'respondAttack': {
       const d = ofKind('dodge');
-      title = `${view.seats[p.attacker].name}의 ${p.source === 'cannonade' ? '포격' : '칼질'}!`;
+      title = `${view.seats[p.attacker].name}의 ${ATTACK_NAME[p.source]}!`;
       body = (
         <>
           <button type="button" disabled={!d.length} onClick={() => respond([d[0].id])}>피하기 내기</button>
@@ -170,9 +173,10 @@ export function PromptNote({ view, send }: { view: PlayerView; send: (a: Action)
       );
       break;
     case 'loot':
+    case 'treasureMap':
     case 'judgeChoice': {
-      const list = p.kind === 'loot' ? p.revealed : p.options;
-      title = p.kind === 'loot' ? '가져갈 전리품을 고르세요' : '판정에 쓸 카드를 고르세요';
+      const list = p.kind === 'judgeChoice' ? p.options : p.revealed;
+      title = p.kind === 'loot' ? '가져갈 전리품을 고르세요' : p.kind === 'treasureMap' ? '🗺️ 보물 지도: 가져갈 1장을 고르세요 (나머지는 버려져요)' : '판정에 쓸 카드를 고르세요';
       body = (
         <div className="note-cards">
           {list.map((c) => (

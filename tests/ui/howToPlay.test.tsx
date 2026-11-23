@@ -56,6 +56,7 @@ describe('HowToPlay', () => {
       expect(dialog.textContent).toContain(info.text);
     }
     expect(dialog.textContent).toContain('×23');
+    expect(within(dialog).getAllByText('확장')).toHaveLength(Object.values(CARD_CATALOG).filter((c) => c.expansion).length);
   });
 
   it('closes with the close button and with Escape, and reopens on the first tab', () => {

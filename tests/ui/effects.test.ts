@@ -81,6 +81,19 @@ describe('effectsFor', () => {
   });
 });
 
+describe('expansion effects', () => {
+  it('flies a used-up gear card from the seat equipment to the discard pile', () => {
+    const c = { id: 'g', kind: 'leatherCoat', suit: 'clubs', rank: 9 } as const;
+    expect(effectsFor([{ type: 'gearUsed', seat: 2, card: c }], 0)).toEqual([{ kind: 'fly', from: 'equip:2', to: 'discard', card: c, at: 0, ms: 450 }]);
+  });
+  it('shows both wager cards on the judge pile, the higher one as success', () => {
+    const a = { id: 'a', kind: 'slash', suit: 'clubs', rank: 12 } as const;
+    const b = { id: 'b', kind: 'slash', suit: 'clubs', rank: 3 } as const;
+    const fx = effectsFor([{ type: 'wager', seat: 0, target: 1, cards: [a, b] }], 0);
+    expect(fx.map((e) => (e.kind === 'judge' ? [e.card.id, e.success] : null))).toEqual([['a', true], ['b', false]]);
+  });
+});
+
 describe('sea event effect', () => {
   it('turns a sea event into a short marker effect (the banner keeps its own timer)', () => {
     expect(effectsFor([{ type: 'seaEvent', event: 'fog' }], 0)).toEqual([{ kind: 'sea', event: 'fog', at: 0, ms: 300 }]);

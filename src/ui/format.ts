@@ -1,5 +1,6 @@
 import type { GameEvent, Role, SeatId, Winner } from '../engine/types';
 import { CARD_CATALOG } from '../engine/cards/catalog';
+import { rankLabel } from './table/Card';
 import { CHARACTER_INFO } from '../engine/characters/roster';
 import { SEA_EVENTS, type SeaEventId } from '../engine/seaEvents';
 
@@ -18,6 +19,12 @@ export function winnerText(w: Winner): string {
     case 'spy':
       return '첩자의 승리!';
   }
+}
+
+/** 받침이 있으면 '이에요', 없으면 '예요' */
+function ieyo(word: string): string {
+  const code = word.charCodeAt(word.length - 1) - 0xac00;
+  return code >= 0 && code <= 11171 && code % 28 !== 0 ? '이에요' : '예요';
 }
 
 export const cardName = (kind: keyof typeof CARD_CATALOG): string => CARD_CATALOG[kind].name;
@@ -65,6 +72,14 @@ export function formatEvent(e: GameEvent, names: (s: SeatId) => string): string 
       return e.role ? `${names(e.seat)}이(가) ${roleName(e.role)} 카드를 뽑았어요.` : `${names(e.seat)}이(가) 역할 카드를 뽑았어요.`;
     case 'gameOver':
       return winnerText(e.winner);
+    case 'roleRevealed': {
+      const r = roleName(e.role);
+      return `🦜 ${names(e.target)}의 역할은 ${r}${ieyo(r)}.`;
+    }
+    case 'wager':
+      return `${names(e.seat)}과(와) ${names(e.target)}의 주사위 내기: ${rankLabel(e.cards[0].rank)} 대 ${rankLabel(e.cards[1].rank)}`;
+    case 'gearUsed':
+      return `${names(e.seat)}의 ${cardName(e.card.kind)}가 효과를 내고 버려졌어요.`;
     case 'seaEvent':
       return `바다 이벤트: ${seaEventTitle(e.event)} — ${SEA_EVENTS[e.event].text}`;
   }

@@ -119,6 +119,7 @@ function CardEntry({ info }: { info: CardInfo }) {
       <div>
         <b>
           {info.name} <span className="guide-count">×{info.count}</span>
+          {info.expansion && <span className="guide-tag">확장</span>}
         </b>
         <div className="guide-text">{info.text}</div>
       </div>

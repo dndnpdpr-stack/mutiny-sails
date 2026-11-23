@@ -159,6 +159,20 @@ describe('TableScreen', () => {
     expect(send).toHaveBeenCalledWith({ type: 'discard', cardIds: ['b'] });
   });
 
+  it('treasure map lets me pick one of the revealed cards', () => {
+    const v = makeView({ pending: { kind: 'treasureMap', seat: 1, revealed: [card('m1', 'rum'), card('m2', 'duel')] } });
+    const { send } = renderTable(v);
+    const note = screen.getByRole('dialog');
+    expect(within(note).getByText(/보물 지도/)).toBeTruthy();
+    fireEvent.click(within(note).getByRole('button', { name: '결투' }));
+    expect(send).toHaveBeenCalledWith({ type: 'chooseCard', cardId: 'm2' });
+  });
+
+  it('names a fire ship attack', () => {
+    renderTable(makeView({ current: 0, pending: { kind: 'respondAttack', seat: 1, attacker: 0, source: 'fireShip' } }));
+    expect(within(screen.getByRole('dialog')).getByText('p0의 불붙은 배!')).toBeTruthy();
+  });
+
   it('drawSource offers deck and discard', () => {
     const v = makeView({ pending: { kind: 'drawSource', seat: 1 } });
     const { send } = renderTable(v);

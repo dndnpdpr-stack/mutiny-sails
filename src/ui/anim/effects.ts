@@ -79,6 +79,15 @@ export function effectsFor(events: GameEvent[], you: SeatId): Effect[] {
       case 'death':
         out.push({ kind: 'death', seat: e.seat, at: at(), ms: DEATH_MS });
         break;
+      case 'gearUsed':
+        out.push({ kind: 'fly', from: `equip:${e.seat}`, to: 'discard', card: e.card, at: at(), ms: FLY_MS });
+        break;
+      case 'wager': {
+        const [a, b] = e.cards;
+        out.push({ kind: 'judge', card: a, success: a.rank > b.rank, at: at(), ms: JUDGE_MS });
+        out.push({ kind: 'judge', card: b, success: b.rank > a.rank, at: at(), ms: JUDGE_MS });
+        break;
+      }
       case 'seaEvent':
         out.push({ kind: 'sea', event: e.event, at: at(), ms: SEA_MS });
         break;

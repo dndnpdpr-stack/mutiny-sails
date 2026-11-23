@@ -21,7 +21,7 @@ export function App({ defaults }: { defaults?: Partial<LocalSetup> & { animation
 
   let body: ReactNode;
   if (!setup) {
-    body = <SetupScreen onStart={(playerCount, myName, seaEvents) => setSetup({ ...localDefaults, playerCount, myName, seaEvents })} />;
+    body = <SetupScreen onStart={(playerCount, myName, options) => setSetup({ ...localDefaults, playerCount, myName, ...options })} />;
   } else if (shown?.winner) {
     body = <ResultScreen view={shown} onRestart={() => (setSetup(null), restart())} />;
   } else if (view && view.seats.some((s) => s.character === null)) {

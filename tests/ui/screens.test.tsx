@@ -14,7 +14,7 @@ describe('SetupScreen', () => {
     expect(screen.getByText('5명').closest('button')?.className).toMatch(/selected/);
     fireEvent.change(screen.getByRole('textbox'), { target: { value: '잭' } });
     fireEvent.click(screen.getByText('출항'));
-    expect(onStart).toHaveBeenCalledWith(5, '잭', true);
+    expect(onStart).toHaveBeenCalledWith(5, '잭', { seaEvents: true, expansionCards: true });
   });
 
   it('can turn sea events off', () => {
@@ -24,7 +24,15 @@ describe('SetupScreen', () => {
     expect(toggle.checked).toBe(true);
     fireEvent.click(toggle);
     fireEvent.click(screen.getByText('출항'));
-    expect(onStart).toHaveBeenCalledWith(5, '', false);
+    expect(onStart).toHaveBeenCalledWith(5, '', { seaEvents: false, expansionCards: true });
+  });
+
+  it('can turn expansion cards off', () => {
+    const onStart = vi.fn();
+    render(<SetupScreen onStart={onStart} />);
+    fireEvent.click(screen.getByRole('checkbox', { name: /확장 카드/ }));
+    fireEvent.click(screen.getByText('출항'));
+    expect(onStart).toHaveBeenCalledWith(5, '', { seaEvents: true, expansionCards: false });
   });
 
   it('shows the title art with the logo and subtitle', () => {

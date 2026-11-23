@@ -2,9 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import titleArt from '../art/title.svg';
 import { HowToPlay } from './HowToPlay';
 
-export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: string, seaEvents: boolean) => void }) {
+export interface SetupOptions {
+  seaEvents: boolean;
+  expansionCards: boolean;
+}
+
+export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: string, options: SetupOptions) => void }) {
   const [count, setCount] = useState(5);
   const [sea, setSea] = useState(true);
+  const [expansion, setExpansion] = useState(true);
   const [name, setName] = useState('');
   const [guide, setGuide] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -39,11 +45,15 @@ export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: 
           <input type="checkbox" checked={sea} onChange={(e) => setSea(e.target.checked)} />
           🌊 바다 이벤트 <small>(두 번째 라운드부터 매 라운드 규칙이 바뀌어요)</small>
         </label>
+        <label className="toggle">
+          <input type="checkbox" checked={expansion} onChange={(e) => setExpansion(e.target.checked)} />
+          🃏 확장 카드 <small>(새 카드 10종 16장을 덱에 섞어요)</small>
+        </label>
         <div className="setup-actions">
           <button ref={guideButtonRef} type="button" className="secondary" onClick={() => setGuide(true)}>
             게임 방법
           </button>
-          <button type="button" className="primary" onClick={() => onStart(count, name.trim(), sea)}>
+          <button type="button" className="primary" onClick={() => onStart(count, name.trim(), { seaEvents: sea, expansionCards: expansion })}>
             출항
           </button>
         </div>
