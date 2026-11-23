@@ -7,6 +7,8 @@
 <p align="center"><b>정체를 숨긴 해적들의 카드 게임</b><br>
 선장을 지킬 것인가, 배를 빼앗을 것인가. 누가 내 편인지 모르는 바다 위에서 칼을 겨눠요.</p>
 
+<p align="center"><a href="https://dndnpdpr-stack.github.io/mutiny-sails/"><b>▶ 브라우저에서 바로 하기</b></a></p>
+
 ---
 
 ## 어떤 게임인가요
@@ -58,7 +60,7 @@ npm test          # 테스트
 npm run build     # 타입 검사 + 배포용 빌드 (dist/)
 ```
 
-`npm run build`로 만든 `dist/` 폴더는 정적 파일이라 GitHub Pages 같은 곳에 그대로 올릴 수 있어요. 외부 서버나 외부 폰트·이미지에 의존하지 않아요.
+`npm run build`로 만든 `dist/` 폴더는 정적 파일이라 GitHub Pages 같은 곳에 그대로 올릴 수 있어요. 외부 서버나 외부 폰트·이미지에 의존하지 않아요. `main`에 올리면 GitHub Actions가 테스트·빌드한 뒤 GitHub Pages에 자동으로 배포해요(`.github/workflows/pages.yml`).
 
 ## 기술 스택
 
