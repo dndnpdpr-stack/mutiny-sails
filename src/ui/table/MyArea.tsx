@@ -23,6 +23,7 @@ export function MyArea(p: {
   highlight: (id: string) => boolean;
   selectedId: string | null;
   onCardClick: (id: string) => void;
+  onCardInfo: (id: string) => void;
   canEndTurn: boolean;
   onEndTurn: () => void;
   /** 직접 쓰는 능력이 없는 캐릭터면 null (데릭·도로시·키키만) */
@@ -57,7 +58,7 @@ export function MyArea(p: {
         ))}
       </div>
       {me.alive ? (
-        <FanHand cards={p.hand} canPlay={p.canPlay} highlight={p.highlight} selectedId={p.selectedId} onCardClick={p.onCardClick} />
+        <FanHand cards={p.hand} canPlay={p.canPlay} highlight={p.highlight} selectedId={p.selectedId} onCardClick={p.onCardClick} onCardInfo={p.onCardInfo} />
       ) : (
         <div className="spectating" data-anchor="hand">
           <span>관전 중</span>

@@ -108,6 +108,7 @@ export function TableScreen(p: {
   const [pickFor, setPickFor] = useState<{ cardId: string; target: SeatId } | null>(null);
   const [peekAck, setPeekAck] = useState(0);
   const [abilityOpen, setAbilityOpen] = useState(false);
+  const [infoId, setInfoId] = useState<string | null>(null);
   const newPeek = latestPeek(latest.events, latest.you, peekAck);
   const memos = peekMemos(latest.events, latest.you);
 
@@ -124,7 +125,7 @@ export function TableScreen(p: {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') cancel();
+      if (e.key === 'Escape') (cancel(), setInfoId(null));
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -137,17 +138,18 @@ export function TableScreen(p: {
   const highlight = (id: string) => !!need && latest.myHand.some((c) => c.id === id && c.kind === need.kind);
   const canPlay = (id: string) => inLatest.has(id) && (hinted.has(id) || respondable(id));
 
-  // 설명 중인 카드: 처음 누르면 설명, 대상 없는 카드는 한 번 더 누르면 낸다
-  const selectedCard = selectedId ? latest.myHand.find((c) => c.id === selectedId) ?? null : null;
-  const playNow = (id: string) => (cancel(), send({ type: 'playCard', cardId: id }));
+  // 누르면 바로 낸다(대상이 있으면 들어 올리고 대상 고르기). 설명은 우클릭·길게 누르기로 따로 본다
+  const infoCard = infoId ? latest.myHand.find((c) => c.id === infoId) ?? null : null;
+  const playNow = (id: string) => (cancel(), setInfoId(null), send({ type: 'playCard', cardId: id }));
   const onCardClick = (id: string) => {
-    if (!inLatest.has(id)) return;
+    setInfoId(null);
+    if (!canPlay(id)) return;
     const ids = responseWith(latest, id);
     if (ids) return send({ type: 'respond', cardIds: ids });
-    if (selectedId === id) {
-      const h = latest.hints.find((x) => x.cardId === id);
-      return h && h.targets === null ? playNow(id) : cancel();
-    }
+    if (selectedId === id) return cancel();
+    const h = latest.hints.find((x) => x.cardId === id);
+    if (!h) return;
+    if (h.targets === null) return playNow(id);
     setPickFor(null);
     setSelectedId(id);
   };
@@ -177,7 +179,7 @@ export function TableScreen(p: {
     if (!myTurn) setAbilityOpen(false);
     cancel();
   }, [myTurn]);
-  const selectedHint = selectedCard ? latest.hints.find((h) => h.cardId === selectedCard.id) : undefined;
+  const infoHint = infoCard ? latest.hints.find((h) => h.cardId === infoCard.id) : undefined;
   const openAbility = () => (cancel(), setAbilityOpen(true));
   const ability =
     latestMe.character === 'derrick'
@@ -227,16 +229,21 @@ export function TableScreen(p: {
         hand={shown.myHand}
         canPlay={canPlay}
         highlight={highlight}
-        selectedId={selectedCard?.id ?? null}
+        selectedId={hint?.cardId ?? null}
         onCardClick={onCardClick}
+        onCardInfo={setInfoId}
         canEndTurn={myTurn}
         onEndTurn={() => (cancel(), send({ type: 'endTurn' }))}
         ability={ability}
         spectate={p.spectate}
       />
 
-      {selectedCard && me.alive && !pick && (
-        <CardInfoNote card={selectedCard} onPlay={selectedHint && selectedHint.targets === null ? () => playNow(selectedCard.id) : null} />
+      {infoCard && me.alive && !pick && (
+        <CardInfoNote
+          card={infoCard}
+          onPlay={infoHint && infoHint.targets === null ? () => playNow(infoCard.id) : null}
+          onClose={() => setInfoId(null)}
+        />
       )}
       <PromptNote view={latest} send={send} />
       {abilityOpen && myTurn && latestMe.character === 'dorothy' && <DorothyNote view={latest} send={send} onClose={() => setAbilityOpen(false)} />}
