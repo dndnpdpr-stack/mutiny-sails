@@ -15,7 +15,7 @@ function ResultSeat({ s, index, stat, mvp }: { s: SeatView; index: number; stat?
   return (
     <li className={`result-seat${mvp ? ' is-mvp' : ''}`}>
       {mvp && <span className="mvp-badge">🏅 MVP</span>}
-      <RoleCard role={s.role} revealed={revealed} />
+      <RoleCard role={s.role} special={s.special} revealed={revealed} />
       <div className="face rs-face"><Portrait id={s.character} variant="face" /></div>
       <div className="rs-name">{s.name}</div>
       <div className="rs-char">{s.character ? CHARACTER_INFO[s.character].name : '?'}</div>
@@ -33,6 +33,7 @@ export function ResultScreen({ view, onRestart }: { view: PlayerView; onRestart:
     <div className="table-bg screen-center">
       <div className="scroll-panel result">
         <h1>{winnerText(view.winner!)}</h1>
+        {view.bountyWon && <p className="bounty-won">💰 현상금 사냥꾼 {view.seats.find((s) => s.role === 'hunter')?.name}도 승리!</p>}
         {m && (
           <div className="mvp">
             <span className="mvp-title">🏅 MVP</span>

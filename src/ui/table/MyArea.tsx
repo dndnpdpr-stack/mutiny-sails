@@ -1,6 +1,6 @@
 import { CHARACTER_INFO } from '../../engine/characters/roster';
 import { Portrait } from './Portrait';
-import type { CardView, Role, SeatView } from '../../engine/types';
+import type { CardView, Role, SeatView, Special } from '../../engine/types';
 import { RoleCard } from './RoleCard';
 import { CardFace } from './Card';
 import { FanHand } from './FanHand';
@@ -15,6 +15,9 @@ export interface Spectate {
 export function MyArea(p: {
   me: SeatView;
   myRole: Role | null;
+  mySpecial?: Special | null;
+  /** 현상금 사냥꾼: 역할 카드에 붙일 표적 안내 */
+  roleNote?: string;
   myRange: number;
   current: boolean;
   fx: SeatFx[];
@@ -53,7 +56,7 @@ export function MyArea(p: {
           </div>
           <div className="mini">사거리 {p.myRange}</div>
         </div>
-        <RoleCard role={p.myRole} revealed={p.myRole !== null} size="sm" label="내 역할 카드" />
+        <RoleCard role={p.myRole} special={p.mySpecial} note={p.roleNote} revealed={p.myRole !== null} size="sm" label="내 역할 카드" />
       </div>
       <div className="equip-row my-equip" data-anchor={`equip:${me.seat}`}>
         {me.equipment.map((c) => (

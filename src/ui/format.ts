@@ -1,14 +1,20 @@
-import type { GameEvent, JudgeReason, Role, SeatId, Winner } from '../engine/types';
+import type { GameEvent, JudgeReason, Role, SeatId, Special, Winner } from '../engine/types';
 import { CARD_CATALOG } from '../engine/cards/catalog';
 import { rankLabel } from './table/Card';
 import { CHARACTER_INFO } from '../engine/characters/roster';
 import { SEA_EVENTS, type SeaEventId } from '../engine/seaEvents';
 import { judgeNeed, judgeRule } from './judgeRule';
 
-const ROLE_NAMES: Record<Role, string> = { captain: '선장', loyalist: '충성 선원', rebel: '반란 선원', spy: '첩자' };
+const ROLE_NAMES: Record<Role, string> = { captain: '선장', loyalist: '충성 선원', rebel: '반란 선원', spy: '첩자', hunter: '현상금 사냥꾼' };
+const SPECIAL_NAMES: Record<Special, string> = { navigator: '항해사', doubleAgent: '이중 첩자' };
 
 export function roleName(r: Role): string {
   return ROLE_NAMES[r];
+}
+
+/** 항해사·이중 첩자면 그 이름, 아니면 역할 이름 */
+export function roleLabel(r: Role, special?: Special | null): string {
+  return special ? SPECIAL_NAMES[special] : ROLE_NAMES[r];
 }
 
 export function winnerText(w: Winner): string {
@@ -67,13 +73,19 @@ export function formatEvent(e: GameEvent, names: (s: SeatId) => string): string 
     case 'peek':
       return `${names(e.target)}의 손패에서 ${cardName(e.card.kind)}을(를) 엿봤어요.`;
     case 'death':
-      return `${names(e.seat)}이(가) 쓰러졌어요. (${roleName(e.role)})`;
+      return `${names(e.seat)}이(가) 쓰러졌어요. (${roleLabel(e.role, e.special)})`;
     case 'ability':
       return `${names(e.seat)}이(가) ${CHARACTER_INFO[e.character].name}의 능력을 썼어요.`;
     case 'characterChosen':
       return `${names(e.seat)}이(가) ${CHARACTER_INFO[e.character].name}을(를) 골랐어요.`;
     case 'roleDrawn':
-      return e.role ? `${names(e.seat)}이(가) ${roleName(e.role)} 카드를 뽑았어요.` : `${names(e.seat)}이(가) 역할 카드를 뽑았어요.`;
+      return e.role ? `${names(e.seat)}이(가) ${roleLabel(e.role, e.special)} 카드를 뽑았어요.` : `${names(e.seat)}이(가) 역할 카드를 뽑았어요.`;
+    case 'bounty': {
+      const t = names(e.target);
+      if (e.state === 'open') return `💰 현상금 표적은 ${t}${ieyo(t)}.`;
+      if (e.state === 'claimed') return `💰 ${t}을(를) 직접 잡았어요! 이제 끝까지 살아남으면 함께 이겨요.`;
+      return `💰 현상금을 놓쳤어요.`;
+    }
     case 'gameOver':
       return winnerText(e.winner);
     case 'roleRevealed': {

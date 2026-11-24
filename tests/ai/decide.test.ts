@@ -221,3 +221,28 @@ describe('judge choice by reason', () => {
     expect(choose('seaMonster', [c('a', 'spades', 12), c('b', 'clubs')])).toEqual({ type: 'chooseCard', cardId: 'b' });
   });
 });
+
+describe('bounty hunter AI', () => {
+  // 8인: 7번이 사냥꾼, 표적은 6번(거리 1) — 0번(선장)도 거리 1
+  const ROLES8 = ['captain', 'rebel', 'rebel', 'spy', 'loyalist', 'rebel', 'loyalist', 'hunter'] as const;
+  const chars = ['derrick', 'bruno', 'hanna', 'orso', 'tom', 'sila', 'bibi', 'gordon'] as CharacterId[];
+
+  it('slashes its bounty target and leaves everyone else alone', () => {
+    for (const level of ['easy', 'normal', 'hard'] as const) {
+      const g = makeGame(8, { roles: [...ROLES8], characters: chars, bountyTarget: 6 });
+      g.start();
+      passUntil(g, 7);
+      const [slash] = setHand(g, 7, ['slash']);
+      expect(decide(buildView(g, 7, () => true), new AiMemory(level), rng(), level)).toEqual({ type: 'playCard', cardId: slash.id, target: 6 });
+    }
+  });
+
+  it('does not slash anyone once the bounty is gone (normal)', () => {
+    const g = makeGame(8, { roles: [...ROLES8], characters: chars, bountyTarget: 6 });
+    g.start();
+    g.kill(6, 4);
+    passUntil(g, 7);
+    setHand(g, 7, ['slash']);
+    expect(decide(buildView(g, 7, () => true), new AiMemory('normal'), rng(), 'normal')).toEqual({ type: 'endTurn' });
+  });
+});

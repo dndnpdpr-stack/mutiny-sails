@@ -35,6 +35,17 @@ describe('SetupScreen', () => {
     expect(onStart).toHaveBeenCalledWith(5, '', { seaEvents: true, expansionCards: false, difficulty: 'normal' });
   });
 
+  it('offers 4 to 9 players and explains the expansion roles at 8+', () => {
+    const onStart = vi.fn();
+    render(<SetupScreen onStart={onStart} />);
+    for (const n of [4, 5, 6, 7, 8, 9]) expect(screen.getByText(`${n}명`)).toBeTruthy();
+    expect(screen.queryByText(/확장 역할/)).toBeNull();
+    fireEvent.click(screen.getByText('9명'));
+    expect(screen.getByText(/확장 역할/).textContent).toContain('현상금 사냥꾼');
+    fireEvent.click(screen.getByText('출항'));
+    expect(onStart.mock.calls[0][0]).toBe(9);
+  });
+
   it('picks the AI difficulty (normal by default) and remembers it', () => {
     localStorage.removeItem('mutiny.difficulty');
     const onStart = vi.fn();
@@ -152,6 +163,23 @@ describe('DraftScreen', () => {
   });
 });
 
+describe('ResultScreen with expansion roles', () => {
+  it('names the special roles and says when the bounty hunter also won', async () => {
+    const seats = [
+      { role: 'captain', special: null },
+      { role: 'rebel', special: 'doubleAgent' },
+      { role: 'loyalist', special: 'navigator' },
+      { role: 'hunter', special: null },
+    ].map((r, i) => ({ seat: i, name: `p${i}`, character: 'tom', hp: 2, maxHp: 4, alive: i !== 1, handCount: 0, equipment: [], isAi: i > 0, ...r }));
+    const view = { you: 0, myRole: 'captain', myHand: [], seats, current: 0, pending: null, hints: [], deckCount: 0, discardTop: null, distances: {},
+      myRange: 1, abilityUsed: false, events: [], winner: 'captainTeam', bountyWon: true } as unknown as PlayerView;
+    render(<ResultScreen view={view} onRestart={vi.fn()} />);
+    expect(screen.getByText(/💰 현상금 사냥꾼 p3도 승리/)).toBeTruthy();
+    await waitFor(() => expect(screen.getByText('이중 첩자')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('항해사')).toBeTruthy());
+  });
+});
+
 describe('ResultScreen', () => {
   it('shows winner, every role and restarts', async () => {
     const roles: Role[] = ['captain', 'loyalist', 'rebel', 'spy'];
@@ -171,6 +199,7 @@ describe('ResultScreen', () => {
     expect(document.querySelector('.mvp')?.textContent).toContain('p2');
     expect(document.querySelector('.result-seat.is-mvp')?.textContent).toContain('p2');
     expect(screen.getAllByText(/피해 \d · 처치 \d/)).toHaveLength(5); // MVP 칸 + 4자리
+    expect(screen.queryByText(/현상금 사냥꾼.*승리/)).toBeNull();
     fireEvent.click(screen.getByText('다시 하기'));
     expect(onRestart).toHaveBeenCalled();
   });

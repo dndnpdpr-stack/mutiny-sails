@@ -62,12 +62,15 @@ export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: 
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="나" maxLength={12} />
         </label>
         <div className="count">
-          {[4, 5, 6, 7].map((n) => (
+          {[4, 5, 6, 7, 8, 9].map((n) => (
             <button key={n} type="button" className={`count-card${n === count ? ' selected' : ''}`} onClick={() => setCount(n)}>
               {n}명
             </button>
           ))}
         </div>
+        {count >= 8 && (
+          <small className="expansion-note">🧭🎭💰 {count}인은 확장 역할(항해사·이중 첩자·현상금 사냥꾼)이 들어가요. 게임 방법 → 역할에서 볼 수 있어요.</small>
+        )}
         <label className="toggle">
           <input type="checkbox" checked={sea} onChange={(e) => setSea(e.target.checked)} />
           🌊 바다 이벤트 <small>(두 번째 라운드부터 매 라운드 규칙이 바뀌어요)</small>

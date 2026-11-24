@@ -4,6 +4,19 @@ import type { GameEvent } from '../../src/engine/types';
 const card = { id: 'c1', kind: 'slash', suit: 'spades', rank: 5 } as const;
 const names = (s: number) => `P${s}`;
 
+describe('format expansion roles', () => {
+  const names = (s: number) => `P${s}`;
+  it('tells the hunter about the bounty', () => {
+    expect(formatEvent({ type: 'bounty', seat: 7, target: 2, state: 'open' }, names)).toBe('💰 현상금 표적은 P2예요.');
+    expect(formatEvent({ type: 'bounty', seat: 7, target: 2, state: 'claimed' }, names)).toContain('직접 잡았어요');
+    expect(formatEvent({ type: 'bounty', seat: 7, target: 2, state: 'lost' }, names)).toContain('놓쳤어요');
+  });
+
+  it('names a fallen double agent', () => {
+    expect(formatEvent({ type: 'death', seat: 1, role: 'rebel', killer: 0, special: 'doubleAgent' }, names)).toContain('(이중 첩자)');
+  });
+});
+
 describe('format', () => {
   it('describes expansion card events', () => {
     expect(formatEvent({ type: 'roleRevealed', seat: 0, target: 2, role: 'spy' }, names)).toBe('🦜 P2의 역할은 첩자예요.');

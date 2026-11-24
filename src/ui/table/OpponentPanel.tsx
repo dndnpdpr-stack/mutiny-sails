@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 import { CHARACTER_INFO } from '../../engine/characters/roster';
 import type { CardView, SeatView } from '../../engine/types';
 import { CARD_CATALOG } from '../../engine/cards/catalog';
-import { roleName } from '../format';
+import { roleLabel } from '../format';
 import { CardBack, CardFace } from './Card';
 import { Portrait } from './Portrait';
 
@@ -75,7 +75,7 @@ export function OpponentPanel(p: {
           👁 엿본 카드: {CARD_CATALOG[p.peeked.kind].name}
         </div>
       )}
-      {s.role && s.role !== 'captain' && <div className="mini role">{roleName(s.role)}</div>}
+      {s.role && s.role !== 'captain' && <div className="mini role">{roleLabel(s.role, s.special)}</div>}
       {s.alive && p.distance !== undefined && <div className="mini dist">거리 {p.distance}</div>}
     </div>
   );

@@ -33,6 +33,8 @@ export function buildView(game: Game, seat: SeatId, isAi: (s: SeatId) => boolean
   return {
     you: seat,
     myRole: me.roleDrawn ? me.role : null,
+    mySpecial: me.roleDrawn ? me.special : null,
+    myBounty: game.bounty && game.bounty.hunter === seat ? { target: game.bounty.target, state: game.bounty.state } : null,
     myHand: me.hand.map((c) => c.toView()),
     seats: game.seats.map((s) => ({
       seat: s.seat,
@@ -43,7 +45,8 @@ export function buildView(game: Game, seat: SeatId, isAi: (s: SeatId) => boolean
       alive: s.alive,
       handCount: s.hand.length,
       equipment: s.equipment.map((c) => c.toView()),
-      role: s.roleDrawn && (over || s.seat === seat || s.role === 'captain' || !s.alive || game.knowsRole(seat, s.seat)) ? s.role : null,
+      role: !s.roleDrawn ? null : over || s.seat === seat || s.role === 'captain' || !s.alive ? s.role : game.seenRole(seat, s.seat),
+      special: s.roleDrawn && (over || s.seat === seat || !s.alive) ? s.special : null,
       isAi: isAi(s.seat),
     })),
     current: game.current,
@@ -56,7 +59,7 @@ export function buildView(game: Game, seat: SeatId, isAi: (s: SeatId) => boolean
     abilityUsed: game.current === seat && game.abilityUsedThisTurn,
     events,
     winner: game.winner,
-    ...(over ? { stats: structuredClone(game.stats) } : {}),
+    ...(over ? { stats: structuredClone(game.stats), bountyWon: game.bountyWon } : {}),
     seaEventsOn: game.seaEventsOn,
     seaEvent: game.seaEvent,
   };

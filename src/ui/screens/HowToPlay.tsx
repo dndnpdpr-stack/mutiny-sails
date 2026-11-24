@@ -37,12 +37,14 @@ function SeaEvents() {
 }
 
 const ROLES: Role[] = ['captain', 'loyalist', 'rebel', 'spy'];
-/** 인원별 역할 구성 (선장, 충성 선원, 반란 선원, 첩자) */
-const ROLE_COUNTS: Array<[number, number, number, number, number]> = [
-  [4, 1, 0, 2, 1],
-  [5, 1, 1, 2, 1],
-  [6, 1, 1, 3, 1],
-  [7, 1, 2, 3, 1],
+/** 인원별 역할 구성 (선장, 충성 선원, 반란 선원, 첩자, 현상금 사냥꾼). 8~9인의 충성·반란에는 항해사·이중 첩자 1명씩이 들어 있다 */
+const ROLE_COUNTS: Array<[number, number, number, number, number, number]> = [
+  [4, 1, 0, 2, 1, 0],
+  [5, 1, 1, 2, 1, 0],
+  [6, 1, 1, 3, 1, 0],
+  [7, 1, 2, 3, 1, 0],
+  [8, 1, 2, 3, 1, 1],
+  [9, 1, 3, 3, 1, 1],
 ];
 
 function Rules() {
@@ -94,6 +96,7 @@ function Roles() {
             <th>충성 선원</th>
             <th>반란 선원</th>
             <th>첩자</th>
+            <th>사냥꾼</th>
           </tr>
         </thead>
         <tbody>
@@ -108,6 +111,25 @@ function Roles() {
         </tbody>
       </table>
       <p>선장이 쓰러졌을 때 첩자 혼자 남아 있으면 첩자가, 아니면 반란 선원이 이겨요.</p>
+      <h3>확장 역할 (8~9인)</h3>
+      <p>8명 이상이면 역할 카드에 확장 역할이 섞여요. 표의 충성 선원 중 1명은 항해사, 반란 선원 중 1명은 이중 첩자예요.</p>
+      <div className="guide-grid">
+        <RoleCard role="loyalist" special="navigator" revealed />
+        <RoleCard role="rebel" special="doubleAgent" revealed />
+        <RoleCard role="hunter" revealed />
+      </div>
+      <ul className="guide-expansion-roles">
+        <li>
+          <b>🧭 항해사</b> (선장 편): 충성 선원과 같아요. 시작할 때 반란 선원 1명의 정체를 몰래 알아요(이중 첩자일 수도 있어요). 들키지 않게 선장을 도와요.
+        </li>
+        <li>
+          <b>🎭 이중 첩자</b> (반란 편): 반란 선원과 같아요. 앵무새 고자질로 정체를 들켜도 충성 선원으로 보여요. 쓰러지면 진짜 정체가 드러나요.
+        </li>
+        <li>
+          <b>💰 현상금 사냥꾼</b> (혼자): 시작할 때 비밀 표적 1명을 받아요(선장은 아니에요). 표적을 <b>직접</b> 쓰러뜨리고 게임이 끝날 때까지 살아 있으면, 어느 편이
+          이기든 함께 이겨요. 다른 사람이 표적을 쓰러뜨리면 현상금은 사라져요. 사냥꾼이 살아 있어도 다른 편의 승리를 막지 않아요.
+        </li>
+      </ul>
     </div>
   );
 }

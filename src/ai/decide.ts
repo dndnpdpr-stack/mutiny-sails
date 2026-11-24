@@ -2,6 +2,7 @@ import type { Rng } from '../engine/rng';
 import type { Action, CardKind, CardView, JudgeReason, PendingView, PlayerView, PlayHint, SeatId } from '../engine/types';
 import type { AiMemory, Difficulty } from './memory';
 import { CHARACTER_INFO } from '../engine/characters/roster';
+import { roleCount } from '../engine/Game';
 
 const WEAPON_RANGE: Partial<Record<CardKind, number>> = { pistol: 2, musket: 3, longMusket: 4, deckCannon: 5, twinPistols: 1, harpoon: 2 };
 const WEAPONS = Object.keys(WEAPON_RANGE) as CardKind[];
@@ -39,6 +40,12 @@ function minScore(mem: AiMemory, easy: number): number {
 
 function targetScore(view: PlayerView, mem: AiMemory, t: SeatId): number {
   const seat = view.seats[t];
+  if (view.myRole === 'hunter') {
+    const b = view.myBounty;
+    if (b && b.state === 'open' && b.target === t) return 20 + (5 - seat.hp) * 0.6;
+    // 표적이 아니면 건드리지 않는다. 나를 노린 사람에게만 조금
+    return mem.attackedMe(t) ? 1 : -5;
+  }
   const alive = view.seats.filter((s) => s.alive).length;
   const level: Difficulty = mem.level;
   // 약한 상대 몰아치기: 어려움은 더 강하게
@@ -54,21 +61,31 @@ function targetScore(view: PlayerView, mem: AiMemory, t: SeatId): number {
     const lean = (sign: number) => (sign * foe > 0 ? sign * foe * 2 + weak : sign * foe * 2);
     // 4라운드가 지나도록 단서가 없으면 선장 쪽은 아직 정체를 안 드러낸 사람을 의심하기 시작한다 (교착 방지)
     const suspectQuiet = mem.rounds >= 4 && foe === 0 ? 1 + weak : 0;
+    // 반란 선원이 다 쓰러졌는데 게임이 안 끝났으면 첩자가 남아 있다: 정체 모르는 사람 중 수상한 순서로 (교착 방지)
+    const deadRebels = view.seats.filter((s) => !s.alive && s.role === 'rebel').length;
+    // 충성 선원끼리 치지 않도록 선장만 한다
+    const spyHunt =
+      view.myRole === 'captain' && deadRebels >= roleCount(view.seats.length, 'rebel') && known === null && seat.alive ? Math.max(1.5, 3 + foe + weak) : 0;
     switch (view.myRole) {
       case 'captain':
       case 'loyalist':
         if (captainSide || (isCaptain && view.myRole === 'loyalist')) return -100;
-        return lean(1) + suspectQuiet + (enemyOfCaptain ? 5 + weak : 0);
+        // 정체를 확실히 아는 적은 행동 점수와 상관없이 친다 (연기에 속지 않는다)
+        if (enemyOfCaptain) return 10 + weak;
+        if (spyHunt) return spyHunt;
+        return lean(1) + suspectQuiet;
       case 'rebel':
         if (known === 'rebel') return -100;
         if (isCaptain) return rebelHiding(view, mem) ? -10 : 20 + weak;
-        return lean(-1) + (captainSide ? 5 + weak : 0);
+        if (captainSide) return 10 + weak;
+        return lean(-1);
       case 'spy': {
         // 끝까지 선장 편인 척: 선장 쪽만 남으면(반란 기색이 아무도 없으면) 그때 돌아선다
         const rebelsLeft = view.seats.some((s) => s.alive && s.seat !== view.you && (s.role === 'rebel' || mem.foe(s.seat) > 0));
         if (alive <= 2 || !rebelsLeft) return isCaptain ? 20 + weak : captainSide ? 8 + weak : 1;
         if (isCaptain) return -10;
-        return lean(1) + (known === 'rebel' ? 5 + weak : 0);
+        if (known === 'rebel') return 10 + weak;
+        return lean(1);
       }
       default:
         return 0;

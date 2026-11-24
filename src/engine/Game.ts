@@ -1,4 +1,4 @@
-import type { Action, AttackSource, CardId, CardKind, CardView, CharacterId, GameEvent, PendingView, Role, SeatId, SeatStats, Winner } from './types';
+import type { Action, AttackSource, BountyState, CardId, CardKind, CardView, CharacterId, GameEvent, PendingView, Role, SeatId, SeatStats, Special, Winner } from './types';
 import { Rng } from './rng';
 import { buildDeckSpec } from './cards/deck';
 import { CARD_CATALOG } from './cards/catalog';
@@ -17,6 +17,10 @@ export interface GameConfig {
   names: string[];
   /** 테스트용 강제값 */
   roles?: Role[];
+  /** 테스트용: roles와 함께 항해사·이중 첩자 지정 */
+  specials?: (Special | null)[];
+  /** 테스트용: 현상금 사냥꾼의 표적 */
+  bountyTarget?: SeatId;
   characters?: CharacterId[];
   /** 덱 맨 위부터의 순서. 나머지는 일반 덱에서 이 카드들을 뺀 뒤 섞어 뒤에 붙인다 */
   stackDeck?: CardView[];
@@ -34,6 +38,8 @@ export interface SeatState {
   seat: SeatId;
   name: string;
   role: Role;
+  /** 8~9인 확장: 항해사(충성)·이중 첩자(반란) */
+  special: Special | null;
   character: Character;
   hp: number;
   maxHp: number;
@@ -51,7 +57,16 @@ export type ApplyResult = { ok: true } | { ok: false; reason: string };
 type Resolver = (a: Action) => string | null;
 type Step = { kind: 'input'; pending: PendingView; resolve: Resolver } | { kind: 'run'; run: () => void };
 
-const ROLE_TABLE: Role[] = ['captain', 'spy', 'rebel', 'rebel', 'loyalist', 'rebel', 'loyalist'];
+/** 인원수만큼 앞에서부터. 8번째부터가 확장 역할 인원(현상금 사냥꾼, 세 번째 충성 선원) */
+const ROLE_TABLE: Role[] = ['captain', 'spy', 'rebel', 'rebel', 'loyalist', 'rebel', 'loyalist', 'hunter', 'loyalist'];
+
+/** n인 게임에 그 역할이 몇 명 있는지 (공개 규칙이라 AI·화면도 쓴다) */
+export function roleCount(n: number, role: Role): number {
+  return ROLE_TABLE.slice(0, n).filter((r) => r === role).length;
+}
+/** 이 인원부터 항해사·이중 첩자·현상금 사냥꾼이 들어간다 */
+export const EXPANSION_ROLES_FROM = 8;
+type RoleSlot = { role: Role; special: Special | null };
 const WRONG_ACTION = '지금 할 수 없는 행동이에요';
 
 export class Game {
@@ -72,7 +87,7 @@ export class Game {
   private started = false;
   private seq = 0;
   /** 엎어 둔 역할 카드 (역할 뽑기를 할 때만) */
-  private roleSlots: Role[] | null = null;
+  private roleSlots: RoleSlot[] | null = null;
   private takenSlots = new Set<number>();
   private firstRoleDrawer: SeatId = 0;
   readonly seaEventsOn: boolean;
@@ -83,18 +98,23 @@ export class Game {
   private seaRng: Rng;
   private captainTurns = 0;
   /** 앵무새의 고자질로 알게 된 역할: 보는 사람 → 알게 된 자리들 */
-  private knownRoles = new Map<SeatId, Set<SeatId>>();
+  /** viewer → (target → viewer에게 보인 역할) */
+  private knownRoles = new Map<SeatId, Map<SeatId, Role>>();
+  /** 현상금 사냥꾼 (8~9인) */
+  bounty: { hunter: SeatId; target: SeatId; state: BountyState } | null = null;
+  private bountyTargetConfig: SeatId | undefined;
 
   constructor(config: GameConfig) {
     const n = config.names.length;
-    if (n < 4 || n > 7) throw new Error('인원은 4~7명이어야 해요');
+    if (n < 4 || n > 9) throw new Error('인원은 4~9명이어야 해요');
+    this.bountyTargetConfig = config.bountyTarget;
     this.rng = new Rng(config.seed);
     this.seaRng = new Rng((config.seed ^ 0x5ea5ea) >>> 0);
     this.seaEventsOn = config.seaEvents ?? false;
     if (config.seaEventOrder) this.seaDeck = [...config.seaEventOrder].reverse();
     const drawRoles = !config.roles;
     this.firstRoleDrawer = config.firstRoleDrawer ?? 0;
-    if (drawRoles) this.roleSlots = this.rng.shuffle(ROLE_TABLE.slice(0, n));
+    if (drawRoles) this.roleSlots = this.makeRoleSlots(n);
     // 역할 뽑기를 하면 뽑기 전까지 자리의 역할은 임시값
     const roles: Role[] = config.roles ?? Array.from({ length: n }, () => 'rebel' as Role);
     const forced = config.characters;
@@ -109,11 +129,11 @@ export class Game {
     this.seats = config.names.map((name, seat) => {
       if (!forced) {
         // 임시 캐릭터(뽑기 전에는 읽지 않음)
-        return { seat, name, role: roles[seat], character: CHARACTERS[CHARACTER_IDS[0]], hp: 0, maxHp: 0, hand: [], equipment: [], alive: true, characterChosen: false, roleDrawn: !drawRoles };
+        return { seat, name, role: roles[seat], special: config.specials?.[seat] ?? null, character: CHARACTERS[CHARACTER_IDS[0]], hp: 0, maxHp: 0, hand: [], equipment: [], alive: true, characterChosen: false, roleDrawn: !drawRoles };
       }
       const character = CHARACTERS[forced[seat]];
       const maxHp = character.maxHp + (roles[seat] === 'captain' ? 1 : 0);
-      return { seat, name, role: roles[seat], character, hp: maxHp, maxHp, hand: [], equipment: [], alive: true, characterChosen: true, roleDrawn: !drawRoles };
+      return { seat, name, role: roles[seat], special: config.specials?.[seat] ?? null, character, hp: maxHp, maxHp, hand: [], equipment: [], alive: true, characterChosen: true, roleDrawn: !drawRoles };
     });
     for (const s of this.seats) this.stats[s.seat] = { damage: 0, kills: 0 };
     if (forced) this.dealOpeningHands();
@@ -146,15 +166,64 @@ export class Game {
     return this.othersFrom(from)[0] ?? from;
   }
 
-  /** viewer가 고자질로 target의 역할을 알고 있는지 */
+  /** viewer가 고자질·항해사로 target의 역할을 알고 있는지 */
   knowsRole(viewer: SeatId, target: SeatId): boolean {
     return this.knownRoles.get(viewer)?.has(target) ?? false;
   }
 
-  revealRoleTo(viewer: SeatId, target: SeatId): void {
-    if (!this.knownRoles.has(viewer)) this.knownRoles.set(viewer, new Set());
-    this.knownRoles.get(viewer)!.add(target);
-    this.emit({ type: 'roleRevealed', seat: viewer, target, role: this.seats[target].role, visibleTo: [viewer] });
+  /** viewer에게 보인 target의 역할 (이중 첩자는 고자질에 충성 선원으로 보인다) */
+  seenRole(viewer: SeatId, target: SeatId): Role | null {
+    return this.knownRoles.get(viewer)?.get(target) ?? null;
+  }
+
+  /** honest: 항해사처럼 진짜 역할을 아는 경우. 아니면(고자질) 이중 첩자는 충성 선원으로 보인다 */
+  revealRoleTo(viewer: SeatId, target: SeatId, honest = false): void {
+    const t = this.seats[target];
+    const seen: Role = !honest && t.special === 'doubleAgent' ? 'loyalist' : t.role;
+    if (!this.knownRoles.has(viewer)) this.knownRoles.set(viewer, new Map());
+    this.knownRoles.get(viewer)!.set(target, seen);
+    this.emit({ type: 'roleRevealed', seat: viewer, target, role: seen, visibleTo: [viewer] });
+  }
+
+  /** 역할 카드 묶음. 8인 이상이면 반란 1장은 이중 첩자, 충성 1장은 항해사 */
+  private makeRoleSlots(n: number): RoleSlot[] {
+    const slots: RoleSlot[] = this.rng.shuffle(ROLE_TABLE.slice(0, n)).map((role) => ({ role, special: null }));
+    if (n >= EXPANSION_ROLES_FROM) {
+      const pick = (role: Role) => {
+        const idx = slots.map((s, i) => (s.role === role ? i : -1)).filter((i) => i >= 0);
+        return idx[this.rng.int(idx.length)];
+      };
+      slots[pick('rebel')].special = 'doubleAgent';
+      slots[pick('loyalist')].special = 'navigator';
+    }
+    return slots;
+  }
+
+  /** 역할이 다 정해진 뒤: 항해사는 반란 선원 1명을 알고, 현상금 사냥꾼은 표적을 받는다 */
+  private setupExpansionRoles(): void {
+    for (const nav of this.seats.filter((s) => s.special === 'navigator')) {
+      const rebels = this.seats.filter((s) => s.role === 'rebel');
+      if (rebels.length) this.revealRoleTo(nav.seat, rebels[this.rng.int(rebels.length)].seat, true);
+    }
+    const hunter = this.seats.find((s) => s.role === 'hunter');
+    if (hunter) {
+      const pool = this.seats.filter((s) => s.role !== 'captain' && s.seat !== hunter.seat).map((s) => s.seat);
+      const target = this.bountyTargetConfig ?? pool[this.rng.int(pool.length)];
+      this.bounty = { hunter: hunter.seat, target, state: 'open' };
+      this.emit({ type: 'bounty', seat: hunter.seat, target, state: 'open', visibleTo: [hunter.seat] });
+    }
+  }
+
+  private setBounty(state: BountyState): void {
+    const b = this.bounty!;
+    b.state = state;
+    this.emit({ type: 'bounty', seat: b.hunter, target: b.target, state, visibleTo: [b.hunter] });
+  }
+
+  /** 게임이 끝났고 현상금 사냥꾼이 표적을 직접 쓰러뜨린 뒤 살아남았는지 */
+  get bountyWon(): boolean {
+    const b = this.bounty;
+    return this.winner !== null && !!b && b.state === 'claimed' && this.seats[b.hunter].alive;
   }
 
   /** 덱 맨 위 카드 (비었으면 버린 카드를 섞어 채운다). 꺼내지 않는다 */
@@ -222,6 +291,7 @@ export class Game {
 
   /** 역할이 다 정해진 뒤: 캐릭터 뽑기 또는 바로 첫 턴 */
   private afterRoles(): void {
+    this.setupExpansionRoles();
     this.current = this.captainSeat();
     if (this.seats.every((s) => s.characterChosen)) this.beginTurn(this.captainSeat());
     else this.draftFrom(0);
@@ -247,7 +317,8 @@ export class Game {
       if (a.type !== 'drawRole') return WRONG_ACTION;
       if (!remaining.includes(a.slot)) return '남아 있는 역할 카드 중에서 골라 주세요';
       const s = this.seats[seat];
-      s.role = slots[a.slot];
+      s.role = slots[a.slot].role;
+      s.special = slots[a.slot].special;
       s.roleDrawn = true;
       this.takenSlots.add(a.slot);
       if (s.role === 'captain') {
@@ -255,7 +326,7 @@ export class Game {
       } else {
         const others = this.seats.map((x) => x.seat).filter((x) => x !== seat);
         this.emit({ type: 'roleDrawn', seat, slot: a.slot, role: null, visibleTo: others });
-        this.emit({ type: 'roleDrawn', seat, slot: a.slot, role: s.role, visibleTo: [seat] });
+        this.emit({ type: 'roleDrawn', seat, slot: a.slot, role: s.role, special: s.special, visibleTo: [seat] });
       }
       this.roleDrawFrom(i + 1);
       return null;
@@ -685,7 +756,10 @@ export class Game {
     const s = this.seats[seat];
     if (!s.alive) return;
     s.alive = false;
-    this.emit({ type: 'death', seat, role: s.role, killer });
+    this.emit({ type: 'death', seat, role: s.role, killer, special: s.special });
+    const b = this.bounty;
+    if (b && b.state === 'open' && seat === b.target) this.setBounty(killer === b.hunter ? 'claimed' : 'lost');
+    else if (b && b.state !== 'lost' && seat === b.hunter) this.setBounty('lost');
     for (const c of s.hand.splice(0)) this.discardCard(c);
     for (const c of s.equipment.splice(0)) this.discardCard(c);
 

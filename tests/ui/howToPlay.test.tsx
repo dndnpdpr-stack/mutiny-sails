@@ -39,6 +39,11 @@ describe('HowToPlay', () => {
     for (const r of ['선장', '충성 선원', '반란 선원', '첩자']) expect(dialog.textContent).toContain(r);
     for (const goal of Object.values(ROLE_GOAL)) expect(dialog.textContent).toContain(goal);
     expect(dialog.textContent).toContain('7명');
+    // 8~9인 확장 역할
+    expect(dialog.textContent).toContain('확장 역할 (8~9인)');
+    for (const name of ['항해사', '이중 첩자', '현상금 사냥꾼']) expect(dialog.textContent).toContain(name);
+    expect(dialog.textContent).toContain('9명');
+    expect(dialog.textContent).toContain('충성 선원으로 보여요');
   });
 
   it('characters tab shows all characters without pick buttons', () => {

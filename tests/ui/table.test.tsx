@@ -494,6 +494,16 @@ describe('TableScreen', () => {
     });
   });
 
+  it('a bounty hunter sees the target on the role card', () => {
+    renderTable(makeView({ myRole: 'hunter', myBounty: { target: 3, state: 'open' } }));
+    expect(screen.getByLabelText('내 역할 카드').textContent).toContain('표적: p3');
+  });
+
+  it('a navigator sees the special name on the role card', () => {
+    renderTable(makeView({ myRole: 'loyalist', mySpecial: 'navigator' }));
+    expect(screen.getByLabelText('내 역할 카드').textContent).toContain('항해사');
+  });
+
   it('keeps showing my role card while spectating', () => {
     const seats = [0, 1, 2, 3, 4].map((i) => seat(i, i === 1 ? { alive: false, hp: 0, role: 'rebel' } : {}));
     renderTable(makeView({ current: 0, pending: { kind: 'turn', seat: 0 } }, seats));

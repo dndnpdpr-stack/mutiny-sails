@@ -47,7 +47,7 @@ export function DraftScreen({ view, send }: { view: PlayerView; send: (a: Action
   return (
     <div className="table-bg screen-center">
       <div className="scroll-panel draft">
-        <RoleCard role={view.myRole} revealed={view.myRole !== null} />
+        <RoleCard role={view.myRole} special={view.mySpecial} revealed={view.myRole !== null} />
         {captain && <p className="captain-call">👑 선장은 {captain.name}</p>}
 
         {rolePhase ? (

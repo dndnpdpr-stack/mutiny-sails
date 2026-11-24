@@ -5,7 +5,7 @@ import { Rng } from '../../src/engine/rng';
 import { buildView } from '../../src/host/view';
 
 function playOut(seed: number, extras = false, level: 'easy' | 'normal' | 'hard' = 'normal') {
-  const n = 4 + (seed % 4);
+  const n = 4 + (seed % 6);
   const game = new Game({ seed, names: Array.from({ length: n }, (_, i) => `P${i}`), seaEvents: extras, expansionCards: extras });
   game.start();
   const mems = game.seats.map(() => new AiMemory());

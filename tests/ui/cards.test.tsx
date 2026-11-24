@@ -43,6 +43,20 @@ describe('CharacterCard', () => {
   });
 });
 
+describe('RoleCard expansion roles', () => {
+  it('shows the special role name and goal instead of the base role', () => {
+    render(<RoleCard role="loyalist" special="navigator" revealed />);
+    expect(screen.getByText('항해사')).toBeTruthy();
+    expect(screen.getByText(/반란 선원 1명의 정체를 알고/)).toBeTruthy();
+  });
+
+  it('a bounty hunter card can carry a note such as the target', () => {
+    render(<RoleCard role="hunter" revealed note="🎯 표적: p2" />);
+    expect(screen.getByText('현상금 사냥꾼')).toBeTruthy();
+    expect(screen.getByText('🎯 표적: p2')).toBeTruthy();
+  });
+});
+
 describe('RoleCard', () => {
   it('revealed shows role and goal', () => {
     render(<RoleCard role="rebel" revealed />);

@@ -191,6 +191,8 @@ export function TableScreen(p: {
   };
 
   const n = shown.seats.length;
+  const b = shown.myBounty;
+  const bountyNote = !b ? undefined : b.state === 'open' ? `🎯 표적: ${shown.seats[b.target].name}` : b.state === 'claimed' ? '✅ 표적 처치! 살아남으세요' : '❌ 표적을 놓쳤어요';
   const others = Array.from({ length: n - 1 }, (_, i) => shown.seats[(shown.you + 1 + i) % n]);
   const me = shown.seats[shown.you];
   const name = (s: SeatId) => shown.seats[s]?.name ?? '?';
@@ -249,6 +251,8 @@ export function TableScreen(p: {
         <MyArea
           me={me}
           myRole={shown.myRole}
+          mySpecial={shown.mySpecial}
+          roleNote={bountyNote}
           myRange={shown.myRange}
           current={shown.current === shown.you}
           fx={fxOf(shown.you)}

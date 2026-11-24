@@ -88,6 +88,20 @@ body { margin: 0; background: #3a2412; }
 .role-card .remoji { font-size: 36px; }
 .role-card .rname { font-weight: bold; margin: 4px 0; }
 .role-card .rgoal { font-size: 12px; }
+.role-card .rnote { margin-top: 4px; padding-top: 4px; border-top: 1px dashed #b89a6a; font-size: 11px; font-weight: 800; color: #7a2a12; }
+.role-card.sm .rnote { font-size: 9.5px; }
+.role-card.front.hunter { background: linear-gradient(#f7ecc8, #dcc27a); }
+.role-card.front.navigator { background: linear-gradient(#e6f0f2, #b9d3d8); }
+.role-card.front.doubleAgent { background: linear-gradient(#efe1ef, #cfb4cf); }
+.setup .expansion-note { font-size: 12px; text-align: center; color: #5b3a20; max-width: 400px; }
+.bounty-won { margin: -4px 0 10px; font-weight: 800; color: #7a4e24; }
+.guide-expansion-roles { padding-left: 18px; }
+.guide-expansion-roles li { margin: 4px 0; }
+@media (max-width: 520px) {
+  /* 4~9명 버튼 6개가 한 줄에 */
+  .setup .count { gap: 5px; width: 100%; }
+  .setup .count .count-card { flex: 1 1 0; min-width: 0; width: auto; height: 60px; padding: 0; font-size: 15px; white-space: nowrap; }
+}
 /* 게임판 내 자리 옆의 작은 역할 카드 */
 .me-cards { display: flex; align-items: stretch; gap: 8px; }
 .role-card.sm { width: 84px; min-height: 0; flex-shrink: 0; }
@@ -346,6 +360,11 @@ h1, h2, h3, .cname, .rname, .opp .nm { font-weight: 800; letter-spacing: -0.01em
 .role-slot.pick:focus-visible .pcard { outline: 3px solid #d9a441; outline-offset: 2px; }
 .role-slot.taken { opacity: 0.55; min-width: 52px; }
 @media (prefers-reduced-motion: reduce) { .role-slot.pick { transition: none; } }
+@media (max-width: 520px) {
+  /* 8~9장도 한 화면에: 폰에서는 엎어 둔 역할 카드를 작게 */
+  .role-spread { gap: 6px; }
+  .role-spread .pcard.back.md { width: 56px; height: 80px; }
+}
 
 /* 바다 이벤트 */
 .sea-card {

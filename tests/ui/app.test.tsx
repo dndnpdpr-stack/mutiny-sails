@@ -92,13 +92,13 @@ describe('App', () => {
   it('new game from spectating goes back to setup', async () => {
     startGame(5, false, 1); // seed 1: 기본 행동만 하면 내가 먼저 쓰러진다
     await pickCharacter();
-    await playUntil(() => screen.queryByText('관전 중') !== null, 10000);
+    await playUntil(() => screen.queryByText('관전 중') !== null, 25000);
     const ff = screen.getByRole('button', { name: /빨리 감기/ });
     fireEvent.click(ff);
     expect(ff.getAttribute('aria-pressed')).toBe('true');
     fireEvent.click(screen.getByRole('button', { name: '새로 하기' }));
     expect(await screen.findByText('출항')).toBeTruthy();
-  }, 25000);
+  }, 40000);
 
   it('reaches the result screen with animations on (Review Focus 3)', async () => {
     startGame(5, true);

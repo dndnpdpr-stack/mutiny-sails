@@ -12,11 +12,17 @@ const HOSTILE_WEIGHT: Partial<Record<CardKind, number>> = { slash: 1, duel: 1, b
  */
 export class AiMemory {
   captainFoe: Record<SeatId, number> = {};
+  /** 나를 해치는 카드를 쓴 사람 */
+  private hitMe = new Set<SeatId>();
   /** 선장 턴이 몇 번 돌았는지 (라운드) */
   rounds = 0;
   private prev: string[] = [];
 
   constructor(public level: Difficulty = 'normal') {}
+
+  attackedMe(seat: SeatId): boolean {
+    return this.hitMe.has(seat);
+  }
 
   foe(seat: SeatId): number {
     return this.captainFoe[seat] ?? 0;
@@ -52,6 +58,7 @@ export class AiMemory {
     const weightOf = (k: CardKind) => (this.level === 'easy' ? (k === 'slash' || k === 'duel' || k === 'brig' ? 1 : 0) : (HOSTILE_WEIGHT[k] ?? 0));
     for (const e of view.events.slice(start)) {
       if (e.type === 'turnStart' && role(e.seat) === 'captain') this.rounds++;
+      if (e.type === 'play' && e.target === view.you && e.seat !== view.you && (HOSTILE_WEIGHT[e.card.kind] ?? 0) > 0) this.hitMe.add(e.seat);
       const w = e.type === 'play' && e.target !== undefined && e.target !== e.seat ? weightOf(e.card.kind) : 0;
       if (e.type === 'play' && e.target !== undefined && w > 0) {
         const r = role(e.target);

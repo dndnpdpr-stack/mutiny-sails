@@ -4,7 +4,11 @@ export type Rank = 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14;
 /** 0..n-1, 앉은 순서(시계 방향) */
 export type SeatId = number;
 export type CardId = string;
-export type Role = 'captain' | 'loyalist' | 'rebel' | 'spy';
+export type Role = 'captain' | 'loyalist' | 'rebel' | 'spy' | 'hunter';
+/** 8~9인 확장 역할 중 기존 역할의 변형: 항해사(충성 선원), 이중 첩자(반란 선원) */
+export type Special = 'navigator' | 'doubleAgent';
+/** 현상금 사냥꾼의 표적 상태: 진행 중 / 직접 쓰러뜨림 / 놓침 */
+export type BountyState = 'open' | 'claimed' | 'lost';
 export type CardKind =
   | 'slash' | 'dodge' | 'rum' | 'cannonade' | 'brawl' | 'duel' | 'pickpocket' | 'cutRope'
   | 'supplyShip' | 'merchantRaid' | 'feast' | 'loot'
@@ -93,14 +97,16 @@ export type GameEvent = { visibleTo?: SeatId[]; seq?: number } & (
   | { type: 'steal'; from: SeatId; to: SeatId; card: CardView | null }
   | { type: 'discardCards'; seat: SeatId; cards: CardView[] }
   | { type: 'peek'; seat: SeatId; target: SeatId; card: CardView }
-  | { type: 'death'; seat: SeatId; role: Role; killer: SeatId | null }
+  | { type: 'death'; seat: SeatId; role: Role; killer: SeatId | null; special?: Special | null }
   | { type: 'ability'; seat: SeatId; character: CharacterId }
   | { type: 'gameOver'; winner: Winner }
   | { type: 'characterChosen'; seat: SeatId; character: CharacterId }
   /** role: 본인과(선장이면 모두) 볼 때만 채워지고, 나머지에게는 null */
-  | { type: 'roleDrawn'; seat: SeatId; slot: number; role: Role | null }
+  | { type: 'roleDrawn'; seat: SeatId; slot: number; role: Role | null; special?: Special | null }
+  /** 현상금 사냥꾼에게만: 표적과 상태 */
+  | { type: 'bounty'; seat: SeatId; target: SeatId; state: BountyState }
   | { type: 'seaEvent'; event: SeaEventId }
-  /** 앵무새의 고자질: 낸 사람에게만 */
+  /** 앵무새의 고자질·항해사: 아는 사람에게만. role은 그 사람에게 보인 역할(이중 첩자는 고자질에 충성 선원으로) */
   | { type: 'roleRevealed'; seat: SeatId; target: SeatId; role: Role }
   /** 주사위 내기: cards = [낸 사람, 대상] 순서로 뒤집은 카드 */
   | { type: 'wager'; seat: SeatId; target: SeatId; cards: [CardView, CardView] }
@@ -126,6 +132,8 @@ export interface SeatView {
   equipment: CardView[];
   /** 선장, 쓰러진 사람, 게임 종료 후에만 공개 */
   role: Role | null;
+  /** 항해사·이중 첩자: 본인, 쓰러진 뒤, 게임 종료 후에만 */
+  special?: Special | null;
   isAi: boolean;
 }
 
@@ -134,6 +142,11 @@ export interface PlayerView {
   you: SeatId;
   /** 아직 역할 카드를 안 뽑았으면 null */
   myRole: Role | null;
+  mySpecial?: Special | null;
+  /** 내가 현상금 사냥꾼이면 표적과 상태 */
+  myBounty?: { target: SeatId; state: BountyState } | null;
+  /** 게임이 끝났을 때: 현상금 사냥꾼도 이겼는지 */
+  bountyWon?: boolean;
   myHand: CardView[];
   seats: SeatView[];
   current: SeatId;
