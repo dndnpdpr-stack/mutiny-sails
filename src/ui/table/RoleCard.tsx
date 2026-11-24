@@ -11,11 +11,12 @@ export const ROLE_GOAL: Record<Role, string> = {
 
 const ROLE_EMOJI: Record<Role, string> = { captain: '👑', loyalist: '⚓', rebel: '🏴‍☠️', spy: '🎭' };
 
-/** revealed가 false→true가 되면 Y축으로 뒤집히며 앞면이 나타난다 */
-export function RoleCard(p: { role: Role | null; revealed: boolean }) {
+/** revealed가 false→true가 되면 Y축으로 뒤집히며 앞면이 나타난다. sm은 게임판 내 자리 옆에 두는 작은 크기 */
+export function RoleCard(p: { role: Role | null; revealed: boolean; size?: 'sm'; label?: string }) {
+  const sm = p.size === 'sm' ? ' sm' : '';
   if (!p.revealed || !p.role) {
     return (
-      <div className="role-card hidden" aria-label="가려진 역할 카드">
+      <div className={`role-card hidden${sm}`} aria-label="가려진 역할 카드">
         <div className="pcard back md" />
       </div>
     );
@@ -23,7 +24,8 @@ export function RoleCard(p: { role: Role | null; revealed: boolean }) {
   return (
     <motion.div
       key="front"
-      className={`role-card front ${p.role}`}
+      className={`role-card front ${p.role}${sm}`}
+      aria-label={p.label}
       initial={{ rotateY: 90 }}
       animate={{ rotateY: 0 }}
       transition={{ duration: 0.4 }}

@@ -328,6 +328,25 @@ describe('TableScreen', () => {
     expect(screen.queryByRole('button', { name: '칼질' })).toBeNull();
   });
 
+  it('shows my role as a card next to my character, with its goal', () => {
+    renderTable(makeView());
+    const rc = screen.getByLabelText('내 역할 카드');
+    expect(rc.textContent).toContain('반란 선원');
+    expect(rc.textContent).toContain('선장을 쓰러뜨리세요');
+    expect(document.querySelector('.me-info')?.textContent).not.toContain('반란 선원');
+  });
+
+  it('keeps showing my role card while spectating', () => {
+    const seats = [0, 1, 2, 3, 4].map((i) => seat(i, i === 1 ? { alive: false, hp: 0, role: 'rebel' } : {}));
+    renderTable(makeView({ current: 0, pending: { kind: 'turn', seat: 0 } }, seats));
+    expect(screen.getByLabelText('내 역할 카드').textContent).toContain('반란 선원');
+  });
+
+  it('shows a face-down role card before my role is known', () => {
+    renderTable(makeView({ myRole: null }));
+    expect(screen.getByLabelText('가려진 역할 카드')).toBeTruthy();
+  });
+
   it('marks a shaken seat while its effect runs', async () => {
     renderTable(makeView(), { effects: [{ kind: 'shake', seat: 2, at: 0, ms: 400 }] });
     await waitFor(() => expect(panel(2).classList.contains('shake')).toBe(true));

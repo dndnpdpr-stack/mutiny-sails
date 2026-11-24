@@ -1,7 +1,7 @@
 import { CHARACTER_INFO } from '../../engine/characters/roster';
 import { Portrait } from './Portrait';
 import type { CardView, Role, SeatView } from '../../engine/types';
-import { roleName } from '../format';
+import { RoleCard } from './RoleCard';
 import { CardFace } from './Card';
 import { FanHand } from './FanHand';
 import { hearts, type SeatFx } from './OpponentPanel';
@@ -27,15 +27,22 @@ export function MyArea(p: {
   const cls = ['me-info', 'panel', p.current ? 'current' : '', me.alive ? '' : 'dead', ...p.fx].filter(Boolean).join(' ');
   return (
     <div className="my-area">
-      <div className={cls} data-anchor={`seat:${me.seat}`}>
-        <div className="face me-face"><Portrait id={me.character} variant="face" /></div>
-        <div className="me-name">
-          <b>{me.name}</b> · {p.myRole ? roleName(p.myRole) : '?'}
+      <div className="me-cards">
+        <div className={cls} data-anchor={`seat:${me.seat}`}>
+          <div className="face me-face">
+            <Portrait id={me.character} variant="face" />
+          </div>
+          <div className="me-name">
+            <b>{me.name}</b>
+          </div>
+          <div className="me-char">{ch?.name ?? '?'}</div>
+          <div className="ability">{ch?.text ?? ''}</div>
+          <div className="hp" aria-label={`체력 ${me.hp}/${me.maxHp}`}>
+            {hearts(me.hp, me.maxHp)}
+          </div>
+          <div className="mini">사거리 {p.myRange}</div>
         </div>
-        <div className="me-char">{ch?.name ?? '?'}</div>
-        <div className="ability">{ch?.text ?? ''}</div>
-        <div className="hp" aria-label={`체력 ${me.hp}/${me.maxHp}`}>{hearts(me.hp, me.maxHp)}</div>
-        <div className="mini">사거리 {p.myRange}</div>
+        <RoleCard role={p.myRole} revealed={p.myRole !== null} size="sm" label="내 역할 카드" />
       </div>
       <div className="equip-row my-equip" data-anchor={`equip:${me.seat}`}>
         {me.equipment.map((c) => (
