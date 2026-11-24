@@ -160,12 +160,17 @@ describe('ResultScreen', () => {
       handCount: 0, equipment: [], role: r, isAi: i > 0,
     }));
     const view = { you: 0, myRole: 'captain', myHand: [], seats, current: 0, pending: null, hints: [], deckCount: 0,
-      discardTop: null, distances: {}, myRange: 1, abilityUsed: false, events: [], winner: 'rebels' } as unknown as PlayerView;
+      discardTop: null, distances: {}, myRange: 1, abilityUsed: false, events: [], winner: 'rebels',
+      stats: { 0: { damage: 2, kills: 0 }, 1: { damage: 1, kills: 0 }, 2: { damage: 5, kills: 1 }, 3: { damage: 0, kills: 0 } } } as unknown as PlayerView;
     const onRestart = vi.fn();
     render(<ResultScreen view={view} onRestart={onRestart} />);
     expect(screen.getByText('반란 선원의 승리!')).toBeTruthy();
     await waitFor(() => expect(screen.getAllByText(ROLES).length).toBeGreaterThanOrEqual(4));
     expect(screen.getByText(/쓰러짐/)).toBeTruthy();
+    // 반란 선원(p2) 한 명뿐이라 MVP, 모두의 기록도 보인다
+    expect(document.querySelector('.mvp')?.textContent).toContain('p2');
+    expect(document.querySelector('.result-seat.is-mvp')?.textContent).toContain('p2');
+    expect(screen.getAllByText(/피해 \d · 처치 \d/)).toHaveLength(5); // MVP 칸 + 4자리
     fireEvent.click(screen.getByText('다시 하기'));
     expect(onRestart).toHaveBeenCalled();
   });

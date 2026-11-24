@@ -147,6 +147,14 @@ body { margin: 0; background: #3a2412; }
 .result-seats { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
 .result-seat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .result-seat .rs-dead { color: #b3261e; font-size: 12px; }
+.result-seat { position: relative; padding: 4px; border-radius: 10px; }
+.result-seat.is-mvp { background: rgba(217, 164, 65, 0.25); box-shadow: 0 0 0 2px #d9a441; }
+.result-seat .mvp-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); z-index: 2; padding: 1px 8px; font-size: 11px; font-weight: 800; white-space: nowrap; color: #3a1d08; background: linear-gradient(#ffe08a, #d9a441); border: 1px solid #7a4e24; border-radius: 4px; }
+.result-seat .rs-stat { font-size: 11px; opacity: 0.85; }
+.mvp { display: flex; flex-direction: column; align-items: center; gap: 2px; margin: 0 0 12px; padding: 8px 18px; border: 2px solid #d9a441; border-radius: 10px; background: linear-gradient(#fff3cf, #f0d995); }
+.mvp .mvp-title { font-size: 13px; font-weight: 800; letter-spacing: 2px; color: #7a4e24; }
+.mvp b { font-size: 20px; }
+.mvp span:last-child { font-size: 13px; }
 
 /* game table */
 .table-screen {

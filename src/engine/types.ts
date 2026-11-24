@@ -72,6 +72,11 @@ export type PendingView =
   /** slots: 아직 남은 역할 카드 자리 번호 (내용은 비공개) */
   | { kind: 'drawRole'; seat: SeatId; slots: number[] };
 
+export interface SeatStats {
+  damage: number;
+  kills: number;
+}
+
 export type Winner = 'captainTeam' | 'rebels' | 'spy';
 
 /** visibleTo 없음 = 모두에게 공개 */
@@ -144,6 +149,8 @@ export interface PlayerView {
   /** 내게 보이는 것만, 최근 100개 */
   events: GameEvent[];
   winner: Winner | null;
+  /** 게임이 끝났을 때만: 자리별 준 피해·쓰러뜨린 수 (MVP용) */
+  stats?: Record<SeatId, SeatStats>;
   /** 바다 이벤트를 쓰는 게임인지, 지금 펼쳐진 이벤트 */
   seaEventsOn: boolean;
   seaEvent: SeaEventId | null;

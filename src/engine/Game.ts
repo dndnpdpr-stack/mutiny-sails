@@ -1,4 +1,4 @@
-import type { Action, AttackSource, CardId, CardKind, CardView, CharacterId, GameEvent, PendingView, Role, SeatId, Winner } from './types';
+import type { Action, AttackSource, CardId, CardKind, CardView, CharacterId, GameEvent, PendingView, Role, SeatId, SeatStats, Winner } from './types';
 import { Rng } from './rng';
 import { buildDeckSpec } from './cards/deck';
 import { CARD_CATALOG } from './cards/catalog';
@@ -64,6 +64,8 @@ export class Game {
   current: SeatId;
   winner: Winner | null = null;
   events: GameEvent[] = [];
+  /** 자리별 준 피해·쓰러뜨린 수. 최근 100개만 보이는 이벤트와 달리 게임 전체를 센다 */
+  stats: Record<SeatId, SeatStats> = {};
   slashesPlayedThisTurn = 0;
   abilityUsedThisTurn = false;
   private stack: Step[] = [];
@@ -113,6 +115,7 @@ export class Game {
       const maxHp = character.maxHp + (roles[seat] === 'captain' ? 1 : 0);
       return { seat, name, role: roles[seat], character, hp: maxHp, maxHp, hand: [], equipment: [], alive: true, characterChosen: true, roleDrawn: !drawRoles };
     });
+    for (const s of this.seats) this.stats[s.seat] = { damage: 0, kills: 0 };
     if (forced) this.dealOpeningHands();
     this.current = drawRoles ? this.firstRoleDrawer : this.captainSeat();
   }
@@ -499,6 +502,8 @@ export class Game {
   emit(e: GameEvent): void {
     e.seq = ++this.seq;
     this.events.push(e);
+    if (e.type === 'damage' && e.source !== null && e.source !== e.seat) this.stats[e.source].damage += e.amount;
+    if (e.type === 'death' && e.killer !== null && e.killer !== e.seat) this.stats[e.killer].kills++;
   }
 
   /** 덱이 부족하면 버린 카드를 섞어 보충, 그래도 부족하면 가능한 만큼 */

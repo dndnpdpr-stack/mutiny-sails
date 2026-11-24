@@ -1,35 +1,50 @@
 import { useEffect, useState } from 'react';
 import { CHARACTER_INFO } from '../../engine/characters/roster';
-import type { PlayerView, SeatView } from '../../engine/types';
+import type { PlayerView, SeatStats, SeatView } from '../../engine/types';
+import { pickMvp } from '../mvp';
 import { winnerText } from '../format';
 import { RoleCard } from '../table/RoleCard';
 import { Portrait } from '../table/Portrait';
 
-function ResultSeat({ s, index }: { s: SeatView; index: number }) {
+function ResultSeat({ s, index, stat, mvp }: { s: SeatView; index: number; stat?: SeatStats; mvp: boolean }) {
   const [revealed, setRevealed] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setRevealed(true), index * 200);
     return () => clearTimeout(t);
   }, [index]);
   return (
-    <li className="result-seat">
+    <li className={`result-seat${mvp ? ' is-mvp' : ''}`}>
+      {mvp && <span className="mvp-badge">🏅 MVP</span>}
       <RoleCard role={s.role} revealed={revealed} />
       <div className="face rs-face"><Portrait id={s.character} variant="face" /></div>
       <div className="rs-name">{s.name}</div>
       <div className="rs-char">{s.character ? CHARACTER_INFO[s.character].name : '?'}</div>
       {!s.alive && <div className="rs-dead">쓰러짐</div>}
+      {stat && <div className="rs-stat">피해 {stat.damage} · 처치 {stat.kills}</div>}
     </li>
   );
 }
 
 export function ResultScreen({ view, onRestart }: { view: PlayerView; onRestart: () => void }) {
+  const mvp = pickMvp(view.seats, view.winner!, view.stats);
+  const m = mvp !== null ? view.seats[mvp] : null;
+  const ms = mvp !== null ? view.stats?.[mvp] : undefined;
   return (
     <div className="table-bg screen-center">
       <div className="scroll-panel result">
         <h1>{winnerText(view.winner!)}</h1>
+        {m && (
+          <div className="mvp">
+            <span className="mvp-title">🏅 MVP</span>
+            <b>{m.name}</b>
+            <span>
+              {m.character ? CHARACTER_INFO[m.character].name : ''} · 피해 {ms?.damage ?? 0} · 처치 {ms?.kills ?? 0}
+            </span>
+          </div>
+        )}
         <ul className="result-seats">
           {view.seats.map((s, i) => (
-            <ResultSeat key={s.seat} s={s} index={i} />
+            <ResultSeat key={s.seat} s={s} index={i} stat={view.stats?.[s.seat]} mvp={s.seat === mvp} />
           ))}
         </ul>
         <button type="button" className="primary" onClick={onRestart}>

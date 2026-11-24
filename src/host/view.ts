@@ -56,6 +56,7 @@ export function buildView(game: Game, seat: SeatId, isAi: (s: SeatId) => boolean
     abilityUsed: game.current === seat && game.abilityUsedThisTurn,
     events,
     winner: game.winner,
+    ...(over ? { stats: structuredClone(game.stats) } : {}),
     seaEventsOn: game.seaEventsOn,
     seaEvent: game.seaEvent,
   };
