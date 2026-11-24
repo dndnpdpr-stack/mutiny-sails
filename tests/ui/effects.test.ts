@@ -21,14 +21,14 @@ describe('effectsFor', () => {
 
   it('own slash with target flies hand -> discard via target', () => {
     const fx = effectsFor([{ type: 'play', seat: 0, card: c('a', 'slash'), target: 3 }], 0);
-    expect(fx[0]).toMatchObject({ kind: 'fly', from: 'hand', to: 'discard', via: 'seat:3' });
+    expect(fx.find((e) => e.kind === 'fly')).toMatchObject({ kind: 'fly', from: 'hand', to: 'discard', via: 'seat:3' });
   });
 
   it('equipment goes to equip slot of self or target', () => {
     const gun = effectsFor([{ type: 'play', seat: 2, card: c('g', 'pistol'), target: undefined }], 0);
     expect(gun[0]).toMatchObject({ from: 'seat:2', to: 'equip:2' });
     const brig = effectsFor([{ type: 'play', seat: 2, card: c('j', 'brig'), target: 4 }], 0);
-    expect(brig[0]).toMatchObject({ to: 'equip:4' });
+    expect(brig.find((e) => e.kind === 'fly')).toMatchObject({ to: 'equip:4' });
   });
 
   it('respond and discardCards fly to discard', () => {
@@ -47,6 +47,22 @@ describe('effectsFor', () => {
     expect(fx[0].at).toBe(fx[1].at);
     const h = effectsFor([{ type: 'heal', seat: 1, amount: 1 }], 0);
     expect(h[0]).toMatchObject({ kind: 'float', text: '+1', tone: 'heal' });
+  });
+
+  it('a judge says what it is for, what it needs, and how it went', () => {
+    const [j] = effectsFor([{ type: 'judge', seat: 1, card: c('a', 'slash'), success: false, reason: 'brig' }], 0);
+    expect(j).toMatchObject({ kind: 'judge', title: '⛓️ 영창 판정', need: '♥이면 탈출', result: '이번 턴은 쉬어요', good: false });
+  });
+
+  it('a targeted play draws an aim arrow from the player to the target, then the card flies', () => {
+    const fx = effectsFor([{ type: 'play', seat: 2, card: c('s', 'slash'), target: 0 }], 0);
+    expect(fx[0]).toMatchObject({ kind: 'aim', from: 2, to: 0, emoji: '🗡️', at: 0 });
+    expect(fx[1]).toMatchObject({ kind: 'fly', from: 'seat:2', via: 'seat:0' });
+  });
+
+  it('plays without another target draw no arrow', () => {
+    expect(effectsFor([{ type: 'play', seat: 2, card: c('r', 'rum') }], 0).some((e) => e.kind === 'aim')).toBe(false);
+    expect(effectsFor([{ type: 'play', seat: 2, card: c('b', 'barrel'), target: 2 }], 0).some((e) => e.kind === 'aim')).toBe(false);
   });
 
   it('judge, death, turnStart, steal', () => {
@@ -91,6 +107,7 @@ describe('expansion effects', () => {
     const b = { id: 'b', kind: 'slash', suit: 'clubs', rank: 3 } as const;
     const fx = effectsFor([{ type: 'wager', seat: 0, target: 1, cards: [a, b] }], 0);
     expect(fx.map((e) => (e.kind === 'judge' ? [e.card.id, e.success] : null))).toEqual([['a', true], ['b', false]]);
+    expect(fx.map((e) => (e.kind === 'judge' ? e.title : null))).toEqual(['🎲 주사위 내기', '']);
   });
 });
 

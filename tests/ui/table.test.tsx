@@ -234,6 +234,25 @@ describe('TableScreen', () => {
       expect(info()).toBeNull();
     });
 
+    it('cards in a pick note show their text on right-click, and a tap still picks', () => {
+      const revealed = [card('t1', 'rum', 'hearts'), card('t2', 'fireShip', 'clubs')];
+      const { send } = renderTable(makeView({ pending: { kind: 'treasureMap', seat: 1, revealed } }));
+      const note = screen.getByRole('dialog');
+      fireEvent.contextMenu(within(note).getByRole('button', { name: '불붙은 배' }));
+      expect(within(info()!).getByText(CARD_CATALOG.fireShip.text)).toBeTruthy();
+      expect(within(info()!).queryByRole('button', { name: '내기' })).toBeNull();
+      expect(send).not.toHaveBeenCalled();
+      fireEvent.click(within(note).getByRole('button', { name: '럼주' }));
+      expect(send).toHaveBeenCalledWith({ type: 'chooseCard', cardId: 't1' });
+    });
+
+    it("an opponent's equipment shows its text on right-click", () => {
+      const seats = [0, 1, 2, 3, 4].map((i) => seat(i, i === 2 ? { equipment: [card('e1', 'barrel', 'hearts')] } : {}));
+      renderTable(makeView({}, seats));
+      fireEvent.contextMenu(within(panel(2)).getByRole('button', { name: '엄폐용 나무통' }));
+      expect(within(info()!).getByText(CARD_CATALOG.barrel.text)).toBeTruthy();
+    });
+
     it('the card info closes once the card left my hand', () => {
       const { rerender, send } = renderTable(makeView({ myHand: [card('s1', 'slash')] }));
       fireEvent.contextMenu(handCard('칼질'));
@@ -355,6 +374,7 @@ describe('TableScreen', () => {
   it('judge choice says what the judgment is for', () => {
     renderTable(makeView({ pending: { kind: 'judgeChoice', seat: 1, options: [card('j1', 'rum', 'hearts'), card('j2', 'dodge', 'clubs')], reason: 'barrel' } }));
     expect(within(screen.getByRole('dialog')).getByText(/엄폐용 나무통 판정/)).toBeTruthy();
+    expect(within(screen.getByRole('dialog')).getByText(/♥이면 피해요/)).toBeTruthy();
   });
 
   it('the ability note does not come back by itself on my next turn', () => {

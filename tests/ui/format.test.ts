@@ -14,7 +14,7 @@ describe('format', () => {
 
   it('names the sea event and the sea monster judgment', () => {
     expect(formatEvent({ type: 'seaEvent', event: 'storm' }, names)).toBe('바다 이벤트: 🌪️ 폭풍 — 모든 거리 +1');
-    expect(formatEvent({ type: 'judge', seat: 1, card, success: false, reason: 'seaMonster' }, names)).toBe('P1의 바다 괴물 판정: 실패');
+    expect(formatEvent({ type: 'judge', seat: 1, card, success: false, reason: 'seaMonster' }, names)).toBe('P1의 바다 괴물 판정(♠만 아니면 무사): 물렸어요!');
   });
 
   it('formats damage with name and amount', () => {

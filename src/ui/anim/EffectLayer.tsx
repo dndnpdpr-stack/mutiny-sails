@@ -26,6 +26,10 @@ function resolve(e: Effect): Pt[] | null {
       const p = center('judge');
       return p ? [p] : null;
     }
+    case 'aim': {
+      const pts = [center(`seat:${e.from}`), center(`seat:${e.to}`)];
+      return pts.every((p) => p) ? (pts as Pt[]) : null;
+    }
     default:
       return null;
   }
@@ -114,17 +118,51 @@ export function EffectLayer(p: { effects: Effect[]; speed: 1 | 2; batchKey: numb
         }
         if (e.kind === 'judge') {
           return (
-            <motion.div
-              key={`${p.batchKey}-${id}`}
-              data-effect="judge"
-              className={`judge-ghost ${e.success ? 'success' : 'fail'}`}
-              style={{ left: path[0].x, top: path[0].y }}
-              initial={{ rotateY: 180 }}
-              animate={{ rotateY: 0 }}
-              transition={{ duration: Math.min(dur, 0.4) }}
-            >
-              <CardFace card={e.card} size="sm" />
-            </motion.div>
+            <div key={`${p.batchKey}-${id}`} data-effect="judge">
+              <motion.div
+                className={`judge-ghost ${(e.good ?? e.success) ? 'success' : 'fail'}`}
+                style={{ left: path[0].x, top: path[0].y }}
+                initial={{ rotateY: 180 }}
+                animate={{ rotateY: 0 }}
+                transition={{ duration: Math.min(dur, 0.4) }}
+              >
+                <CardFace card={e.card} size="sm" />
+              </motion.div>
+              {/* 판정 더미 아래, 화면 가로 가운데에 이유·조건·결과 */}
+              {e.title && (
+                <div className="judge-caption" style={{ top: path[0].y + 46 }}>
+                  <b>{e.title}</b>
+                  <span className="judge-need">{e.need}</span>
+                  <span className={`judge-result ${e.good === null ? '' : e.good ? 'good' : 'bad'}`}>{e.result}</span>
+                </div>
+              )}
+            </div>
+          );
+        }
+        if (e.kind === 'aim') {
+          const [a, b] = path;
+          const len = Math.hypot(b.x - a.x, b.y - a.y);
+          const ang = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
+          return (
+            <div key={`${p.batchKey}-${id}`} data-effect="aim">
+              {/* 낸 사람 → 대상으로 뻗는 빨간 화살 */}
+              <motion.div
+                className="aim-line"
+                style={{ left: a.x, top: a.y, width: len, rotate: ang }}
+                initial={{ scaleX: 0, opacity: 1 }}
+                animate={{ scaleX: 1, opacity: [1, 1, 0] }}
+                transition={{ duration: dur, ease: 'easeOut', opacity: { times: [0, 0.7, 1], duration: dur } }}
+              />
+              <motion.div
+                className="aim-hit"
+                style={{ left: b.x, top: b.y }}
+                initial={{ scale: 0.4, opacity: 0 }}
+                animate={{ scale: [0.4, 1.3, 1], opacity: [0, 1, 0] }}
+                transition={{ duration: dur, times: [0, 0.5, 1] }}
+              >
+                {e.emoji}
+              </motion.div>
+            </div>
           );
         }
         return null;

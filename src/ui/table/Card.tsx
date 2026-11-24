@@ -1,4 +1,6 @@
+import { createContext, useContext } from 'react';
 import { motion } from 'framer-motion';
+import { useLongPress } from './longPress';
 import { CARD_CATALOG } from '../../engine/cards/catalog';
 import type { CardView, Suit } from '../../engine/types';
 
@@ -8,6 +10,9 @@ const RANK_LABEL: Record<number, string> = { 11: 'J', 12: 'Q', 13: 'K', 14: 'A' 
 export function rankLabel(rank: number): string {
   return RANK_LABEL[rank] ?? String(rank);
 }
+
+/** 게임판이 주는 "카드 설명 보기". 있으면 모든 카드가 우클릭·길게 누르기로 설명을 띄운다 */
+export const CardInfoContext = createContext<((card: CardView) => void) | null>(null);
 
 export function CardFace(p: {
   card: CardView;
@@ -20,6 +25,8 @@ export function CardFace(p: {
   layoutId?: string;
 }) {
   const info = CARD_CATALOG[p.card.kind];
+  const showInfo = useContext(CardInfoContext);
+  const press = useLongPress(() => showInfo?.(p.card));
   const red = p.card.suit === 'hearts' || p.card.suit === 'diamonds';
   const cls = [
     'pcard',
@@ -39,8 +46,9 @@ export function CardFace(p: {
       className={cls}
       aria-label={info.name}
       title={info.text}
-      disabled={!p.onClick}
+      disabled={!p.onClick && !showInfo}
       onClick={p.onClick}
+      {...(showInfo ? press : {})}
       whileHover={p.onClick ? { y: -6 } : undefined}
     >
       <span className="corner">

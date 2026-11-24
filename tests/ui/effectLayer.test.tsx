@@ -11,6 +11,8 @@ function Anchors() {
       <div data-anchor="deck" />
       <div data-anchor="hand" />
       <div data-anchor="seat:1" />
+      <div data-anchor="seat:2" />
+      <div data-anchor="judge" />
     </>
   );
 }
@@ -31,6 +33,24 @@ const count = (c: HTMLElement, kind: string) => c.querySelectorAll(`[data-effect
 describe('EffectLayer', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
+
+  it('draws an aim arrow between two seats', () => {
+    const { container } = setup([{ kind: 'aim', from: 1, to: 2, emoji: '🗡️', at: 0, ms: 700 }]);
+    act(() => { vi.advanceTimersByTime(0); });
+    expect(count(container, 'aim')).toBe(1);
+    act(() => { vi.advanceTimersByTime(701); });
+    expect(count(container, 'aim')).toBe(0);
+  });
+
+  it('a judge shows its reason, what it needs, and the result', () => {
+    const card = { id: 'j', kind: 'rum' as const, suit: 'hearts' as const, rank: 5 as const };
+    const { container } = setup([{ kind: 'judge', card, success: true, title: '⛓️ 영창 판정', need: '♥이면 탈출', result: '탈출!', good: true, at: 0, ms: 1400 }]);
+    act(() => { vi.advanceTimersByTime(0); });
+    const j = container.querySelector('[data-effect="judge"]') as HTMLElement;
+    expect(j.textContent).toContain('⛓️ 영창 판정');
+    expect(j.textContent).toContain('♥이면 탈출');
+    expect(j.textContent).toContain('탈출!');
+  });
 
   it('draws a fly effect at at=0', () => {
     const { container } = setup([fly(0)]);

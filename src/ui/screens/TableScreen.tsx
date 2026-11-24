@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import type { Action, PlayerView, SeatId } from '../../engine/types';
+import type { Action, CardView, PlayerView, SeatId } from '../../engine/types';
+import { CardInfoContext } from '../table/Card';
 import { EffectLayer } from '../anim/EffectLayer';
 import type { Effect } from '../anim/effects';
 import { CenterPile } from '../table/CenterPile';
@@ -55,10 +56,13 @@ function useEffectFlags(effects: Effect[], speed: 1 | 2, key: number): Flags {
       if (names.length === 0 || end <= c.elapsed) return;
       if (!c.started.has(id)) {
         timers.push(
-          setTimeout(() => {
-            c.started.add(id);
-            bump(names, 1);
-          }, Math.max(0, e.at - c.elapsed) / speed),
+          setTimeout(
+            () => {
+              c.started.add(id);
+              bump(names, 1);
+            },
+            Math.max(0, e.at - c.elapsed) / speed,
+          ),
         );
       }
       timers.push(setTimeout(() => bump(names, -1), (end - c.elapsed) / speed));
@@ -110,7 +114,9 @@ export function TableScreen(p: {
   const [pickFor, setPickFor] = useState<{ cardId: string; target: SeatId } | null>(null);
   const [peekAck, setPeekAck] = useState(0);
   const [abilityOpen, setAbilityOpen] = useState(false);
-  const [infoId, setInfoId] = useState<string | null>(null);
+  // 설명 중인 카드. hand면 손패 카드(낼 수 있으면 내기 버튼, 손을 떠나면 닫힘), 아니면 쪽지·장비·더미의 카드
+  const [info, setInfo] = useState<{ card: CardView; hand: boolean } | null>(null);
+  const closeInfo = () => setInfo(null);
   const newPeek = latestPeek(latest.events, latest.you, peekAck);
   const memos = peekMemos(latest.events, latest.you);
 
@@ -118,7 +124,7 @@ export function TableScreen(p: {
   const seaBanner = useSeaBanner(p.effects, p.batchKey);
   const fxOf = (s: SeatId) => FX.filter((c) => (flags[`${s}:${c}`] ?? 0) > 0);
 
-  const hint = selectedId ? latest.hints.find((h) => h.cardId === selectedId && latest.myHand.some((c) => c.id === h.cardId)) ?? null : null;
+  const hint = selectedId ? (latest.hints.find((h) => h.cardId === selectedId && latest.myHand.some((c) => c.id === h.cardId)) ?? null) : null;
   const pick = pickFor && hint?.cardId === pickFor.cardId ? pickFor : null;
   const cancel = () => {
     setSelectedId(null);
@@ -127,7 +133,7 @@ export function TableScreen(p: {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') (cancel(), setInfoId(null));
+      if (e.key === 'Escape') (cancel(), closeInfo());
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -141,10 +147,16 @@ export function TableScreen(p: {
   const canPlay = (id: string) => inLatest.has(id) && (hinted.has(id) || respondable(id));
 
   // 누르면 바로 낸다(대상이 있으면 들어 올리고 대상 고르기). 설명은 우클릭·길게 누르기로 따로 본다
-  const infoCard = infoId ? latest.myHand.find((c) => c.id === infoId) ?? null : null;
-  const playNow = (id: string) => (cancel(), setInfoId(null), send({ type: 'playCard', cardId: id }));
+  const infoCard = !info ? null : info.hand ? (latest.myHand.find((c) => c.id === info.card.id) ?? null) : info.card;
+  const playNow = (id: string) => (cancel(), closeInfo(), send({ type: 'playCard', cardId: id }));
+  const onHandInfo = (id: string) => {
+    const c = latest.myHand.find((x) => x.id === id);
+    if (c) setInfo({ card: c, hand: true });
+  };
+  // 쪽지(고르기 창)가 바뀌거나 닫히면 그 쪽지 카드의 설명도 닫는다
+  useEffect(() => setInfo((i) => (i && !i.hand ? null : i)), [latest.pending]);
   const onCardClick = (id: string) => {
-    setInfoId(null);
+    closeInfo();
     if (!canPlay(id)) return;
     const ids = responseWith(latest, id);
     if (ids) return send({ type: 'respond', cardIds: ids });
@@ -181,7 +193,7 @@ export function TableScreen(p: {
     if (!myTurn) setAbilityOpen(false);
     cancel();
   }, [myTurn]);
-  const infoHint = infoCard ? latest.hints.find((h) => h.cardId === infoCard.id) : undefined;
+  const infoHint = infoCard && info?.hand ? latest.hints.find((h) => h.cardId === infoCard.id) : undefined;
   const openAbility = () => (cancel(), setAbilityOpen(true));
   const ability =
     latestMe.character === 'derrick'
@@ -196,84 +208,86 @@ export function TableScreen(p: {
           : null;
 
   return (
-    <div className="table-bg table-screen">
-      <div className="opp-arc">
-        {others.map((s, i) => {
-          const lift = Math.sin((Math.PI * (i + 0.5)) / others.length);
-          return (
-            <OpponentPanel
-              key={s.seat}
-              seat={s}
-              current={shown.current === s.seat}
-              distance={shown.distances[s.seat]}
-              targetable={!!hint?.targets?.includes(s.seat)}
-              outOfRange={!!hint?.targets && s.alive && !hint.targets.includes(s.seat)}
-              fx={fxOf(s.seat)}
-              peeked={memos[s.seat] ?? null}
-              style={{ marginTop: Math.round((1 - lift) * 48) }}
-              onClick={() => onSeatClick(s.seat)}
-            />
-          );
-        })}
-      </div>
-
-      <div className="table-middle">
-        <CenterPile deckCount={shown.deckCount} discardTop={shown.discardTop} seaEventsOn={shown.seaEventsOn} seaEvent={shown.seaEvent} />
-        <GameLog events={shown.events} name={name} />
-      </div>
-
-      <MyArea
-        me={me}
-        myRole={shown.myRole}
-        myRange={shown.myRange}
-        current={shown.current === shown.you}
-        fx={fxOf(shown.you)}
-        hand={shown.myHand}
-        canPlay={canPlay}
-        highlight={highlight}
-        selectedId={hint?.cardId ?? null}
-        onCardClick={onCardClick}
-        onCardInfo={setInfoId}
-        canEndTurn={myTurn}
-        onEndTurn={() => (cancel(), send({ type: 'endTurn' }))}
-        ability={ability}
-        spectate={p.spectate}
-        doubleSpeed={p.doubleSpeed}
-      />
-
-      {infoCard && me.alive && !pick && (
-        <CardInfoNote
-          card={infoCard}
-          onPlay={infoHint && infoHint.targets === null ? () => playNow(infoCard.id) : null}
-          onClose={() => setInfoId(null)}
-        />
-      )}
-      <PromptNote view={latest} send={send} />
-      {abilityOpen && myTurn && latestMe.character === 'dorothy' && <DorothyNote view={latest} send={send} onClose={() => setAbilityOpen(false)} />}
-      {abilityOpen && myTurn && latestMe.character === 'kiki' && <KikiNote view={latest} send={send} onClose={() => setAbilityOpen(false)} />}
-      {newPeek && <PeekNote targetName={latest.seats[newPeek.target].name} card={newPeek.card} onClose={() => setPeekAck(newPeek.seq ?? 0)} />}
-      {pick && (
-        <TargetCardNote
-          targetName={latest.seats[pick.target].name}
-          equipment={latest.seats[pick.target].equipment}
-          handCount={latest.seats[pick.target].handCount}
-          onPick={(cardId) => {
-            send(cardId ? { type: 'playCard', cardId: pick.cardId, target: pick.target, targetCardId: cardId } : { type: 'playCard', cardId: pick.cardId, target: pick.target });
-            cancel();
-          }}
-          onCancel={cancel}
-        />
-      )}
-
-      {seaBanner && (
-        <div className="turn-banner sea-banner">
-          <div>{seaEventTitle(seaBanner.event)}!</div>
-          {seaBanner.mine && <div className="sea-banner-turn">내 차례!</div>}
+    <CardInfoContext.Provider value={(card) => setInfo({ card, hand: false })}>
+      <div className="table-bg table-screen">
+        <div className="opp-arc">
+          {others.map((s, i) => {
+            const lift = Math.sin((Math.PI * (i + 0.5)) / others.length);
+            return (
+              <OpponentPanel
+                key={s.seat}
+                seat={s}
+                current={shown.current === s.seat}
+                distance={shown.distances[s.seat]}
+                targetable={!!hint?.targets?.includes(s.seat)}
+                outOfRange={!!hint?.targets && s.alive && !hint.targets.includes(s.seat)}
+                fx={fxOf(s.seat)}
+                peeked={memos[s.seat] ?? null}
+                style={{ marginTop: Math.round((1 - lift) * 48) }}
+                onClick={() => onSeatClick(s.seat)}
+              />
+            );
+          })}
         </div>
-      )}
-      {(flags.banner ?? 0) > 0 && !seaBanner && <div className="turn-banner">내 차례!</div>}
-      {p.lastRejection && <div className="toast note">{p.lastRejection}</div>}
-      <EffectLayer effects={p.effects} speed={p.speed} batchKey={p.batchKey} />
-    </div>
+
+        <div className="table-middle">
+          <CenterPile deckCount={shown.deckCount} discardTop={shown.discardTop} seaEventsOn={shown.seaEventsOn} seaEvent={shown.seaEvent} />
+          <GameLog events={shown.events} name={name} />
+        </div>
+
+        <MyArea
+          me={me}
+          myRole={shown.myRole}
+          myRange={shown.myRange}
+          current={shown.current === shown.you}
+          fx={fxOf(shown.you)}
+          hand={shown.myHand}
+          canPlay={canPlay}
+          highlight={highlight}
+          selectedId={hint?.cardId ?? null}
+          onCardClick={onCardClick}
+          onCardInfo={onHandInfo}
+          canEndTurn={myTurn}
+          onEndTurn={() => (cancel(), send({ type: 'endTurn' }))}
+          ability={ability}
+          spectate={p.spectate}
+          doubleSpeed={p.doubleSpeed}
+        />
+
+        {infoCard && (!info?.hand || (me.alive && !pick)) && (
+          <CardInfoNote card={infoCard} onPlay={infoHint && infoHint.targets === null ? () => playNow(infoCard.id) : null} onClose={closeInfo} />
+        )}
+        <PromptNote view={latest} send={send} />
+        {abilityOpen && myTurn && latestMe.character === 'dorothy' && <DorothyNote view={latest} send={send} onClose={() => setAbilityOpen(false)} />}
+        {abilityOpen && myTurn && latestMe.character === 'kiki' && <KikiNote view={latest} send={send} onClose={() => setAbilityOpen(false)} />}
+        {newPeek && <PeekNote targetName={latest.seats[newPeek.target].name} card={newPeek.card} onClose={() => setPeekAck(newPeek.seq ?? 0)} />}
+        {pick && (
+          <TargetCardNote
+            targetName={latest.seats[pick.target].name}
+            equipment={latest.seats[pick.target].equipment}
+            handCount={latest.seats[pick.target].handCount}
+            onPick={(cardId) => {
+              send(
+                cardId
+                  ? { type: 'playCard', cardId: pick.cardId, target: pick.target, targetCardId: cardId }
+                  : { type: 'playCard', cardId: pick.cardId, target: pick.target },
+              );
+              cancel();
+            }}
+            onCancel={cancel}
+          />
+        )}
+
+        {seaBanner && (
+          <div className="turn-banner sea-banner">
+            <div>{seaEventTitle(seaBanner.event)}!</div>
+            {seaBanner.mine && <div className="sea-banner-turn">내 차례!</div>}
+          </div>
+        )}
+        {(flags.banner ?? 0) > 0 && !seaBanner && <div className="turn-banner">내 차례!</div>}
+        {p.lastRejection && <div className="toast note">{p.lastRejection}</div>}
+        <EffectLayer effects={p.effects} speed={p.speed} batchKey={p.batchKey} />
+      </div>
+    </CardInfoContext.Provider>
   );
 }
