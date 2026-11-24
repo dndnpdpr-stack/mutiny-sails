@@ -350,3 +350,58 @@ h1, h2, h3, .cname, .rname, .opp .nm { font-weight: 800; letter-spacing: -0.01em
   .draft-options .char-card .ctext { font-size: 10.5px; min-height: 0; word-break: keep-all; }
   .draft-options .char-card .pick { padding: 4px 8px; font-size: 13px; }
 }
+
+/* ── 폰 세로 압축 배치: 상대·가운데·내 자리·손패가 한 화면(약 700px)에 들어가게 ── */
+@media (max-width: 640px) {
+  .table-screen { min-height: 100dvh; padding: 14px 6px 6px; gap: 8px; }
+
+  /* 상대: 한 줄에 4명까지 들어가는 작은 칩. 활 모양 들쭉날쭉(margin-top)은 끈다 */
+  .opp-arc { display: grid; grid-template-columns: repeat(auto-fit, minmax(76px, 1fr)); gap: 6px; align-items: stretch; }
+  .opp-arc .opp { margin-top: 0 !important; }
+  .opp { padding: 4px 3px 3px; border-radius: 9px; display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; column-gap: 5px; }
+  .opp > * { flex-basis: 100%; }
+  .opp > .face { flex: 0 0 34px; }
+  /* 손패 수와 거리를 한 줄에 */
+  .opp > .hand-count, .opp > .dist { flex-basis: auto; order: 1; }
+  .opp > .equip-row, .opp > .peek-memo, .opp > .role { order: 2; }
+  .opp .face { width: 34px; height: 34px; margin-bottom: 2px; }
+  .opp .nm { font-size: 11px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .opp .cname { font-size: 9.5px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .opp .mini { font-size: 9.5px; }
+  .opp .hp { font-size: 10px; letter-spacing: 0; line-height: 1.3; }
+  .opp .hand-count .pcard.back { width: 11px; height: 15px; }
+  /* 상대 장비는 그림만 (이름·숫자는 길게 눌러 보는 대신 title로) */
+  .opp .equip-row { gap: 2px; margin-top: 2px; flex-wrap: wrap; }
+  .opp .equip-row .pcard.sm { width: 22px; height: 26px; padding: 0; border-width: 1px; border-radius: 4px; font-size: 9px; }
+  .opp .equip-row .pcard.sm .corner, .opp .equip-row .pcard.sm .name { display: none; }
+  .opp .equip-row .pcard.sm .emoji { font-size: 1.5em; }
+  .opp.captain { border-width: 2px; padding-top: 9px; }
+  .captain-ribbon { top: -9px; padding: 1px 6px; font-size: 10px; letter-spacing: 0; }
+
+  /* 가운데: 카드 더미를 줄이고 일지는 최근 몇 줄만 */
+  .table-middle { gap: 6px; }
+  .center-pile { zoom: 0.56; padding-bottom: 20px; }
+  .center-pile:has(.sea) { zoom: 0.56; }
+  .log { max-height: 62px; padding: 4px 8px; font-size: 11px; }
+  .log h4 { display: none; }
+  .log ul { padding-left: 14px; }
+
+  /* 내 자리: 얼굴·글씨를 줄이고 역할 카드도 작게 */
+  .my-area { gap: 4px; }
+  .me-info { font-size: 12px; padding: 6px 8px; }
+  .me-face { width: 40px; height: 40px; }
+  .me-info .ability { font-size: 10.5px; line-height: 1.35; }
+  .me-info .hp { font-size: 12px; }
+  .role-card.sm { width: 68px; }
+  .role-card.sm .remoji { font-size: 20px; }
+  .role-card.sm .rname { font-size: 12px; }
+  .role-card.sm .rgoal { font-size: 9.5px; }
+  .role-card.sm.hidden .pcard.back { width: 68px; min-height: 90px; }
+
+  /* 손패: 위 여백을 줄이고(들어 올릴 자리만) 가운데 정렬 */
+  /* my-area가 justify-items:center라 그냥 두면 손패 칸이 좁게 줄어 카드가 잘린다 → 폭을 꽉 채운다 */
+  .my-area > .fan-hand { justify-self: stretch; width: 100%; box-sizing: border-box; }
+  .fan-hand { min-height: 0; padding: 30px 30px 22px; justify-content: safe center; zoom: 0.85; }
+  .my-area > .me-cards { justify-self: stretch; }
+  .actions .end-turn { padding: 8px 18px; font-size: 15px; }
+}
