@@ -76,13 +76,16 @@ function useSeaBanner(effects: Effect[], key: number) {
   const [banner, setBanner] = useState<{ event: SeaEventId; mine: boolean } | null>(null);
   const effectsRef = useRef(effects);
   effectsRef.current = effects;
+  // 다음 장면(batch)이 시작돼도 끄는 타이머는 살아 있어야 한다. 새 이벤트가 오거나 화면이 닫힐 때만 취소
+  const timer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => clearTimeout(timer.current), []);
   useEffect(() => {
     const sea = [...effectsRef.current].reverse().find((e) => e.kind === 'sea');
     if (!sea || sea.kind !== 'sea') return;
     const mine = effectsRef.current.some((e) => e.kind === 'turn' && e.mine);
     setBanner({ event: sea.event, mine });
-    const t = setTimeout(() => setBanner(null), SEA_BANNER_MS);
-    return () => clearTimeout(t);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setBanner(null), SEA_BANNER_MS);
   }, [key]);
   return banner;
 }

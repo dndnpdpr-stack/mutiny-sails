@@ -384,6 +384,22 @@ describe('TableScreen', () => {
     }
   });
 
+  it('the sea banner still goes away when another batch starts before its time is up', () => {
+    vi.useFakeTimers();
+    try {
+      const v = makeView();
+      const sea: Effect[] = [{ kind: 'sea', event: 'storm', at: 0, ms: 300 }];
+      const { rerender } = render(<TableScreen latest={v} shown={v} effects={sea} speed={1} batchKey={1} send={vi.fn()} lastRejection={null} />);
+      act(() => void vi.advanceTimersByTime(500));
+      expect(screen.getByText('🌪️ 폭풍!')).toBeTruthy();
+      rerender(<TableScreen latest={v} shown={v} effects={[]} speed={1} batchKey={2} send={vi.fn()} lastRejection={null} />);
+      act(() => void vi.advanceTimersByTime(2000));
+      expect(screen.queryByText('🌪️ 폭풍!')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('shows the current sea event card next to the deck only when events are on', () => {
     const { unmount } = renderTable(makeView({ seaEventsOn: true, seaEvent: 'storm' }));
     const slot = screen.getByTestId('sea-event');
