@@ -478,3 +478,17 @@ h1, h2, h3, .cname, .rname, .opp .nm { font-weight: 800; letter-spacing: -0.01em
   .draft > .role-card.front .rgoal { font-size: 11.5px; line-height: 1.35; }
   .draft > .role-card.front .rnote { grid-column: 2; }
 }
+/* 내 전적 */
+.my-result { margin: -6px 0 4px; font-size: 18px; font-weight: 900; }
+.my-result.won { color: #2f6b2a; }
+.my-result.lost { color: #8a2a1e; }
+.record-line { margin: 0 0 10px; font-size: 13px; color: #5b3a20; text-align: center; }
+.record-chip { font-family: var(--font); font-size: 13px; padding: 4px 12px; border: 1px dashed #7a4e24; border-radius: 999px; background: transparent; color: #5b3a20; cursor: pointer; }
+.record-backdrop { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 16px; background: rgba(0, 0, 0, 0.55); }
+.record-panel { max-width: 380px; padding: 18px; }
+.record-panel h2 { margin: 0; }
+.record-total { margin: 0; text-align: center; }
+.record-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.record-table th, .record-table td { padding: 4px 6px; border-bottom: 1px solid #d6bd8a; text-align: center; }
+.record-table td:first-child, .record-table th:first-child { text-align: left; }
+.secondary.danger { background: #b3261e; color: #fff; }

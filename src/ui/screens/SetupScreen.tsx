@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import titleArt from '../art/title.svg';
 import { HowToPlay } from './HowToPlay';
+import { RecordPanel } from './RecordPanel';
+import { loadRecord, rate } from '../record';
 import type { Difficulty } from '../../ai/memory';
 
 export interface SetupOptions {
@@ -40,6 +42,8 @@ export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: 
   };
   const [name, setName] = useState('');
   const [guide, setGuide] = useState(false);
+  const [record, setRecord] = useState(loadRecord);
+  const [showRecord, setShowRecord] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const guideButtonRef = useRef<HTMLButtonElement>(null);
   const wasOpen = useRef(false);
@@ -90,6 +94,9 @@ export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: 
           </div>
           <small>{DIFFICULTIES.find((d) => d.id === difficulty)!.text}</small>
         </div>
+        <button type="button" className="record-chip" onClick={() => setShowRecord(true)}>
+          📜 내 전적 {record.games ? `${record.games}전 ${record.wins}승 (${rate(record)})` : '없음'}
+        </button>
         <div className="setup-actions">
           <button ref={guideButtonRef} type="button" className="secondary" onClick={() => setGuide(true)}>
             게임 방법
@@ -100,6 +107,7 @@ export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: 
         </div>
       </div>
       {guide && <HowToPlay onClose={() => setGuide(false)} />}
+      {showRecord && <RecordPanel record={record} onChange={setRecord} onClose={() => setShowRecord(false)} />}
     </div>
   );
 }
