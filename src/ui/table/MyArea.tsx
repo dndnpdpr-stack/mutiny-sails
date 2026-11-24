@@ -6,6 +6,12 @@ import { CardFace } from './Card';
 import { FanHand } from './FanHand';
 import { hearts, type SeatFx } from './OpponentPanel';
 
+export interface Spectate {
+  fast: boolean;
+  onToggleFast: () => void;
+  onRestart: () => void;
+}
+
 export function MyArea(p: {
   me: SeatView;
   myRole: Role | null;
@@ -21,6 +27,7 @@ export function MyArea(p: {
   onEndTurn: () => void;
   /** 직접 쓰는 능력이 없는 캐릭터면 null (데릭·도로시·키키만) */
   ability: { enabled: boolean; onUse: () => void } | null;
+  spectate?: Spectate;
 }) {
   const me = p.me;
   const ch = me.character ? CHARACTER_INFO[me.character] : null;
@@ -53,7 +60,17 @@ export function MyArea(p: {
         <FanHand cards={p.hand} canPlay={p.canPlay} highlight={p.highlight} selectedId={p.selectedId} onCardClick={p.onCardClick} />
       ) : (
         <div className="spectating" data-anchor="hand">
-          관전 중
+          <span>관전 중</span>
+          {p.spectate && (
+            <span className="spectate-controls">
+              <button type="button" className={p.spectate.fast ? 'on' : ''} aria-pressed={p.spectate.fast} onClick={p.spectate.onToggleFast}>
+                ⏩ 빨리 감기
+              </button>
+              <button type="button" onClick={p.spectate.onRestart}>
+                새로 하기
+              </button>
+            </span>
+          )}
         </div>
       )}
       <div className="actions">

@@ -22,10 +22,13 @@ function makeView(extra: Partial<PlayerView> = {}, seats?: SeatView[]): PlayerVi
   };
 }
 
-function renderTable(latest: PlayerView, opts: { shown?: PlayerView; effects?: Effect[]; lastRejection?: string | null } = {}) {
+function renderTable(
+  latest: PlayerView,
+  opts: { shown?: PlayerView; effects?: Effect[]; lastRejection?: string | null; spectate?: { fast: boolean; onToggleFast: () => void; onRestart: () => void } } = {},
+) {
   const send = vi.fn<(a: Action) => void>();
   const r = render(
-    <TableScreen latest={latest} shown={opts.shown ?? latest} effects={opts.effects ?? []} speed={1} batchKey={0} send={send} lastRejection={opts.lastRejection ?? null} />,
+    <TableScreen latest={latest} shown={opts.shown ?? latest} effects={opts.effects ?? []} speed={1} batchKey={0} send={send} lastRejection={opts.lastRejection ?? null} spectate={opts.spectate} />,
   );
   return { ...r, send };
 }
@@ -334,6 +337,33 @@ describe('TableScreen', () => {
     expect(rc.textContent).toContain('반란 선원');
     expect(rc.textContent).toContain('선장을 쓰러뜨리세요');
     expect(document.querySelector('.me-info')?.textContent).not.toContain('반란 선원');
+  });
+
+  describe('spectating controls', () => {
+    const deadSeats = () => [0, 1, 2, 3, 4].map((i) => seat(i, i === 1 ? { alive: false, hp: 0, role: 'rebel' } : {}));
+    const spectate = (fast = false) => ({ fast, onToggleFast: vi.fn(), onRestart: vi.fn() });
+
+    it('offers fast forward and new game once I am dead', () => {
+      const sp = spectate();
+      renderTable(makeView({ current: 0, pending: { kind: 'turn', seat: 0 } }, deadSeats()), { spectate: sp });
+      const ff = screen.getByRole('button', { name: /빨리 감기/ });
+      expect(ff.getAttribute('aria-pressed')).toBe('false');
+      fireEvent.click(ff);
+      expect(sp.onToggleFast).toHaveBeenCalledTimes(1);
+      fireEvent.click(screen.getByRole('button', { name: '새로 하기' }));
+      expect(sp.onRestart).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows fast forward as pressed while it is on', () => {
+      renderTable(makeView({ current: 0, pending: { kind: 'turn', seat: 0 } }, deadSeats()), { spectate: spectate(true) });
+      expect(screen.getByRole('button', { name: /빨리 감기/ }).getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('hides them while I am alive', () => {
+      renderTable(makeView(), { spectate: spectate() });
+      expect(screen.queryByRole('button', { name: /빨리 감기/ })).toBeNull();
+      expect(screen.queryByRole('button', { name: '새로 하기' })).toBeNull();
+    });
   });
 
   it('keeps showing my role card while spectating', () => {

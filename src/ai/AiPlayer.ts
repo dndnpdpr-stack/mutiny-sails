@@ -12,16 +12,23 @@ export class AiPlayer {
   private lastView: PlayerView | null = null;
   private retried = false;
   private off: () => void;
+  private delayMs: number;
 
   constructor(
     private readonly transport: Transport<ServerMessage, ClientMessage>,
-    private readonly opts: { delayMs: number; seed: number },
+    opts: { delayMs: number; seed: number },
   ) {
     this.rng = new Rng(opts.seed);
+    this.delayMs = opts.delayMs;
     this.off = transport.onMessage((m) => {
       if (m.type === 'view') this.onView(m.view);
       else if (m.type === 'rejected') this.onRejected();
     });
+  }
+
+  /** 다음 행동부터 기다리는 시간을 바꾼다 (관전 중 빨리 감기) */
+  setDelay(ms: number): void {
+    this.delayMs = ms;
   }
 
   dispose(): void {
@@ -44,7 +51,7 @@ export class AiPlayer {
     this.timer = setTimeout(() => {
       this.timer = null;
       this.transport.send({ type: 'action', action });
-    }, this.opts.delayMs);
+    }, this.delayMs);
   }
 
   private onRejected(): void {

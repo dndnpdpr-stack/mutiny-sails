@@ -12,6 +12,7 @@ import { latestPeek, peekMemos } from '../table/peek';
 import { DorothyNote, KikiNote, dorothyTargets, kikiTargets } from '../table/AbilityNote';
 import { seaEventTitle } from '../format';
 import type { SeaEventId } from '../../engine/seaEvents';
+import type { Spectate } from '../table/MyArea';
 
 type Flags = Record<string, number>;
 
@@ -99,6 +100,8 @@ export function TableScreen(p: {
   batchKey: number;
   send: (a: Action) => void;
   lastRejection: string | null;
+  /** 내가 쓰러진 뒤 관전 중에 쓰는 버튼 */
+  spectate?: Spectate;
 }) {
   const { latest, shown, send } = p;
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -229,6 +232,7 @@ export function TableScreen(p: {
         canEndTurn={myTurn}
         onEndTurn={() => (cancel(), send({ type: 'endTurn' }))}
         ability={ability}
+        spectate={p.spectate}
       />
 
       {selectedCard && me.alive && !pick && (

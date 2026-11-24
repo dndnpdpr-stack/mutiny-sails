@@ -19,6 +19,9 @@ export interface LocalSetup {
   expansionCards?: boolean;
 }
 
+/** 빨리 감기 중 AI 행동 간격 */
+export const FAST_AI_MS = 100;
+
 const NICKNAMES = ['붉은수염', '애꾸눈 잭', '검은 메리', '폭풍의 핀', '소금 샐리', '철갈고리', '바다쥐 로코', '황금이빨', '안개 속 아나', '녹슨 닻 칼'];
 
 export function useLocalGame(setup: LocalSetup | null) {
@@ -26,8 +29,11 @@ export function useLocalGame(setup: LocalSetup | null) {
   const [lastRejection, setLastRejection] = useState<string | null>(null);
   const [round, setRound] = useState(0);
   const client = useRef<Transport<ServerMessage, ClientMessage> | null>(null);
+  const aiRef = useRef<AiPlayer[]>([]);
+  const [fast, setFastState] = useState(false);
 
   useEffect(() => {
+    setFastState(false);
     if (!setup) {
       setView(null);
       return;
@@ -54,8 +60,10 @@ export function useLocalGame(setup: LocalSetup | null) {
         ais.push(new AiPlayer(remote, { delayMs: setup.aiDelayMs ?? 700, seed: seed + s }));
       }
     }
+    aiRef.current = ais;
     return () => {
       ais.forEach((a) => a.dispose());
+      aiRef.current = [];
       session.dispose();
       client.current = null;
     };
@@ -73,5 +81,13 @@ export function useLocalGame(setup: LocalSetup | null) {
     setRound((r) => r + 1);
   }, []);
 
-  return { view, lastRejection, send, restart };
+  const setFast = useCallback(
+    (on: boolean) => {
+      setFastState(on);
+      aiRef.current.forEach((a) => a.setDelay(on ? FAST_AI_MS : (setup?.aiDelayMs ?? 700)));
+    },
+    [setup],
+  );
+
+  return { view, lastRejection, send, restart, fast, setFast };
 }
