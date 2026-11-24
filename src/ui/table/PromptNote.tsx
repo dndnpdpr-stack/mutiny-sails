@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import type { Action, CardKind, CardView, PlayerView } from '../../engine/types';
 import { CardFace } from './Card';
+import { CARD_CATALOG } from '../../engine/cards/catalog';
 import { judgeReasonName } from '../format';
 import { judgeNeed } from '../judgeRule';
 import type { AttackSource } from '../../engine/types';
@@ -43,6 +44,28 @@ export function Note(p: { title: string; children: ReactNode }) {
         <div className="note-body">{p.children}</div>
       </div>
     </div>
+  );
+}
+
+/** 무기를 이미 끼고 있을 때: 있던 무기를 버리고 바꿀지 묻는다 */
+export function WeaponSwapNote(p: { oldCard: CardView; newCard: CardView; onYes: () => void; onNo: () => void }) {
+  return (
+    <Note title="무기 바꾸기">
+      <p>
+        지금 낀 <b>{CARD_CATALOG[p.oldCard.kind].name}</b>을(를) 버리고 <b>{CARD_CATALOG[p.newCard.kind].name}</b>을(를) 낄까요?
+      </p>
+      <div className="note-cards">
+        <CardFace card={p.oldCard} size="sm" />
+        <span className="swap-arrow">→</span>
+        <CardFace card={p.newCard} size="sm" />
+      </div>
+      <button type="button" onClick={p.onYes}>
+        바꾸기
+      </button>
+      <button type="button" onClick={p.onNo}>
+        그대로 두기
+      </button>
+    </Note>
   );
 }
 

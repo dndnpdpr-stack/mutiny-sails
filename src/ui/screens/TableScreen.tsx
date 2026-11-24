@@ -7,7 +7,8 @@ import { CenterPile } from '../table/CenterPile';
 import { GameLog } from '../table/GameLog';
 import { MyArea } from '../table/MyArea';
 import { OpponentPanel, type SeatFx } from '../table/OpponentPanel';
-import { PeekNote, PromptNote, TargetCardNote, responseNeed, responseWith } from '../table/PromptNote';
+import { PeekNote, PromptNote, TargetCardNote, WeaponSwapNote, responseNeed, responseWith } from '../table/PromptNote';
+import { CARD_CATALOG } from '../../engine/cards/catalog';
 import { CardInfoNote } from '../table/CardInfoNote';
 import { latestPeek, peekMemos } from '../table/peek';
 import { DorothyNote, KikiNote, dorothyTargets, kikiTargets } from '../table/AbilityNote';
@@ -126,9 +127,12 @@ export function TableScreen(p: {
 
   const hint = selectedId ? (latest.hints.find((h) => h.cardId === selectedId && latest.myHand.some((c) => c.id === h.cardId)) ?? null) : null;
   const pick = pickFor && hint?.cardId === pickFor.cardId ? pickFor : null;
+  // 무기를 이미 끼고 있으면 바로 내지 않고 바꿀지 묻는다
+  const [swap, setSwap] = useState<{ oldCard: CardView; newCard: CardView } | null>(null);
   const cancel = () => {
     setSelectedId(null);
     setPickFor(null);
+    setSwap(null);
   };
 
   useEffect(() => {
@@ -148,7 +152,14 @@ export function TableScreen(p: {
 
   // 누르면 바로 낸다(대상이 있으면 들어 올리고 대상 고르기). 설명은 우클릭·길게 누르기로 따로 본다
   const infoCard = !info ? null : info.hand ? (latest.myHand.find((c) => c.id === info.card.id) ?? null) : info.card;
-  const playNow = (id: string) => (cancel(), closeInfo(), send({ type: 'playCard', cardId: id }));
+  const playNow = (id: string) => {
+    cancel();
+    closeInfo();
+    const card = latest.myHand.find((c) => c.id === id);
+    const old = latest.seats[latest.you].equipment.find((c) => CARD_CATALOG[c.kind].weapon);
+    if (card && old && CARD_CATALOG[card.kind].weapon) return setSwap({ oldCard: old, newCard: card });
+    send({ type: 'playCard', cardId: id });
+  };
   const onHandInfo = (id: string) => {
     const c = latest.myHand.find((x) => x.id === id);
     if (c) setInfo({ card: c, hand: true });
@@ -285,7 +296,15 @@ export function TableScreen(p: {
           </div>
         )}
         {(flags.banner ?? 0) > 0 && !seaBanner && <div className="turn-banner">내 차례!</div>}
-        {p.lastRejection && <div className="toast note">{p.lastRejection}</div>}
+        {swap && (
+        <WeaponSwapNote
+          oldCard={swap.oldCard}
+          newCard={swap.newCard}
+          onYes={() => (send({ type: 'playCard', cardId: swap.newCard.id }), setSwap(null))}
+          onNo={() => setSwap(null)}
+        />
+      )}
+      {p.lastRejection && <div className="toast note">{p.lastRejection}</div>}
         <EffectLayer effects={p.effects} speed={p.speed} batchKey={p.batchKey} />
       </div>
     </CardInfoContext.Provider>

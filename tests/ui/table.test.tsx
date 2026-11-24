@@ -74,6 +74,45 @@ describe('TableScreen', () => {
     expect(screen.getByText('항해 일지')).toBeTruthy();
   });
 
+  describe('weapon swap', () => {
+    const musketHint = { cardId: 'w2', targets: null, targetCards: false };
+    const armed = () => [0, 1, 2, 3, 4].map((i) => seat(i, i === 1 ? { equipment: [card('w1', 'pistol')] } : {}));
+    const swapNote = () => screen.queryByRole('dialog', { name: '무기 바꾸기' });
+
+    it('asks before throwing away the weapon I already have, and equips on yes', () => {
+      const { send } = renderTable(makeView({ myHand: [card('w2', 'musket')], hints: [musketHint] }, armed()));
+      fireEvent.click(handCard('머스킷'));
+      expect(send).not.toHaveBeenCalled();
+      expect(swapNote()!.textContent).toContain('권총');
+      expect(swapNote()!.textContent).toContain('머스킷');
+      fireEvent.click(within(swapNote()!).getByRole('button', { name: '바꾸기' }));
+      expect(send).toHaveBeenCalledWith({ type: 'playCard', cardId: 'w2' });
+      expect(swapNote()).toBeNull();
+    });
+
+    it('keeps the old weapon when I say no', () => {
+      const { send } = renderTable(makeView({ myHand: [card('w2', 'musket')], hints: [musketHint] }, armed()));
+      fireEvent.click(handCard('머스킷'));
+      fireEvent.click(within(swapNote()!).getByRole('button', { name: '그대로 두기' }));
+      expect(send).not.toHaveBeenCalled();
+      expect(swapNote()).toBeNull();
+    });
+
+    it('equips right away when I have no weapon', () => {
+      const { send } = renderTable(makeView({ myHand: [card('w2', 'musket')], hints: [musketHint] }));
+      fireEvent.click(handCard('머스킷'));
+      expect(send).toHaveBeenCalledWith({ type: 'playCard', cardId: 'w2' });
+    });
+
+    it('also asks from the play button in the card info', () => {
+      const { send } = renderTable(makeView({ myHand: [card('w2', 'musket')], hints: [musketHint] }, armed()));
+      fireEvent.contextMenu(handCard('머스킷'));
+      fireEvent.click(within(screen.getByRole('dialog', { name: '카드 설명' })).getByRole('button', { name: '내기' }));
+      expect(send).not.toHaveBeenCalled();
+      expect(swapNote()).toBeTruthy();
+    });
+  });
+
   it('has a 2x speed toggle', () => {
     const onToggle = vi.fn();
     const { rerender, send } = renderTable(makeView(), { doubleSpeed: { on: false, onToggle } });

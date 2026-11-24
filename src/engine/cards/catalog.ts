@@ -13,9 +13,11 @@ export interface CardInfo {
   targetsCards: boolean;
   /** 확장 카드 (켰을 때만 덱에 들어간다) */
   expansion?: boolean;
+  /** 무기 (하나만 낄 수 있어서 새로 끼면 있던 무기는 버려진다) */
+  weapon: boolean;
 }
 
-const list: Array<Omit<CardInfo, 'needsTarget' | 'targetsCards'>> = [
+const list: Array<Omit<CardInfo, 'needsTarget' | 'targetsCards' | 'weapon'>> = [
   { kind: 'slash', name: '칼질', count: 23, category: 'action', emoji: '🗡️', text: '사거리 안의 1명을 공격해요. 상대는 피하기를 내거나 체력 1을 잃어요. (한 턴에 1번)' },
   { kind: 'dodge', name: '피하기', count: 12, category: 'action', emoji: '💨', text: '공격을 받았을 때 내서 무효로 만들어요.' },
   { kind: 'rum', name: '럼주', count: 6, category: 'action', emoji: '🍺', text: '체력 1을 회복해요. 두 명만 남으면 쓸 수 없어요.' },
@@ -53,7 +55,8 @@ const list: Array<Omit<CardInfo, 'needsTarget' | 'targetsCards'>> = [
 
 const TARGETED: CardKind[] = ['slash', 'duel', 'pickpocket', 'cutRope', 'brig', 'parrotTattle', 'diceWager', 'fireShip'];
 const CARD_TARGETING: CardKind[] = ['pickpocket', 'cutRope'];
+const WEAPONS: CardKind[] = ['pistol', 'musket', 'longMusket', 'deckCannon', 'twinPistols', 'harpoon'];
 
 export const CARD_CATALOG = Object.fromEntries(
-  list.map((i) => [i.kind, { ...i, needsTarget: TARGETED.includes(i.kind), targetsCards: CARD_TARGETING.includes(i.kind) }]),
+  list.map((i) => [i.kind, { ...i, needsTarget: TARGETED.includes(i.kind), targetsCards: CARD_TARGETING.includes(i.kind), weapon: WEAPONS.includes(i.kind) }]),
 ) as Record<CardKind, CardInfo>;
