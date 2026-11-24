@@ -210,6 +210,10 @@ body { margin: 0; background: #3a2412; }
 .spectate-controls { display: flex; gap: 8px; letter-spacing: 0; }
 .spectate-controls button { font-size: 14px; padding: 6px 12px; }
 .spectate-controls button.on { background: #d9a441; font-weight: bold; box-shadow: 0 0 10px rgba(255, 224, 138, 0.7); }
+.table-screen button.speed-toggle {
+  font-weight: 800; background: rgba(30, 18, 8, 0.75); color: var(--gold); border: 1px solid var(--gold);
+}
+.table-screen button.speed-toggle.on { background: #d9a441; color: #3a1d08; box-shadow: 0 0 10px rgba(255, 224, 138, 0.7); }
 .actions { display: flex; flex-direction: column; gap: 8px; align-self: center; }
 .actions .end-turn { font-size: 16px; padding: 10px 18px; background: #d9a441; font-weight: bold; }
 
@@ -377,6 +381,14 @@ h1, h2, h3, .cname, .rname, .opp .nm { font-weight: 800; letter-spacing: -0.01em
   .opp .equip-row .pcard.sm .emoji { font-size: 1.5em; }
   .opp.captain { border-width: 2px; padding-top: 9px; }
   .captain-ribbon { top: -9px; padding: 1px 6px; font-size: 10px; letter-spacing: 0; }
+
+  /* 상대가 5명 이상(6~7인)이면 칩 두 줄이 되므로 한 단계 더 줄인다 */
+  .opp-arc:has(> .opp:nth-child(5)) .opp { padding: 3px 2px 2px; }
+  .opp-arc:has(> .opp:nth-child(5)) .opp .face { width: 28px; height: 28px; flex-basis: 28px; margin-bottom: 1px; }
+  .opp-arc:has(> .opp:nth-child(5)) .opp .nm { font-size: 10.5px; }
+  .opp-arc:has(> .opp:nth-child(5)) .opp .hp { font-size: 9px; line-height: 1.2; }
+  .opp-arc:has(> .opp:nth-child(5)) .opp .equip-row .pcard.sm { width: 20px; height: 22px; }
+  .opp-arc:has(> .opp:nth-child(5)) ~ .table-middle .log { max-height: 48px; }
 
   /* 가운데: 카드 더미를 줄이고 일지는 최근 몇 줄만 */
   .table-middle { gap: 6px; }

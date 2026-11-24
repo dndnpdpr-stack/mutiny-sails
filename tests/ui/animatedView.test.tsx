@@ -53,6 +53,16 @@ describe('useAnimatedView', () => {
     expect(result.current.batchKey).toBeGreaterThan(0);
   });
 
+  it('double speed mode plays even a short batch at 2x', () => {
+    const v1 = view([dmg(1)]);
+    const v2 = view([dmg(1), dmg(2)]);
+    const { result, rerender } = renderHook(({ latest }) => useAnimatedView(latest, { enabled: true, minSpeed: 2 }), { initialProps: { latest: v1 } });
+    rerender({ latest: v2 });
+    expect(result.current.speed).toBe(2);
+    act(() => { vi.advanceTimersByTime(301); });
+    expect(result.current.shown).toBe(v2);
+  });
+
   it('changes batchKey when a batch with effects starts, and again for the next batch', () => {
     const { result, rerender } = setup(view([]));
     const k0 = result.current.batchKey;

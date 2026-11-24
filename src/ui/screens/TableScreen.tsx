@@ -102,6 +102,8 @@ export function TableScreen(p: {
   lastRejection: string | null;
   /** 내가 쓰러진 뒤 관전 중에 쓰는 버튼 */
   spectate?: Spectate;
+  /** 2배속 모드 켜기/끄기 */
+  doubleSpeed?: { on: boolean; onToggle: () => void };
 }) {
   const { latest, shown, send } = p;
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -236,6 +238,7 @@ export function TableScreen(p: {
         onEndTurn={() => (cancel(), send({ type: 'endTurn' }))}
         ability={ability}
         spectate={p.spectate}
+        doubleSpeed={p.doubleSpeed}
       />
 
       {infoCard && me.alive && !pick && (

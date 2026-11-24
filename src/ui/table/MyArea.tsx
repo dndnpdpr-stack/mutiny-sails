@@ -29,6 +29,7 @@ export function MyArea(p: {
   /** 직접 쓰는 능력이 없는 캐릭터면 null (데릭·도로시·키키만) */
   ability: { enabled: boolean; onUse: () => void } | null;
   spectate?: Spectate;
+  doubleSpeed?: { on: boolean; onToggle: () => void };
 }) {
   const me = p.me;
   const ch = me.character ? CHARACTER_INFO[me.character] : null;
@@ -77,6 +78,17 @@ export function MyArea(p: {
         </div>
       )}
       <div className="actions">
+        {p.doubleSpeed && (
+          <button
+            type="button"
+            className={`speed-toggle${p.doubleSpeed.on ? ' on' : ''}`}
+            aria-label="2배속"
+            aria-pressed={p.doubleSpeed.on}
+            onClick={p.doubleSpeed.onToggle}
+          >
+            2×
+          </button>
+        )}
         {p.ability && (
           <button type="button" disabled={!p.ability.enabled} onClick={p.ability.onUse}>
             능력 사용

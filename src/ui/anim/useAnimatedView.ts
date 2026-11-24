@@ -20,11 +20,13 @@ const fresh = (view: PlayerView, lastSeq: number) => view.events.filter((e) => (
  * 호스트가 보낸 view를 큐에 쌓고, 새 이벤트의 연출이 끝난 뒤에 화면에 반영한다.
  * 밀리면 2배속, 많이 밀리면 큐를 버리고 최신 view로 바로 건너뛴다.
  */
-export function useAnimatedView(latest: PlayerView | null, opts: { enabled: boolean }): AnimatedView {
+export function useAnimatedView(latest: PlayerView | null, opts: { enabled: boolean; /** 2배속 모드면 2 */ minSpeed?: 1 | 2 }): AnimatedView {
   const [state, setState] = useState<AnimatedView>(() => ({ shown: latest, effects: [], speed: 1, batchKey: 0 }));
 
   const enabledRef = useRef(opts.enabled);
   enabledRef.current = opts.enabled;
+  const minRef = useRef<1 | 2>(opts.minSpeed ?? 1);
+  minRef.current = opts.minSpeed ?? 1;
 
   const m = useRef({
     handled: latest as PlayerView | null,
@@ -91,7 +93,7 @@ export function useAnimatedView(latest: PlayerView | null, opts: { enabled: bool
         }
         s.curMs = ms;
         s.rawLeft = ms;
-        s.speed = ms + backlog() > FAST_MS ? 2 : 1;
+        s.speed = minRef.current === 2 || ms + backlog() > FAST_MS ? 2 : 1;
         s.batchKey++; // 연출 시작도 새 묶음: EffectLayer가 이 키로 다시 재생한다
         setState({ shown: s.shown, effects: fx, speed: s.speed, batchKey: s.batchKey });
         schedule(view);
@@ -153,7 +155,7 @@ export function useAnimatedView(latest: PlayerView | null, opts: { enabled: bool
       show(latest, true);
       return;
     }
-    const next: 1 | 2 = total > FAST_MS ? 2 : 1;
+    const next: 1 | 2 = minRef.current === 2 || total > FAST_MS ? 2 : 1;
     if (next !== s.speed) {
       if (s.timer && s.running) {
         // 진행한 만큼 빼고 새 배속으로 남은 시간을 다시 잡는다

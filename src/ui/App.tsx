@@ -15,9 +15,9 @@ function prefersReducedMotion(): boolean {
 export function App({ defaults }: { defaults?: Partial<LocalSetup> & { animations?: boolean } }) {
   const [setup, setSetup] = useState<LocalSetup | null>(null);
   const [reducedMotion] = useState(prefersReducedMotion);
-  const { view, lastRejection, send, restart, fast, setFast } = useLocalGame(setup);
+  const { view, lastRejection, send, restart, fast, setFast, double, setDouble } = useLocalGame(setup);
   const { animations = true, ...localDefaults } = defaults ?? {};
-  const { shown, effects, speed, batchKey } = useAnimatedView(view, { enabled: animations && !reducedMotion && !fast });
+  const { shown, effects, speed, batchKey } = useAnimatedView(view, { enabled: animations && !reducedMotion && !fast, minSpeed: double ? 2 : 1 });
 
   const newGame = () => (setSetup(null), restart());
 
@@ -42,6 +42,7 @@ export function App({ defaults }: { defaults?: Partial<LocalSetup> & { animation
         send={send}
         lastRejection={lastRejection}
         spectate={{ fast, onToggleFast: () => setFast(!fast), onRestart: newGame }}
+        doubleSpeed={{ on: double, onToggle: () => setDouble(!double) }}
       />
     );
   }

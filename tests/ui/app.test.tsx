@@ -78,6 +78,17 @@ describe('App', () => {
     await playThrough(10000);
   }, 25000);
 
+  it('remembers the 2x speed choice for the next game', async () => {
+    localStorage.removeItem('mutiny.doubleSpeed');
+    startGame(5, false);
+    await pickCharacter();
+    const b = await screen.findByRole('button', { name: '2배속' });
+    fireEvent.click(b);
+    expect(b.getAttribute('aria-pressed')).toBe('true');
+    expect(localStorage.getItem('mutiny.doubleSpeed')).toBe('1');
+    localStorage.removeItem('mutiny.doubleSpeed');
+  });
+
   it('new game from spectating goes back to setup', async () => {
     startGame(5, false, 1); // seed 1: 기본 행동만 하면 내가 먼저 쓰러진다
     await pickCharacter();

@@ -21,6 +21,16 @@ export interface LocalSetup {
 
 /** 빨리 감기 중 AI 행동 간격 */
 export const FAST_AI_MS = 100;
+/** 2배속 선택을 이 브라우저에 기억하는 키 */
+export const DOUBLE_SPEED_KEY = 'mutiny.doubleSpeed';
+
+function loadDouble(): boolean {
+  try {
+    return localStorage.getItem(DOUBLE_SPEED_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
 
 const NICKNAMES = ['붉은수염', '애꾸눈 잭', '검은 메리', '폭풍의 핀', '소금 샐리', '철갈고리', '바다쥐 로코', '황금이빨', '안개 속 아나', '녹슨 닻 칼'];
 
@@ -30,10 +40,15 @@ export function useLocalGame(setup: LocalSetup | null) {
   const [round, setRound] = useState(0);
   const client = useRef<Transport<ServerMessage, ClientMessage> | null>(null);
   const aiRef = useRef<AiPlayer[]>([]);
-  const [fast, setFastState] = useState(false);
+  const [fast, setFast] = useState(false);
+  const [double, setDoubleState] = useState(loadDouble);
+  const doubleRef = useRef(double);
+  doubleRef.current = double;
+  const base = setup?.aiDelayMs ?? 700;
+  const delayOf = (f: boolean, d: boolean) => (f ? FAST_AI_MS : d ? Math.round(base / 2) : base);
 
   useEffect(() => {
-    setFastState(false);
+    setFast(false);
     if (!setup) {
       setView(null);
       return;
@@ -57,7 +72,7 @@ export function useLocalGame(setup: LocalSetup | null) {
           else setLastRejection(m.reason);
         });
       } else {
-        ais.push(new AiPlayer(remote, { delayMs: setup.aiDelayMs ?? 700, seed: seed + s }));
+        ais.push(new AiPlayer(remote, { delayMs: delayOf(false, doubleRef.current), seed: seed + s }));
       }
     }
     aiRef.current = ais;
@@ -81,13 +96,19 @@ export function useLocalGame(setup: LocalSetup | null) {
     setRound((r) => r + 1);
   }, []);
 
-  const setFast = useCallback(
-    (on: boolean) => {
-      setFastState(on);
-      aiRef.current.forEach((a) => a.setDelay(on ? FAST_AI_MS : (setup?.aiDelayMs ?? 700)));
-    },
-    [setup],
-  );
+  // 빨리 감기·2배속이 바뀌면 지금 AI들의 행동 간격도 바꾼다
+  useEffect(() => {
+    aiRef.current.forEach((a) => a.setDelay(delayOf(fast, double)));
+  }, [fast, double, base]);
 
-  return { view, lastRejection, send, restart, fast, setFast };
+  const setDouble = useCallback((on: boolean) => {
+    setDoubleState(on);
+    try {
+      localStorage.setItem(DOUBLE_SPEED_KEY, on ? '1' : '0');
+    } catch {
+      // 저장이 막힌 브라우저면 이번 접속 동안만 기억한다
+    }
+  }, []);
+
+  return { view, lastRejection, send, restart, fast, setFast, double, setDouble };
 }

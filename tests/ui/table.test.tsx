@@ -24,11 +24,17 @@ function makeView(extra: Partial<PlayerView> = {}, seats?: SeatView[]): PlayerVi
 
 function renderTable(
   latest: PlayerView,
-  opts: { shown?: PlayerView; effects?: Effect[]; lastRejection?: string | null; spectate?: { fast: boolean; onToggleFast: () => void; onRestart: () => void } } = {},
+  opts: {
+    shown?: PlayerView;
+    effects?: Effect[];
+    lastRejection?: string | null;
+    spectate?: { fast: boolean; onToggleFast: () => void; onRestart: () => void };
+    doubleSpeed?: { on: boolean; onToggle: () => void };
+  } = {},
 ) {
   const send = vi.fn<(a: Action) => void>();
   const r = render(
-    <TableScreen latest={latest} shown={opts.shown ?? latest} effects={opts.effects ?? []} speed={1} batchKey={0} send={send} lastRejection={opts.lastRejection ?? null} spectate={opts.spectate} />,
+    <TableScreen latest={latest} shown={opts.shown ?? latest} effects={opts.effects ?? []} speed={1} batchKey={0} send={send} lastRejection={opts.lastRejection ?? null} spectate={opts.spectate} doubleSpeed={opts.doubleSpeed} />,
   );
   return { ...r, send };
 }
@@ -66,6 +72,18 @@ describe('TableScreen', () => {
       expect(document.querySelector(`[data-anchor="${a}"]`)).not.toBeNull();
     }
     expect(screen.getByText('항해 일지')).toBeTruthy();
+  });
+
+  it('has a 2x speed toggle', () => {
+    const onToggle = vi.fn();
+    const { rerender, send } = renderTable(makeView(), { doubleSpeed: { on: false, onToggle } });
+    const b = screen.getByRole('button', { name: '2배속' });
+    expect(b.getAttribute('aria-pressed')).toBe('false');
+    fireEvent.click(b);
+    expect(onToggle).toHaveBeenCalledTimes(1);
+    const v = makeView();
+    rerender(<TableScreen latest={v} shown={v} effects={[]} speed={2} batchKey={0} send={send} lastRejection={null} doubleSpeed={{ on: true, onToggle }} />);
+    expect(screen.getByRole('button', { name: '2배속' }).getAttribute('aria-pressed')).toBe('true');
   });
 
   it('marks the captain with a ribbon and its own frame', () => {
