@@ -7,6 +7,45 @@ import type { Anchor, Effect } from './effects';
 interface Pt { x: number; y: number }
 interface Live { id: number; effect: Effect; path: Pt[]; speed: 1 | 2 }
 
+/** 달려든 패널이 대상에 닿는 시점(전체 길이 비율) */
+const IMPACT_AT = 0.45;
+
+/**
+ * 공격한 사람의 패널이 대상 쪽으로 달려들었다 제자리로 돌아온다(패널 자체를 Web Animations로 움직임).
+ * 닿는 순간 대상 패널이 움찔하며 번쩍인다. 움직일 수 없는 환경(테스트 등)이면 아무것도 안 한다.
+ */
+function lunge(from: string, to: string, [a, b]: Pt[], ms: number): void {
+  const el = document.querySelector<HTMLElement>(`[data-anchor="${from}"]`);
+  const target = document.querySelector<HTMLElement>(`[data-anchor="${to}"]`);
+  // 끝까지 가면 겹쳐 보이니 맞닿을 만큼만
+  const dx = (b.x - a.x) * 0.72;
+  const dy = (b.y - a.y) * 0.72;
+  if (el && typeof el.animate === 'function') {
+    el.animate(
+      [
+        { transform: 'translate(0, 0) scale(1)', zIndex: 45 },
+        { transform: `translate(${-dx * 0.06}px, ${-dy * 0.06}px) scale(1.04)`, zIndex: 45, offset: 0.15 },
+        { transform: `translate(${dx}px, ${dy}px) scale(1.1)`, zIndex: 45, offset: IMPACT_AT },
+        { transform: `translate(${dx * 0.9}px, ${dy * 0.9}px) scale(1.06)`, zIndex: 45, offset: 0.55 },
+        { transform: 'translate(0, 0) scale(1)', zIndex: 45 },
+      ],
+      { duration: ms, easing: 'ease-in-out' },
+    );
+  }
+  if (target && typeof target.animate === 'function') {
+    const kx = Math.sign(dx || 1) * 8;
+    target.animate(
+      [
+        { transform: 'none', filter: 'none' },
+        { transform: `translateX(${kx}px) scale(0.95)`, filter: 'brightness(1.7) drop-shadow(0 0 14px rgba(224, 69, 58, 0.95))', offset: 0.25 },
+        { transform: `translateX(${-kx * 0.6}px)`, filter: 'brightness(1.2)', offset: 0.6 },
+        { transform: 'none', filter: 'none' },
+      ],
+      { duration: ms * 0.45, delay: ms * IMPACT_AT },
+    );
+  }
+}
+
 function center(a: Anchor): Pt | null {
   const r = anchorRect(a);
   return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null;
@@ -67,6 +106,7 @@ export function EffectLayer(p: { effects: Effect[]; speed: 1 | 2; batchKey: numb
             if (!path) return;
             c.started.set(id, { t: Date.now(), speed: p.speed });
             setLive((l) => [...l, { id, effect, path, speed: p.speed }]);
+            if (effect.kind === 'aim') lunge(`seat:${effect.from}`, `seat:${effect.to}`, path, effect.ms / p.speed);
           }, Math.max(0, effect.at - c.elapsed) / p.speed),
         );
       }
@@ -140,26 +180,18 @@ export function EffectLayer(p: { effects: Effect[]; speed: 1 | 2; batchKey: numb
           );
         }
         if (e.kind === 'aim') {
-          const [a, b] = path;
-          const len = Math.hypot(b.x - a.x, b.y - a.y);
-          const ang = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
+          const b = path[1];
           return (
             <div key={`${p.batchKey}-${id}`} data-effect="aim">
-              {/* 낸 사람 → 대상으로 뻗는 빨간 화살 */}
-              <motion.div
-                className="aim-line"
-                style={{ left: a.x, top: a.y, width: len, rotate: ang }}
-                initial={{ scaleX: 0, opacity: 1 }}
-                animate={{ scaleX: 1, opacity: [1, 1, 0] }}
-                transition={{ duration: dur, ease: 'easeOut', opacity: { times: [0, 0.7, 1], duration: dur } }}
-              />
+              {/* 패널이 부딪히는 순간 대상 위에 카드 그림과 💥 */}
               <motion.div
                 className="aim-hit"
                 style={{ left: b.x, top: b.y }}
-                initial={{ scale: 0.4, opacity: 0 }}
-                animate={{ scale: [0.4, 1.3, 1], opacity: [0, 1, 0] }}
-                transition={{ duration: dur, times: [0, 0.5, 1] }}
+                initial={{ scale: 0.3, opacity: 0 }}
+                animate={{ scale: [0.3, 0.3, 1.4, 1.1], opacity: [0, 0, 1, 0] }}
+                transition={{ duration: dur, times: [0, IMPACT_AT, IMPACT_AT + 0.12, 1] }}
               >
+                <span className="aim-burst">💥</span>
                 {e.emoji}
               </motion.div>
             </div>

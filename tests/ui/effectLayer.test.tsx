@@ -34,12 +34,23 @@ describe('EffectLayer', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
-  it('draws an aim arrow between two seats', () => {
-    const { container } = setup([{ kind: 'aim', from: 1, to: 2, emoji: '🗡️', at: 0, ms: 700 }]);
-    act(() => { vi.advanceTimersByTime(0); });
-    expect(count(container, 'aim')).toBe(1);
-    act(() => { vi.advanceTimersByTime(701); });
-    expect(count(container, 'aim')).toBe(0);
+  it('an attack makes the attacker panel lunge at the target, which shakes on impact', () => {
+    const animate = vi.fn();
+    const orig = HTMLElement.prototype.animate;
+    HTMLElement.prototype.animate = animate as unknown as typeof orig;
+    try {
+      const { container } = setup([{ kind: 'aim', from: 1, to: 2, emoji: '🗡️', at: 0, ms: 800 }]);
+      act(() => { vi.advanceTimersByTime(0); });
+      expect(count(container, 'aim')).toBe(1);
+      const who = animate.mock.contexts.map((el) => (el as HTMLElement).dataset.anchor);
+      expect(who).toEqual(['seat:1', 'seat:2']);
+      // 달려드는 쪽은 대상 방향으로 움직이는 transform이 있다
+      expect(JSON.stringify(animate.mock.calls[0][0])).toContain('translate(');
+      act(() => { vi.advanceTimersByTime(801); });
+      expect(count(container, 'aim')).toBe(0);
+    } finally {
+      HTMLElement.prototype.animate = orig;
+    }
   });
 
   it('a judge shows its reason, what it needs, and the result', () => {

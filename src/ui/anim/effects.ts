@@ -12,7 +12,7 @@ export type Effect =
   | { kind: 'float'; seat: SeatId; text: string; tone: 'damage' | 'heal'; at: number; ms: number }
   /** good: 판정 받은 사람에게 좋은 결과인지 (null이면 중립 — 주사위 내기) / 설명 줄이 없으면(title '') 카드만 */
   | { kind: 'judge'; card: CardView; success: boolean; title: string; need: string; result: string; good: boolean | null; at: number; ms: number }
-  /** 누가 누구에게 카드를 냈는지: 낸 사람 → 대상 화살표 */
+  /** 누가 누구에게 카드를 냈는지: 낸 사람의 패널이 대상에게 달려들어 부딪힌다 */
   | { kind: 'aim'; from: SeatId; to: SeatId; emoji: string; at: number; ms: number }
   | { kind: 'death'; seat: SeatId; at: number; ms: number }
   | { kind: 'turn'; seat: SeatId; mine: boolean; at: number; ms: number }
@@ -24,7 +24,8 @@ const SHAKE_MS = 400;
 const FLOAT_MS = 600;
 /** 무엇을 위한 판정인지·결과를 읽을 시간 */
 const JUDGE_MS = 1400;
-const AIM_MS = 700;
+/** 공격한 사람 패널이 달려들었다 돌아오는 시간 */
+const AIM_MS = 800;
 const DEATH_MS = 600;
 const TURN_MS = 500;
 /** 표시만 하는 짧은 표시. 띠는 TableScreen이 자기 타이머로 띄워서 배속·몰아치기에 영향받지 않는다 */
