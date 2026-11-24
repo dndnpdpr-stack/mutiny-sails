@@ -2,11 +2,11 @@ import { Rng } from '../engine/rng';
 import type { Transport } from '../net/Transport';
 import type { ClientMessage, ServerMessage } from '../host/messages';
 import type { PlayerView } from '../engine/types';
-import { AiMemory } from './memory';
+import { AiMemory, type Difficulty } from './memory';
 import { decide, fallbackAction } from './decide';
 
 export class AiPlayer {
-  private mem = new AiMemory();
+  private mem: AiMemory;
   private rng: Rng;
   private timer: ReturnType<typeof setTimeout> | null = null;
   private lastView: PlayerView | null = null;
@@ -16,9 +16,10 @@ export class AiPlayer {
 
   constructor(
     private readonly transport: Transport<ServerMessage, ClientMessage>,
-    opts: { delayMs: number; seed: number },
+    opts: { delayMs: number; seed: number; difficulty?: Difficulty },
   ) {
     this.rng = new Rng(opts.seed);
+    this.mem = new AiMemory(opts.difficulty ?? 'normal');
     this.delayMs = opts.delayMs;
     this.off = transport.onMessage((m) => {
       if (m.type === 'view') this.onView(m.view);

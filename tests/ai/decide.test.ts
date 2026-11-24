@@ -68,6 +68,7 @@ describe('decide with expansion cards', () => {
     const [slash] = setHand(g, 0, ['slash']);
     const mem = new AiMemory();
     mem.captainFoe[4] = 5;
+    mem.captainFoe[1] = 1;
     expect(ai(g, 0, mem)).toEqual({ type: 'playCard', cardId: slash.id, target: 4 });
     g.revealRoleTo(0, 4);
     expect(ai(g, 0, mem)).toEqual({ type: 'playCard', cardId: slash.id, target: 1 });
@@ -91,6 +92,58 @@ describe('decide with expansion cards', () => {
     g.start();
     const [coat] = setHand(g, 0, ['leatherCoat']);
     expect(ai(g, 0)).toEqual({ type: 'playCard', cardId: coat.id });
+  });
+});
+
+describe('difficulty', () => {
+  // 5인: 0 선장, 1·2 반란, 3 첩자, 4 충성. 1번 차례에서 선장(0)은 거리 1
+  const rebelTurn = (level: 'easy' | 'normal' | 'hard', mem = new AiMemory(level)) => {
+    const g = makeGame(5);
+    g.start();
+    passUntil(g, 1);
+    const [slash] = setHand(g, 1, ['slash']);
+    return { g, slash, act: () => decide(buildView(g, 1, () => true), mem, rng(), level) };
+  };
+
+  it('easy and normal rebels slash the captain in range', () => {
+    for (const level of ['easy', 'normal'] as const) {
+      const { slash, act } = rebelTurn(level);
+      expect(act()).toEqual({ type: 'playCard', cardId: slash.id, target: 0 });
+    }
+  });
+
+  it('a normal rebel does not slash someone it has no clue about', () => {
+    const g = makeGame(5);
+    g.start();
+    passUntil(g, 2); // 2번(반란): 거리 1은 1번(반란)·3번(첩자), 선장은 거리 2
+    const [slash] = setHand(g, 2, ['slash']);
+    const view = buildView(g, 2, () => true);
+    expect(view.hints.find((h) => h.cardId === slash.id)?.targets).not.toContain(0);
+    expect(decide(view, new AiMemory('normal'), rng(), 'normal')).toEqual({ type: 'endTurn' });
+    expect(decide(view, new AiMemory('easy'), rng(), 'easy')).toMatchObject({ type: 'playCard', cardId: slash.id });
+  });
+
+  it('a hard rebel hides early: no lone slash on a healthy captain, but strikes when the captain is weak', () => {
+    const { g, act } = rebelTurn('hard');
+    expect(act()).toEqual({ type: 'endTurn' });
+    g.seats[0].hp = 2;
+    expect(act()).toMatchObject({ type: 'playCard', target: 0 });
+  });
+
+  it('a hard rebel strikes with two slashes in hand', () => {
+    const g = makeGame(5);
+    g.start();
+    passUntil(g, 1);
+    setHand(g, 1, ['slash', 'slash']);
+    expect(decide(buildView(g, 1, () => true), new AiMemory('hard'), rng(), 'hard')).toMatchObject({ type: 'playCard', target: 0 });
+  });
+
+  it('memory counts rounds from the captain turns', () => {
+    const g = makeGame(4);
+    g.start();
+    const mem = new AiMemory();
+    mem.update(buildView(g, 1, () => true));
+    expect(mem.rounds).toBe(1);
   });
 });
 

@@ -4,7 +4,7 @@ import { Game } from '../../src/engine/Game';
 import { Rng } from '../../src/engine/rng';
 import { buildView } from '../../src/host/view';
 
-function playOut(seed: number, extras = false) {
+function playOut(seed: number, extras = false, level: 'easy' | 'normal' | 'hard' = 'normal') {
   const n = 4 + (seed % 4);
   const game = new Game({ seed, names: Array.from({ length: n }, (_, i) => `P${i}`), seaEvents: extras, expansionCards: extras });
   game.start();
@@ -16,7 +16,7 @@ function playOut(seed: number, extras = false) {
     const p = game.pending();
     if (!p) throw new Error(`no pending at seed ${seed}`);
     const view = buildView(game, p.seat, () => true);
-    const action = decide(view, mems[p.seat], rng);
+    const action = decide(view, mems[p.seat], rng, level);
     if (!action) throw new Error(`no action at seed ${seed}`);
     const r = game.apply(p.seat, action);
     if (!r.ok) {
@@ -42,6 +42,12 @@ describe('AI simulation', () => {
     }
     console.log('winners', tally, 'steps', steps, 'rejected', rejected);
     expect(rejected / steps).toBeLessThan(0.01);
+  }, 120000);
+
+  it('every difficulty finishes its games (no stalemate)', () => {
+    for (const level of ['easy', 'hard'] as const) {
+      for (let seed = 1; seed <= 100; seed++) expect(playOut(seed, true, level).winner, `${level} seed ${seed}`).not.toBeNull();
+    }
   }, 120000);
 
   it('300 games with sea events and expansion cards all finish with few rejected actions', () => {

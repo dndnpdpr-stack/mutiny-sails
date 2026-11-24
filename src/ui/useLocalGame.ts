@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AiPlayer } from '../ai/AiPlayer';
+import type { Difficulty } from '../ai/memory';
 import { Game } from '../engine/Game';
 import type { Action, PlayerView } from '../engine/types';
 import { HostSession } from '../host/HostSession';
@@ -17,6 +18,8 @@ export interface LocalSetup {
   seaEvents?: boolean;
   /** 확장 카드 사용 (기본 켜짐) */
   expansionCards?: boolean;
+  /** AI 난이도 (기본 보통) */
+  difficulty?: Difficulty;
 }
 
 /** 빨리 감기 중 AI 행동 간격 */
@@ -72,7 +75,7 @@ export function useLocalGame(setup: LocalSetup | null) {
           else setLastRejection(m.reason);
         });
       } else {
-        ais.push(new AiPlayer(remote, { delayMs: delayOf(false, doubleRef.current), seed: seed + s }));
+        ais.push(new AiPlayer(remote, { delayMs: delayOf(false, doubleRef.current), seed: seed + s, difficulty: setup.difficulty ?? 'normal' }));
       }
     }
     aiRef.current = ais;

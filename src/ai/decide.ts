@@ -1,6 +1,6 @@
 import type { Rng } from '../engine/rng';
 import type { Action, CardKind, CardView, JudgeReason, PendingView, PlayerView, PlayHint, SeatId } from '../engine/types';
-import type { AiMemory } from './memory';
+import type { AiMemory, Difficulty } from './memory';
 import { CHARACTER_INFO } from '../engine/characters/roster';
 
 const WEAPON_RANGE: Partial<Record<CardKind, number>> = { pistol: 2, musket: 3, longMusket: 4, deckCannon: 5, twinPistols: 1, harpoon: 2 };
@@ -17,16 +17,63 @@ const KEEP_VALUE: Record<CardKind, number> = {
 
 const isTurnOf = (view: PlayerView): boolean => view.pending?.seat === view.you;
 
+/**
+ * 어려움의 반란 선원은 정체를 숨기다가(선장을 안 친다) 기회가 오면 몰아친다.
+ * 기회: 선장이 약해졌거나, 이미 들켰거나, 3라운드가 지났거나, 남은 사람이 적거나, 칼질 2장 이상으로 선장을 칠 수 있을 때
+ */
+export function rebelHiding(view: PlayerView, mem: AiMemory): boolean {
+  if (mem.level !== 'hard' || view.myRole !== 'rebel') return false;
+  const captain = view.seats.find((s) => s.role === 'captain' && s.alive);
+  if (!captain) return false;
+  const alive = view.seats.filter((s) => s.alive).length;
+  const slashes = view.myHand.filter((c) => c.kind === 'slash').length;
+  const canHitCaptain = view.hints.some((h) => h.targets?.includes(captain.seat) && view.myHand.find((c) => c.id === h.cardId)?.kind === 'slash');
+  const strike = captain.hp <= 2 || mem.foe(view.you) >= 2 || mem.rounds >= 3 || alive <= 3 || (canHitCaptain && slashes >= 2);
+  return !strike;
+}
+
+/** 난이도별 "이 점수 이상이어야 공격한다". 쉬움은 원래 기준, 보통·어려움은 근거(점수 1 이상)가 있어야 */
+function minScore(mem: AiMemory, easy: number): number {
+  return mem.level === 'easy' ? easy : Math.max(easy, 1);
+}
+
 function targetScore(view: PlayerView, mem: AiMemory, t: SeatId): number {
   const seat = view.seats[t];
   const alive = view.seats.filter((s) => s.alive).length;
-  const weak = (5 - seat.hp) * 0.3;
+  const level: Difficulty = mem.level;
+  // 약한 상대 몰아치기: 어려움은 더 강하게
+  const weak = (5 - seat.hp) * (level === 'hard' ? 0.6 : 0.3);
   const foe = mem.foe(t);
   const isCaptain = seat.role === 'captain';
   // 고자질 등으로 역할을 알게 된 상대
   const known = seat.alive ? seat.role : null;
   const captainSide = known === 'loyalist';
   const enemyOfCaptain = known === 'rebel' || known === 'spy';
+  if (level !== 'easy') {
+    // 근거 있는 상대만: 단서가 없는(foe 0) 사람은 약해도 0점
+    const lean = (sign: number) => (sign * foe > 0 ? sign * foe * 2 + weak : sign * foe * 2);
+    // 4라운드가 지나도록 단서가 없으면 선장 쪽은 아직 정체를 안 드러낸 사람을 의심하기 시작한다 (교착 방지)
+    const suspectQuiet = mem.rounds >= 4 && foe === 0 ? 1 + weak : 0;
+    switch (view.myRole) {
+      case 'captain':
+      case 'loyalist':
+        if (captainSide || (isCaptain && view.myRole === 'loyalist')) return -100;
+        return lean(1) + suspectQuiet + (enemyOfCaptain ? 5 + weak : 0);
+      case 'rebel':
+        if (known === 'rebel') return -100;
+        if (isCaptain) return rebelHiding(view, mem) ? -10 : 20 + weak;
+        return lean(-1) + (captainSide ? 5 + weak : 0);
+      case 'spy': {
+        // 끝까지 선장 편인 척: 선장 쪽만 남으면(반란 기색이 아무도 없으면) 그때 돌아선다
+        const rebelsLeft = view.seats.some((s) => s.alive && s.seat !== view.you && (s.role === 'rebel' || mem.foe(s.seat) > 0));
+        if (alive <= 2 || !rebelsLeft) return isCaptain ? 20 + weak : captainSide ? 8 + weak : 1;
+        if (isCaptain) return -10;
+        return lean(1) + (known === 'rebel' ? 5 + weak : 0);
+      }
+      default:
+        return 0;
+    }
+  }
   switch (view.myRole) {
     case 'captain':
       if (captainSide) return -100;
@@ -87,8 +134,9 @@ function decideTurn(view: PlayerView, mem: AiMemory): Action {
     }
   }
 
-  // 회복
-  if (me.hp < me.maxHp) {
+  // 회복. 어려움은 럼주를 쓰러질 때를 대비해 아껴 두고, 체력이 2 이하거나 손패가 넘칠 때만 마신다
+  const saveRum = mem.level === 'hard' && me.hp > 2 && hand.length <= me.hp;
+  if (me.hp < me.maxHp && !saveRum) {
     const h = hintsOf('rum')[0];
     if (h) return play(h);
   }
@@ -115,7 +163,7 @@ function decideTurn(view: PlayerView, mem: AiMemory): Action {
 
   // 공격
   for (const h of hintsOf('slash')) {
-    const t = bestTarget(view, mem, h.targets ?? [], -50);
+    const t = bestTarget(view, mem, h.targets ?? [], minScore(mem, 0));
     if (t !== null) return play(h, t);
   }
   if (me.hp >= 3) {
@@ -129,7 +177,7 @@ function decideTurn(view: PlayerView, mem: AiMemory): Action {
   }
   for (const h of hintsOf('pickpocket', 'cutRope')) {
     const candidates = (h.targets ?? []).filter((t) => view.seats[t].handCount + view.seats[t].equipment.length > 0);
-    const t = bestTarget(view, mem, candidates, 0);
+    const t = bestTarget(view, mem, candidates, minScore(mem, 0));
     if (t === null) continue;
     const seat = view.seats[t];
     if (seat.handCount === 0) return { type: 'playCard', cardId: h.cardId, target: t, targetCardId: seat.equipment[0].id };
@@ -150,7 +198,7 @@ function decideTurn(view: PlayerView, mem: AiMemory): Action {
     }
   }
   for (const h of hintsOf('diceWager')) {
-    const t = bestTarget(view, mem, (h.targets ?? []).filter((s) => view.seats[s].handCount > 0), 0);
+    const t = bestTarget(view, mem, (h.targets ?? []).filter((s) => view.seats[s].handCount > 0), minScore(mem, 0));
     if (t !== null) return play(h, t);
   }
   for (const h of hintsOf('walkPlank')) {
@@ -304,7 +352,8 @@ function respond(view: PlayerView, p: PendingView): Action | null {
 }
 
 /** view만 보고 행동을 고른다. 내가 기다림의 대상이 아니면 null */
-export function decide(view: PlayerView, mem: AiMemory, rng: Rng): Action | null {
+export function decide(view: PlayerView, mem: AiMemory, rng: Rng, level?: Difficulty): Action | null {
+  if (level) mem.level = level;
   mem.update(view);
   const p = view.pending;
   if (!p || !isTurnOf(view)) return null;

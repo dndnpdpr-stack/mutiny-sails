@@ -1,16 +1,43 @@
 import { useEffect, useRef, useState } from 'react';
 import titleArt from '../art/title.svg';
 import { HowToPlay } from './HowToPlay';
+import type { Difficulty } from '../../ai/memory';
 
 export interface SetupOptions {
   seaEvents: boolean;
   expansionCards: boolean;
+  difficulty: Difficulty;
+}
+
+const DIFFICULTY_KEY = 'mutiny.difficulty';
+const DIFFICULTIES: { id: Difficulty; name: string; text: string }[] = [
+  { id: 'easy', name: '쉬움', text: '단순하게 싸워요. 가끔 같은 편도 헷갈려요.' },
+  { id: 'normal', name: '보통', text: '누가 어느 편인지 행동을 보고 추리해요.' },
+  { id: 'hard', name: '어려움', text: '정체를 숨기고 있다가 기회가 오면 몰아쳐요.' },
+];
+
+function loadDifficulty(): Difficulty {
+  try {
+    const v = localStorage.getItem(DIFFICULTY_KEY);
+    return v === 'easy' || v === 'hard' ? v : 'normal';
+  } catch {
+    return 'normal';
+  }
 }
 
 export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: string, options: SetupOptions) => void }) {
   const [count, setCount] = useState(5);
   const [sea, setSea] = useState(true);
   const [expansion, setExpansion] = useState(true);
+  const [difficulty, setDifficulty] = useState<Difficulty>(loadDifficulty);
+  const pickDifficulty = (d: Difficulty) => {
+    setDifficulty(d);
+    try {
+      localStorage.setItem(DIFFICULTY_KEY, d);
+    } catch {
+      // 저장이 막혀 있으면 이번만
+    }
+  };
   const [name, setName] = useState('');
   const [guide, setGuide] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -49,11 +76,22 @@ export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: 
           <input type="checkbox" checked={expansion} onChange={(e) => setExpansion(e.target.checked)} />
           🃏 확장 카드 <small>(새 카드 10종 16장을 덱에 섞어요)</small>
         </label>
+        <div className="difficulty">
+          <span className="difficulty-label">🤖 AI 난이도</span>
+          <div className="difficulty-options">
+            {DIFFICULTIES.map((d) => (
+              <button key={d.id} type="button" className={d.id === difficulty ? 'selected' : ''} aria-pressed={d.id === difficulty} onClick={() => pickDifficulty(d.id)}>
+                {d.name}
+              </button>
+            ))}
+          </div>
+          <small>{DIFFICULTIES.find((d) => d.id === difficulty)!.text}</small>
+        </div>
         <div className="setup-actions">
           <button ref={guideButtonRef} type="button" className="secondary" onClick={() => setGuide(true)}>
             게임 방법
           </button>
-          <button type="button" className="primary" onClick={() => onStart(count, name.trim(), { seaEvents: sea, expansionCards: expansion })}>
+          <button type="button" className="primary" onClick={() => onStart(count, name.trim(), { seaEvents: sea, expansionCards: expansion, difficulty })}>
             출항
           </button>
         </div>
