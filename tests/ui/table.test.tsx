@@ -68,6 +68,22 @@ describe('TableScreen', () => {
     expect(screen.getByText('항해 일지')).toBeTruthy();
   });
 
+  it('marks the captain with a ribbon and its own frame', () => {
+    renderTable(makeView());
+    expect(panel(0).classList.contains('captain')).toBe(true);
+    expect(within(panel(0)).getByText('👑 선장')).toBeTruthy();
+    expect(panel(2).classList.contains('captain')).toBe(false);
+    expect(document.querySelector('.me-info')?.classList.contains('captain')).toBe(false);
+  });
+
+  it('marks my own panel when I am the captain', () => {
+    const seats = [0, 1, 2, 3, 4].map((i) => seat(i, { role: i === 1 ? 'captain' : null }));
+    renderTable(makeView({ myRole: 'captain' }, seats));
+    const me = document.querySelector('.me-info') as HTMLElement;
+    expect(me.classList.contains('captain')).toBe(true);
+    expect(within(me).getByText('👑 선장')).toBeTruthy();
+  });
+
   it('orders opponents clockwise starting after me', () => {
     renderTable(makeView());
     const order = screen.getAllByTestId('seat-panel').map((p) => p.getAttribute('data-anchor'));

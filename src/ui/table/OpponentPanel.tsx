@@ -12,6 +12,11 @@ export function hearts(hp: number, maxHp: number): string {
   return '♥'.repeat(Math.max(hp, 0)) + '♡'.repeat(Math.max(maxHp - Math.max(hp, 0), 0));
 }
 
+/** 선장 자리 위에 걸치는 금색 리본 */
+export function CaptainRibbon() {
+  return <span className="captain-ribbon">👑 선장</span>;
+}
+
 export function OpponentPanel(p: {
   seat: SeatView;
   current: boolean;
@@ -29,6 +34,7 @@ export function OpponentPanel(p: {
   const cls = [
     'opp',
     p.current ? 'current' : '',
+    s.role === 'captain' ? 'captain' : '',
     s.alive ? '' : 'dead',
     p.targetable ? 'targetable' : '',
     p.outOfRange ? 'out-of-range' : '',
@@ -45,7 +51,7 @@ export function OpponentPanel(p: {
       role={p.targetable ? 'button' : undefined}
       onClick={p.targetable ? p.onClick : undefined}
     >
-      {s.role === 'captain' && <span className="crown" aria-label="선장">👑</span>}
+      {s.role === 'captain' && <CaptainRibbon />}
       <div className="face"><Portrait id={s.character} variant="face" /></div>
       <div className="nm">
         {s.name}
@@ -69,7 +75,7 @@ export function OpponentPanel(p: {
           👁 엿본 카드: {CARD_CATALOG[p.peeked.kind].name}
         </div>
       )}
-      {s.role && <div className="mini role">{roleName(s.role)}</div>}
+      {s.role && s.role !== 'captain' && <div className="mini role">{roleName(s.role)}</div>}
       {s.alive && p.distance !== undefined && <div className="mini dist">거리 {p.distance}</div>}
     </div>
   );

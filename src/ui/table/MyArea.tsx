@@ -4,7 +4,7 @@ import type { CardView, Role, SeatView } from '../../engine/types';
 import { RoleCard } from './RoleCard';
 import { CardFace } from './Card';
 import { FanHand } from './FanHand';
-import { hearts, type SeatFx } from './OpponentPanel';
+import { CaptainRibbon, hearts, type SeatFx } from './OpponentPanel';
 
 export interface Spectate {
   fast: boolean;
@@ -32,11 +32,13 @@ export function MyArea(p: {
 }) {
   const me = p.me;
   const ch = me.character ? CHARACTER_INFO[me.character] : null;
-  const cls = ['me-info', 'panel', p.current ? 'current' : '', me.alive ? '' : 'dead', ...p.fx].filter(Boolean).join(' ');
+  const captain = p.myRole === 'captain';
+  const cls = ['me-info', 'panel', p.current ? 'current' : '', captain ? 'captain' : '', me.alive ? '' : 'dead', ...p.fx].filter(Boolean).join(' ');
   return (
     <div className="my-area">
       <div className="me-cards">
         <div className={cls} data-anchor={`seat:${me.seat}`}>
+          {captain && <CaptainRibbon />}
           <div className="face me-face">
             <Portrait id={me.character} variant="face" />
           </div>
