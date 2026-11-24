@@ -141,7 +141,7 @@ body { margin: 0; background: #3a2412; }
 .effect-layer .float-num.heal { color: #5fc46b; }
 
 /* screens */
-.screen-center { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; }
+.screen-center { min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; }
 .scroll-panel {
   background: #f3e3b8; color: #3b2a14; border: 2px solid #7a4e24; border-radius: 14px; padding: 24px;
   max-width: 720px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px;
@@ -462,4 +462,19 @@ h1, h2, h3, .cname, .rname, .opp .nm { font-weight: 800; letter-spacing: -0.01em
   .fan-hand { min-height: 0; padding: 30px 30px 22px; justify-content: safe center; zoom: 0.85; }
   .my-area > .me-cards { justify-self: stretch; }
   .actions .end-turn { padding: 8px 18px; font-size: 15px; }
+}
+/* 폰: 캐릭터 고르기 화면이 주소창에 가리지 않게(100dvh) 역할 카드를 가로 띠로 줄인다 */
+@media (max-width: 520px) {
+  .screen-center:has(.draft) { padding: 8px; }
+  .scroll-panel.draft { padding: 12px 10px; gap: 8px; }
+  .scroll-panel.draft h3 { margin: 0; }
+  .draft .captain-call { margin: 0; }
+  .draft > .role-card.front {
+    width: 100%; max-width: 340px; min-height: 0; box-sizing: border-box; padding: 6px 12px;
+    display: grid; grid-template-columns: auto 1fr; column-gap: 10px; align-items: center; text-align: left;
+  }
+  .draft > .role-card.front .remoji { grid-row: span 3; font-size: 30px; }
+  .draft > .role-card.front .rname { margin: 0; }
+  .draft > .role-card.front .rgoal { font-size: 11.5px; line-height: 1.35; }
+  .draft > .role-card.front .rnote { grid-column: 2; }
 }
