@@ -8,13 +8,13 @@ import type { PlayerView, Role, SeatView } from '../../src/engine/types';
 const ROLES = /선장|충성 선원|반란 선원|첩자/;
 
 describe('SetupScreen', () => {
-  it('defaults to 5 players and starts with the typed name', () => {
+  it('defaults to 9 players and starts with the typed name', () => {
     const onStart = vi.fn();
     render(<SetupScreen onStart={onStart} />);
-    expect(screen.getByText('5명').closest('button')?.className).toMatch(/selected/);
+    expect(screen.getByText('9명').closest('button')?.className).toMatch(/selected/);
     fireEvent.change(screen.getByRole('textbox'), { target: { value: '잭' } });
     fireEvent.click(screen.getByText('출항'));
-    expect(onStart).toHaveBeenCalledWith(5, '잭', { seaEvents: true, expansionCards: true, difficulty: 'normal' });
+    expect(onStart).toHaveBeenCalledWith(9, '잭', { seaEvents: true, expansionCards: true, difficulty: 'normal' });
   });
 
   it('can turn sea events off', () => {
@@ -24,7 +24,7 @@ describe('SetupScreen', () => {
     expect(toggle.checked).toBe(true);
     fireEvent.click(toggle);
     fireEvent.click(screen.getByText('출항'));
-    expect(onStart).toHaveBeenCalledWith(5, '', { seaEvents: false, expansionCards: true, difficulty: 'normal' });
+    expect(onStart).toHaveBeenCalledWith(9, '', { seaEvents: false, expansionCards: true, difficulty: 'normal' });
   });
 
   it('can turn expansion cards off', () => {
@@ -32,13 +32,14 @@ describe('SetupScreen', () => {
     render(<SetupScreen onStart={onStart} />);
     fireEvent.click(screen.getByRole('checkbox', { name: /확장 카드/ }));
     fireEvent.click(screen.getByText('출항'));
-    expect(onStart).toHaveBeenCalledWith(5, '', { seaEvents: true, expansionCards: false, difficulty: 'normal' });
+    expect(onStart).toHaveBeenCalledWith(9, '', { seaEvents: true, expansionCards: false, difficulty: 'normal' });
   });
 
   it('offers 4 to 9 players and explains the expansion roles at 8+', () => {
     const onStart = vi.fn();
     render(<SetupScreen onStart={onStart} />);
     for (const n of [4, 5, 6, 7, 8, 9]) expect(screen.getByText(`${n}명`)).toBeTruthy();
+    fireEvent.click(screen.getByText('7명'));
     expect(screen.queryByText(/확장 역할/)).toBeNull();
     fireEvent.click(screen.getByText('9명'));
     expect(screen.getByText(/확장 역할/).textContent).toContain('현상금 사냥꾼');
@@ -54,7 +55,7 @@ describe('SetupScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: /어려움/ }));
     expect(screen.getByText(/정체를 숨기/)).toBeTruthy();
     fireEvent.click(screen.getByText('출항'));
-    expect(onStart).toHaveBeenCalledWith(5, '', { seaEvents: true, expansionCards: true, difficulty: 'hard' });
+    expect(onStart).toHaveBeenCalledWith(9, '', { seaEvents: true, expansionCards: true, difficulty: 'hard' });
     unmount();
     render(<SetupScreen onStart={vi.fn()} />);
     expect(screen.getByRole('button', { name: /어려움/ }).getAttribute('aria-pressed')).toBe('true');

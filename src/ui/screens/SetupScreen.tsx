@@ -29,7 +29,7 @@ function loadDifficulty(): Difficulty {
 }
 
 export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: string, options: SetupOptions) => void }) {
-  const [count, setCount] = useState(5);
+  const [count, setCount] = useState(9);
   const [sea, setSea] = useState(true);
   const [expansion, setExpansion] = useState(true);
   const [difficulty, setDifficulty] = useState<Difficulty>(loadDifficulty);
