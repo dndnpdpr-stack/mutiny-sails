@@ -237,6 +237,39 @@ class Morgan extends Character {
   }
 }
 
+class Bartol extends Character {
+  readonly id = 'bartol';
+  readonly name = '덩치 바르톨';
+  readonly maxHp = 5;
+  readonly text = '덩치가 커서 남이 나를 볼 때 거리 -1.';
+  distanceBonusAgainstMe(): number {
+    return -1;
+  }
+}
+
+class Pip extends Character {
+  readonly id = 'pip';
+  readonly name = '견습생 핍';
+  readonly maxHp = 2;
+  readonly text = '칼질·포격을 받을 때 판정: ♥이면 피해요. 피해를 받을 때마다 카드 2장을 받아요.';
+  hasInnateBarrel(): boolean {
+    return true;
+  }
+  drawOnDamage(): number {
+    return 2;
+  }
+}
+
+class Jack extends Character {
+  readonly id = 'jack';
+  readonly name = '쌍칼 잭';
+  readonly maxHp = 4;
+  readonly text = '칼질을 한 턴에 몇 번이든 써요.';
+  minSlashes(): number {
+    return Infinity;
+  }
+}
+
 export const CHARACTERS: Record<CharacterId, Character> = {
   tom: new Tom(),
   margo: new Margo(),
@@ -256,6 +289,9 @@ export const CHARACTERS: Record<CharacterId, Character> = {
   gordon: new Gordon(),
   kiki: new Kiki(),
   morgan: new Morgan(),
+  bartol: new Bartol(),
+  pip: new Pip(),
+  jack: new Jack(),
 };
 
 export const CHARACTER_IDS = Object.keys(CHARACTERS) as CharacterId[];

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 166 200">
+  <!-- 쌍칼 잭: 어깨 뒤로 엇갈린 두 자루 칼, 날카로운 콧수염, 한쪽 눈썹을 올린 자신만만한 웃음, 붉은 머리띠 -->
+  <rect width="166" height="200" fill="#7a3a3a"/>
+  <path d="M0 150 Q83 124 166 150 L166 200 L0 200 Z" fill="#632e2e"/>
+  <g stroke="#1b120a" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 엇갈린 칼 -->
+    <path d="M14 30 L128 170 M152 30 L38 170" fill="none" stroke-width="11"/>
+    <path d="M14 30 L128 170 M152 30 L38 170" fill="none" stroke="#d8dde2" stroke-width="5"/>
+    <path d="M118 150 L138 166 M48 150 L28 166" fill="none" stroke="#e0b13a" stroke-width="7"/>
+    <path d="M10 200 Q16 148 54 138 L112 138 Q150 148 156 200 Z" fill="#2b2b3a" stroke-width="5"/>
+    <path d="M60 140 L83 176 L106 140" fill="#efe6d2" stroke-width="4"/>
+    <path d="M70 120 L70 142 L96 142 L96 120 Z" fill="#c48a62" stroke-width="4"/>
+    <path d="M42 84 Q36 128 83 132 Q130 128 124 84 Q122 52 83 52 Q44 52 42 84 Z" fill="#e0a87e" stroke-width="5"/>
+    <path d="M102 56 Q126 66 124 88 Q122 122 94 130 Q114 106 110 74 Z" fill="#c48a62" stroke="none"/>
+    <!-- 머리와 머리띠 -->
+    <path d="M38 86 Q30 40 83 38 Q136 40 128 86 Q124 66 110 60 Q83 54 56 60 Q42 66 38 86 Z" fill="#2a1c14" stroke-width="5"/>
+    <path d="M40 70 Q83 54 126 70 L126 80 Q83 64 40 80 Z" fill="#c0392b" stroke-width="4"/>
+    <path d="M40 74 L22 66 M40 78 L24 86" fill="none" stroke="#c0392b" stroke-width="6"/>
+    <path d="M54 86 L72 90 M94 86 L112 80" fill="none" stroke-width="5"/>
+    <path d="M58 96 q6 -3 12 0 M96 96 q6 -3 12 0" fill="none" stroke-width="3.5"/>
+    <path d="M80 96 Q72 110 80 112 Q90 114 94 106" fill="#c48a62" stroke-width="4.5"/>
+    <!-- 콧수염과 웃음 -->
+    <path d="M60 116 Q72 110 83 116 Q94 110 106 116 Q110 108 114 112" fill="none" stroke-width="5"/>
+    <path d="M70 122 Q86 130 100 120" fill="none" stroke-width="4"/>
+  </g>
+  <circle cx="64" cy="95" r="2.6" fill="#1b120a"/><circle cx="102" cy="95" r="2.6" fill="#1b120a"/>
+</svg>

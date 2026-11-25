@@ -59,7 +59,15 @@ export abstract class Character {
   resistsTakes(): boolean {
     return false;
   }
-  /** 모건: 한 턴 칼질 횟수의 최소값 */
+  /** 핍: 나무통을 몸에 단 것처럼 칼질·포격을 받을 때 먼저 판정 */
+  hasInnateBarrel(): boolean {
+    return false;
+  }
+  /** 핍: 피해를 1번 받을 때마다 뽑는 카드 수 */
+  drawOnDamage(): number {
+    return 0;
+  }
+  /** 모건·잭: 한 턴 칼질 횟수의 최소값 */
   minSlashes(_game: Game, _me: SeatId): number {
     return 0;
   }

@@ -660,6 +660,18 @@ export class Game {
       this.emit({ type: 'ability', seat: target, character: ch.id });
       return;
     }
+    const barrelThen = () => this.barrelOrRespond(target, attacker, source, afterHit);
+    if (ch.hasInnateBarrel()) {
+      this.emit({ type: 'ability', seat: target, character: ch.id });
+      judge(this, target, 'barrel', isHeart, (dodged) => {
+        if (!dodged) barrelThen();
+      });
+      return;
+    }
+    barrelThen();
+  }
+
+  private barrelOrRespond(target: SeatId, attacker: SeatId, source: AttackSource, afterHit?: () => void): void {
     if (this.findEquip(target, 'barrel')) {
       judge(this, target, 'barrel', isHeart, (dodged) => {
         if (!dodged) this.attackResponse(target, attacker, source, afterHit);
@@ -738,6 +750,12 @@ export class Game {
     if (!s.alive) return;
     s.hp -= amount;
     this.emit({ type: 'damage', seat: target, amount, source });
+    const extra = s.character.drawOnDamage();
+    // 핍: 쓰러지기 직전이어도 받은 카드(럼주)로 버틸 수 있다. 둘만 남아 바로 쓰러지면 받지 않는다
+    if (extra && (s.hp > 0 || this.aliveSeats().length > 2)) {
+      this.emit({ type: 'ability', seat: target, character: s.character.id });
+      this.giveCards(target, this.draw(extra));
+    }
     if (s.hp > 0) return;
     if (this.aliveSeats().length <= 2) {
       this.kill(target, source);

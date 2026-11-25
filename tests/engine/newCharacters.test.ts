@@ -1,5 +1,5 @@
 import type { CharacterId } from '../../src/engine/types';
-import { slashLimit } from '../../src/engine/rules';
+import { distance, slashLimit } from '../../src/engine/rules';
 import { buildView } from '../../src/host/view';
 import { defaultActionFor } from '../../src/engine/defaults';
 import { giveEquip, ids, makeGame, setHand, stackTop } from './helpers';
@@ -150,5 +150,77 @@ describe('morgan', () => {
     expect(slashLimit(g, 0)).toBe(1);
     g.seats[0].hp = 2;
     expect(slashLimit(g, 0)).toBe(2);
+  });
+});
+
+describe('bartol', () => {
+  it('has 5 hp and is one step closer for everyone', () => {
+    const g = game(['tom', 'derrick', 'bartol']);
+    expect(g.seats[2].maxHp).toBe(5);
+    expect(distance(g, 0, 2)).toBe(1); // 원래 거리 2
+    expect(distance(g, 2, 0)).toBe(2);
+  });
+});
+
+describe('pip', () => {
+  function slashPip(g: ReturnType<typeof game>) {
+    const [slash] = setHand(g, 0, ['slash']);
+    g.apply(0, { type: 'playCard', cardId: slash.id, target: 1 });
+  }
+
+  it('has 2 hp and dodges a slash on a ♥ judgement, like a barrel', () => {
+    const g = game(['tom', 'pip']);
+    expect(g.seats[1].maxHp).toBe(2);
+    stackTop(g, [{ kind: 'rum', suit: 'hearts' }]);
+    slashPip(g);
+    expect(g.events.find((e) => e.type === 'judge')).toMatchObject({ seat: 1, success: true, reason: 'barrel' });
+    expect(g.pending()?.kind).not.toBe('respondAttack');
+    expect(g.seats[1].hp).toBe(2);
+  });
+
+  it('draws 2 cards when hurt', () => {
+    const g = game(['tom', 'pip']);
+    setHand(g, 1, []);
+    stackTop(g, [{ kind: 'slash', suit: 'spades' }]);
+    slashPip(g);
+    expect(g.pending()).toMatchObject({ kind: 'respondAttack', seat: 1 });
+    g.apply(1, { type: 'respond', cardIds: [] });
+    expect(g.seats[1].hp).toBe(1);
+    expect(g.seats[1].hand.length).toBe(2);
+  });
+
+  it('can survive with a rum drawn from the hit that would knock them out', () => {
+    const g = game(['tom', 'pip']);
+    setHand(g, 1, []);
+    g.seats[1].hp = 1;
+    stackTop(g, [{ kind: 'slash', suit: 'spades' }, { kind: 'rum' }, { kind: 'dodge' }]);
+    slashPip(g);
+    g.apply(1, { type: 'respond', cardIds: [] });
+    expect(g.pending()).toMatchObject({ kind: 'dying', seat: 1 });
+    const rum = g.seats[1].hand.find((c) => c.kind === 'rum')!;
+    g.apply(1, { type: 'respond', cardIds: [rum.id] });
+    expect(g.seats[1].alive).toBe(true);
+  });
+
+  it('a real barrel gives a second chance after a failed own judgement', () => {
+    const g = game(['tom', 'pip']);
+    giveEquip(g, 1, 'barrel');
+    stackTop(g, [{ kind: 'slash', suit: 'spades' }, { kind: 'rum', suit: 'hearts' }]);
+    slashPip(g);
+    const judges = g.events.filter((e) => e.type === 'judge');
+    expect(judges.map((e) => (e as { success: boolean }).success)).toEqual([false, true]);
+    expect(g.seats[1].hp).toBe(2);
+  });
+});
+
+describe('jack', () => {
+  it('may slash any number of times a turn', () => {
+    const g = game(['jack']);
+    const [a, b, c] = setHand(g, 0, ['slash', 'slash', 'slash']);
+    for (const s of [a, b, c]) {
+      expect(g.apply(0, { type: 'playCard', cardId: s.id, target: 1 }).ok).toBe(true);
+      while (g.pending()?.seat !== 0) g.apply(g.pending()!.seat, { type: 'respond', cardIds: [] });
+    }
+    expect(slashLimit(g, 0)).toBe(Infinity);
   });
 });
