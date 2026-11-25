@@ -69,6 +69,27 @@ export function WeaponSwapNote(p: { oldCard: CardView; newCard: CardView; onYes:
   );
 }
 
+/** 널빤지 걷기: 내고 나서도 내 손패가 가장 많으면 나도 2장을 버리게 되니 먼저 묻는다 */
+export function PlankWarnNote(p: { card: CardView; mine: number; others: string[]; onYes: () => void; onNo: () => void }) {
+  return (
+    <Note title="널빤지 걷기 주의">
+      <p>
+        이 카드를 내도 내 손패가 <b>{p.mine}장</b>으로 가장 많아서 <b>나도 2장을 버려야 해요</b>.
+        {p.others.length > 0 && ` (같이 버리는 사람: ${p.others.join(', ')})`}
+      </p>
+      <div className="note-cards">
+        <CardFace card={p.card} size="sm" />
+      </div>
+      <button type="button" onClick={p.onYes}>
+        그래도 내기
+      </button>
+      <button type="button" onClick={p.onNo}>
+        그만두기
+      </button>
+    </Note>
+  );
+}
+
 /** 마고 능력: 엿본 카드를 보여주는 쪽지 */
 export function PeekNote(p: { targetName: string; card: CardView; onClose: () => void }) {
   return (

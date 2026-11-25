@@ -113,6 +113,39 @@ describe('TableScreen', () => {
     });
   });
 
+  describe('walk the plank warning', () => {
+    const plankHint = { cardId: 'k1', targets: null, targetCards: false };
+    const hand = (n: number) => [card('k1', 'walkPlank'), ...Array.from({ length: n - 1 }, (_, i) => card(`f${i}`, 'rum'))];
+    const note = () => screen.queryByRole('dialog', { name: '널빤지 걷기 주의' });
+
+    it('warns when I would still have the most cards, naming who ties, and plays on yes', () => {
+      // 내고 나면 3장, 다른 사람들도 3장(동률)
+      const { send } = renderTable(makeView({ myHand: hand(4), hints: [plankHint] }));
+      fireEvent.click(handCard('널빤지 걷기'));
+      expect(send).not.toHaveBeenCalled();
+      expect(note()!.textContent).toContain('3장');
+      expect(note()!.textContent).toContain('p0, p2, p3, p4');
+      fireEvent.click(within(note()!).getByRole('button', { name: '그래도 내기' }));
+      expect(send).toHaveBeenCalledWith({ type: 'playCard', cardId: 'k1' });
+      expect(note()).toBeNull();
+    });
+
+    it('can be called off', () => {
+      const { send } = renderTable(makeView({ myHand: hand(5), hints: [plankHint] }));
+      fireEvent.click(handCard('널빤지 걷기'));
+      fireEvent.click(within(note()!).getByRole('button', { name: '그만두기' }));
+      expect(send).not.toHaveBeenCalled();
+      expect(note()).toBeNull();
+    });
+
+    it('plays right away when someone else has more cards', () => {
+      const { send } = renderTable(makeView({ myHand: hand(3), hints: [plankHint] }));
+      fireEvent.click(handCard('널빤지 걷기'));
+      expect(note()).toBeNull();
+      expect(send).toHaveBeenCalledWith({ type: 'playCard', cardId: 'k1' });
+    });
+  });
+
   it('has a 2x speed toggle', () => {
     const onToggle = vi.fn();
     const { rerender, send } = renderTable(makeView(), { doubleSpeed: { on: false, onToggle } });

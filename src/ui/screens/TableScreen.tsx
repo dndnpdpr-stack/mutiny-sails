@@ -7,7 +7,7 @@ import { CenterPile } from '../table/CenterPile';
 import { GameLog } from '../table/GameLog';
 import { MyArea } from '../table/MyArea';
 import { OpponentPanel, type SeatFx } from '../table/OpponentPanel';
-import { PeekNote, PromptNote, TargetCardNote, WeaponSwapNote, responseNeed, responseWith } from '../table/PromptNote';
+import { PeekNote, PlankWarnNote, PromptNote, TargetCardNote, WeaponSwapNote, responseNeed, responseWith } from '../table/PromptNote';
 import { CARD_CATALOG } from '../../engine/cards/catalog';
 import { CardInfoNote } from '../table/CardInfoNote';
 import { latestPeek, peekMemos } from '../table/peek';
@@ -129,10 +129,13 @@ export function TableScreen(p: {
   const pick = pickFor && hint?.cardId === pickFor.cardId ? pickFor : null;
   // 무기를 이미 끼고 있으면 바로 내지 않고 바꿀지 묻는다
   const [swap, setSwap] = useState<{ oldCard: CardView; newCard: CardView } | null>(null);
+  // 널빤지 걷기를 내면 나도 버리게 될 때 먼저 묻는다
+  const [plank, setPlank] = useState<{ card: CardView; mine: number; others: string[] } | null>(null);
   const cancel = () => {
     setSelectedId(null);
     setPickFor(null);
     setSwap(null);
+    setPlank(null);
   };
 
   useEffect(() => {
@@ -158,6 +161,12 @@ export function TableScreen(p: {
     const card = latest.myHand.find((c) => c.id === id);
     const old = latest.seats[latest.you].equipment.find((c) => CARD_CATALOG[c.kind].weapon);
     if (card && old && CARD_CATALOG[card.kind].weapon) return setSwap({ oldCard: old, newCard: card });
+    if (card?.kind === 'walkPlank') {
+      const mine = latest.myHand.length - 1;
+      const rivals = latest.seats.filter((s) => s.alive && s.seat !== latest.you);
+      const most = Math.max(0, ...rivals.map((s) => s.handCount));
+      if (mine > 0 && mine >= most) return setPlank({ card, mine, others: rivals.filter((s) => s.handCount === mine).map((s) => s.name) });
+    }
     send({ type: 'playCard', cardId: id });
   };
   const onHandInfo = (id: string) => {
@@ -306,6 +315,15 @@ export function TableScreen(p: {
           newCard={swap.newCard}
           onYes={() => (send({ type: 'playCard', cardId: swap.newCard.id }), setSwap(null))}
           onNo={() => setSwap(null)}
+        />
+      )}
+      {plank && (
+        <PlankWarnNote
+          card={plank.card}
+          mine={plank.mine}
+          others={plank.others}
+          onYes={() => (send({ type: 'playCard', cardId: plank.card.id }), setPlank(null))}
+          onNo={() => setPlank(null)}
         />
       )}
       {p.lastRejection && <div className="toast note">{p.lastRejection}</div>}
