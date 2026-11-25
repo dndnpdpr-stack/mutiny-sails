@@ -243,6 +243,7 @@ export function TableScreen(p: {
                 distance={shown.distances[s.seat]}
                 targetable={!!hint?.targets?.includes(s.seat)}
                 outOfRange={!!hint?.targets && s.alive && !hint.targets.includes(s.seat)}
+                bountyTarget={b?.state === 'open' && b.target === s.seat && s.alive}
                 fx={fxOf(s.seat)}
                 peeked={memos[s.seat] ?? null}
                 style={{ marginTop: Math.round((1 - lift) * 48) }}

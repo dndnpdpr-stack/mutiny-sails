@@ -104,7 +104,7 @@ export type GameEvent = { visibleTo?: SeatId[]; seq?: number } & (
   /** role: 본인과(선장이면 모두) 볼 때만 채워지고, 나머지에게는 null */
   | { type: 'roleDrawn'; seat: SeatId; slot: number; role: Role | null; special?: Special | null }
   /** 현상금 사냥꾼에게만: 표적과 상태 */
-  | { type: 'bounty'; seat: SeatId; target: SeatId; state: BountyState }
+  | { type: 'bounty'; seat: SeatId; target: SeatId; state: BountyState; renewed?: boolean }
   | { type: 'seaEvent'; event: SeaEventId }
   /** 앵무새의 고자질·항해사: 아는 사람에게만. role은 그 사람에게 보인 역할(이중 첩자는 고자질에 충성 선원으로) */
   | { type: 'roleRevealed'; seat: SeatId; target: SeatId; role: Role }

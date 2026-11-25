@@ -107,11 +107,26 @@ describe('bounty hunter', () => {
     expect(buildView(g, 2, () => true).bountyWon).toBe(true);
   });
 
-  it('loses the bounty if someone else knocks out the target', () => {
+  it('gets a new living target if someone else knocks out the target', () => {
     const g = forced({ bountyTarget: 6 });
     g.kill(6, 2);
-    expect(buildView(g, 7, () => true).myBounty!.state).toBe('lost');
-    for (const s of [1, 2, 3, 5]) g.kill(s, 0);
+    const b = buildView(g, 7, () => true).myBounty!;
+    expect(b.state).toBe('open');
+    expect([1, 2, 3, 4, 5]).toContain(b.target);
+    expect(g.events.at(-1)).toMatchObject({ type: 'bounty', seat: 7, target: b.target, state: 'open', renewed: true, visibleTo: [7] });
+    g.kill(b.target, 7);
+    expect(g.bounty!.state).toBe('claimed');
+  });
+
+  it('loses the bounty when no one is left to become the new target', () => {
+    const g = forced({ bountyTarget: 6 });
+    for (const s of [1, 2, 3]) g.kill(s, 0);
+    g.kill(4, 0);
+    g.kill(6, 5); // 살아 있는 후보는 5뿐 → 5가 새 표적
+    expect(g.bounty!.target).toBe(5);
+    expect(g.bounty!.state).toBe('open');
+    g.kill(5, 0); // 남이 잡았고 다음 후보가 없다
+    expect(g.bounty!.state).toBe('lost');
     expect(g.bountyWon).toBe(false);
   });
 

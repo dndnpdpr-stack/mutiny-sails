@@ -532,6 +532,19 @@ describe('TableScreen', () => {
     expect(screen.getByLabelText('내 역할 카드').textContent).toContain('표적: p3');
   });
 
+  it('a bounty hunter sees the target seat highlighted, and only that seat', () => {
+    renderTable(makeView({ myRole: 'hunter', myBounty: { target: 3, state: 'open' } }));
+    const marked = document.querySelectorAll('.opp.bounty-target');
+    expect(marked.length).toBe(1);
+    expect(marked[0].getAttribute('data-anchor')).toBe('seat:3');
+    expect(screen.getAllByLabelText('현상금 표적').length).toBe(1);
+  });
+
+  it('no target highlight once the bounty is claimed', () => {
+    renderTable(makeView({ myRole: 'hunter', myBounty: { target: 3, state: 'claimed' } }));
+    expect(document.querySelector('.bounty-target')).toBeNull();
+  });
+
   it('a navigator sees the special name on the role card', () => {
     renderTable(makeView({ myRole: 'loyalist', mySpecial: 'navigator' }));
     expect(screen.getByLabelText('내 역할 카드').textContent).toContain('항해사');

@@ -209,6 +209,13 @@ body { margin: 0; background: #3a2412; }
 .opp.dead, .me-info.dead { filter: grayscale(1); opacity: 0.6; }
 .opp.targetable { cursor: pointer; animation: target-blink 0.9s ease-in-out infinite; }
 .opp.out-of-range { opacity: 0.45; }
+/* 현상금 사냥꾼만 보는 표적 표시: 테두리·빛과 겹치지 않게 바깥 점선으로 */
+.opp.bounty-target { outline: 2px dashed #ff6b5b; outline-offset: 2px; }
+.bounty-badge {
+  position: absolute; top: -8px; right: -6px; z-index: 2;
+  font-size: 14px; line-height: 1; padding: 2px; border-radius: 50%;
+  background: #3a1410; box-shadow: 0 0 0 1px #ff6b5b;
+}
 .opp.shake, .me-info.shake { animation: seat-shake 0.4s; }
 .opp.dying, .me-info.dying { animation: seat-dying 0.6s forwards; }
 .opp.turn-glow, .me-info.turn-glow { box-shadow: 0 0 22px 6px rgba(255, 224, 138, 0.85); }

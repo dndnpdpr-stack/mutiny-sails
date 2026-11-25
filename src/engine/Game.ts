@@ -220,6 +220,15 @@ export class Game {
     this.emit({ type: 'bounty', seat: b.hunter, target: b.target, state, visibleTo: [b.hunter] });
   }
 
+  /** 남이 표적을 쓰러뜨렸으면 사냥꾼은 새 표적을 받는다 (선장·자신 말고 살아 있는 사람). 받을 사람이 없으면 놓친다 */
+  private retargetBounty(fallen: SeatId): void {
+    const b = this.bounty!;
+    const pool = this.seats.filter((s) => s.alive && s.role !== 'captain' && s.seat !== b.hunter && s.seat !== fallen).map((s) => s.seat);
+    if (!pool.length) return this.setBounty('lost');
+    b.target = pool[this.rng.int(pool.length)];
+    this.emit({ type: 'bounty', seat: b.hunter, target: b.target, state: 'open', renewed: true, visibleTo: [b.hunter] });
+  }
+
   /** 게임이 끝났고 현상금 사냥꾼이 표적을 직접 쓰러뜨린 뒤 살아남았는지 */
   get bountyWon(): boolean {
     const b = this.bounty;
@@ -758,7 +767,10 @@ export class Game {
     s.alive = false;
     this.emit({ type: 'death', seat, role: s.role, killer, special: s.special });
     const b = this.bounty;
-    if (b && b.state === 'open' && seat === b.target) this.setBounty(killer === b.hunter ? 'claimed' : 'lost');
+    if (b && b.state === 'open' && seat === b.target) {
+      if (killer === b.hunter) this.setBounty('claimed');
+      else this.retargetBounty(seat);
+    }
     else if (b && b.state !== 'lost' && seat === b.hunter) this.setBounty('lost');
     for (const c of s.hand.splice(0)) this.discardCard(c);
     for (const c of s.equipment.splice(0)) this.discardCard(c);
@@ -792,7 +804,8 @@ export class Game {
   private checkWinner(): Winner | null {
     const alive = this.seats.filter((x) => x.alive);
     if (!alive.some((x) => x.role === 'captain')) {
-      return alive.length === 1 && alive[0].role === 'spy' ? 'spy' : 'rebels';
+      // 선장이 쓰러질 때 반란 선원은 다 쓰러지고 첩자가 살아 있으면 첩자 승리 (충성 선원이 남아 있어도)
+      return alive.some((x) => x.role === 'spy') && !alive.some((x) => x.role === 'rebel') ? 'spy' : 'rebels';
     }
     if (!alive.some((x) => x.role === 'rebel' || x.role === 'spy')) return 'captainTeam';
     return null;

@@ -54,6 +54,16 @@ describe('win conditions', () => {
     expect(g.events.at(-1)).toMatchObject({ type: 'gameOver', winner: 'spy' });
   });
 
+  it('spy wins when the captain falls after every rebel, even with loyalists alive', () => {
+    const g = started();
+    g.kill(1, null);
+    g.kill(2, null);
+    expect(g.winner).toBeNull();
+    g.kill(0, 3);
+    expect(g.seats[4].alive).toBe(true);
+    expect(g.winner).toBe('spy');
+  });
+
   it('rebels win if any rebel lives when the captain falls', () => {
     const g = started();
     const [duel] = setHand(g, 0, ['duel']);

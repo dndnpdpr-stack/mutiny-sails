@@ -82,6 +82,7 @@ export function formatEvent(e: GameEvent, names: (s: SeatId) => string): string 
       return e.role ? `${names(e.seat)}이(가) ${roleLabel(e.role, e.special)} 카드를 뽑았어요.` : `${names(e.seat)}이(가) 역할 카드를 뽑았어요.`;
     case 'bounty': {
       const t = names(e.target);
+      if (e.state === 'open' && e.renewed) return `💰 다른 사람이 표적을 쓰러뜨렸어요. 새 표적은 ${t}${ieyo(t)}.`;
       if (e.state === 'open') return `💰 현상금 표적은 ${t}${ieyo(t)}.`;
       if (e.state === 'claimed') return `💰 ${t}을(를) 직접 잡았어요! 이제 끝까지 살아남으면 함께 이겨요.`;
       return `💰 현상금을 놓쳤어요.`;

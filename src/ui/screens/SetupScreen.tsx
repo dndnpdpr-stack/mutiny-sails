@@ -19,6 +19,19 @@ const DIFFICULTIES: { id: Difficulty; name: string; text: string }[] = [
   { id: 'hard', name: '어려움', text: '정체를 숨기고 있다가 기회가 오면 몰아쳐요.' },
 ];
 
+const COUNT_KEY = 'mutiny.playerCount';
+const DEFAULT_COUNT = 5;
+
+/** 지난번에 고른 인원. 처음이면 5명 */
+function loadCount(): number {
+  try {
+    const n = Number(localStorage.getItem(COUNT_KEY));
+    return Number.isInteger(n) && n >= 4 && n <= 9 ? n : DEFAULT_COUNT;
+  } catch {
+    return DEFAULT_COUNT;
+  }
+}
+
 function loadDifficulty(): Difficulty {
   try {
     const v = localStorage.getItem(DIFFICULTY_KEY);
@@ -29,7 +42,15 @@ function loadDifficulty(): Difficulty {
 }
 
 export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: string, options: SetupOptions) => void }) {
-  const [count, setCount] = useState(9);
+  const [count, setCountState] = useState(loadCount);
+  const setCount = (n: number) => {
+    setCountState(n);
+    try {
+      localStorage.setItem(COUNT_KEY, String(n));
+    } catch {
+      // 저장이 막혀 있으면 이번만
+    }
+  };
   const [sea, setSea] = useState(true);
   const [expansion, setExpansion] = useState(true);
   const [difficulty, setDifficulty] = useState<Difficulty>(loadDifficulty);

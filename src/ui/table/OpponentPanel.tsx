@@ -23,6 +23,8 @@ export function OpponentPanel(p: {
   distance?: number;
   targetable: boolean;
   outOfRange: boolean;
+  /** 내가 현상금 사냥꾼일 때 지금 표적 (나만 보인다) */
+  bountyTarget?: boolean;
   fx: SeatFx[];
   /** 마고 능력으로 엿본 카드 */
   peeked?: CardView | null;
@@ -38,6 +40,7 @@ export function OpponentPanel(p: {
     s.alive ? '' : 'dead',
     p.targetable ? 'targetable' : '',
     p.outOfRange ? 'out-of-range' : '',
+    p.bountyTarget ? 'bounty-target' : '',
     ...p.fx,
   ]
     .filter(Boolean)
@@ -52,6 +55,7 @@ export function OpponentPanel(p: {
       onClick={p.targetable ? p.onClick : undefined}
     >
       {s.role === 'captain' && <CaptainRibbon />}
+      {p.bountyTarget && <span className="bounty-badge" aria-label="현상금 표적">🎯</span>}
       <div className="face"><Portrait id={s.character} variant="face" /></div>
       <div className="nm">
         {s.name}
