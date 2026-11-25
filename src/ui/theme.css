@@ -440,7 +440,7 @@ h1, h2, h3, .cname, .rname, .opp .nm { font-weight: 800; letter-spacing: -0.01em
   .table-middle { gap: 6px; }
   .center-pile { zoom: 0.56; padding-bottom: 20px; }
   .center-pile:has(.sea) { zoom: 0.56; }
-  .log { max-height: 62px; padding: 4px 8px; font-size: 11px; }
+  .log { max-height: 62px; padding: 4px 8px; font-size: 11px; line-height: 1.45; }
   .log h4 { display: none; }
   .log ul { padding-left: 14px; }
 
@@ -492,3 +492,13 @@ h1, h2, h3, .cname, .rname, .opp .nm { font-weight: 800; letter-spacing: -0.01em
 .record-table th, .record-table td { padding: 4px 6px; border-bottom: 1px solid #d6bd8a; text-align: center; }
 .record-table td:first-child, .record-table th:first-child { text-align: left; }
 .secondary.danger { background: #b3261e; color: #fff; }
+/* 폰 세로에서 화면이 넉넉하면(전체 화면·홈 화면 앱) 항해 일지를 5줄까지 */
+@media (max-width: 640px) and (min-height: 780px) {
+  .log,
+  .opp-arc:has(> .opp:nth-child(5)) ~ .table-middle .log { max-height: 88px; }
+}
+/* 전체 화면이면 맨 위가 화면 끝에 붙지 않게 여백 */
+:root:fullscreen .table-screen { padding-top: 28px; }
+@media (display-mode: fullscreen) {
+  .table-screen { padding-top: 28px; }
+}
