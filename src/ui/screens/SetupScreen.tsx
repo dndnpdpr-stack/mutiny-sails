@@ -3,6 +3,7 @@ import titleArt from '../art/title.svg';
 import { HowToPlay } from './HowToPlay';
 import { RecordPanel } from './RecordPanel';
 import { loadRecord, rate } from '../record';
+import { enterFullscreen, fullscreenAvailable, isTouchDevice, loadAutoFullscreen, saveAutoFullscreen } from '../fullscreen';
 import type { Difficulty } from '../../ai/memory';
 
 export interface SetupOptions {
@@ -44,6 +45,9 @@ export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: 
   const [guide, setGuide] = useState(false);
   const [record, setRecord] = useState(loadRecord);
   const [showRecord, setShowRecord] = useState(false);
+  // 폰에서만: 출항을 누르는 순간 전체 화면으로(브라우저는 누른 순간에만 허락한다)
+  const [showFsOption] = useState(() => fullscreenAvailable() && isTouchDevice());
+  const [autoFs, setAutoFs] = useState(loadAutoFullscreen);
   const panelRef = useRef<HTMLDivElement>(null);
   const guideButtonRef = useRef<HTMLButtonElement>(null);
   const wasOpen = useRef(false);
@@ -83,6 +87,12 @@ export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: 
           <input type="checkbox" checked={expansion} onChange={(e) => setExpansion(e.target.checked)} />
           🃏 확장 카드 <small>(새 카드 10종 16장을 덱에 섞어요)</small>
         </label>
+        {showFsOption && (
+          <label className="toggle">
+            <input type="checkbox" checked={autoFs} onChange={(e) => (setAutoFs(e.target.checked), saveAutoFullscreen(e.target.checked))} />
+            📱 출항하면 전체 화면 <small>(주소창·상태 표시줄을 숨겨요. 게임 중 ⛶ 버튼으로도 켜고 꺼요)</small>
+          </label>
+        )}
         <div className="difficulty">
           <span className="difficulty-label">🤖 AI 난이도</span>
           <div className="difficulty-options">
@@ -101,7 +111,10 @@ export function SetupScreen({ onStart }: { onStart: (playerCount: number, name: 
           <button ref={guideButtonRef} type="button" className="secondary" onClick={() => setGuide(true)}>
             게임 방법
           </button>
-          <button type="button" className="primary" onClick={() => onStart(count, name.trim(), { seaEvents: sea, expansionCards: expansion, difficulty })}>
+          <button type="button" className="primary" onClick={() => {
+              if (showFsOption && autoFs) enterFullscreen();
+              onStart(count, name.trim(), { seaEvents: sea, expansionCards: expansion, difficulty });
+            }}>
             출항
           </button>
         </div>

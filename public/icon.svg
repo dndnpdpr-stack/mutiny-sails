@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 앱 아이콘: 노을 바다 위 해적선의 돛. 가운데 80% 안에 그려 둥근/원형 아이콘으로 잘려도 보이게 -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a2a4a"/>
+      <stop offset="0.55" stop-color="#c8643a"/>
+      <stop offset="0.56" stop-color="#2c4a60"/>
+      <stop offset="1" stop-color="#1b2f40"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#sky)"/>
+  <circle cx="356" cy="268" r="70" fill="#f2c14e" opacity="0.85"/>
+  <!-- 돛대 -->
+  <rect x="246" y="96" width="14" height="250" rx="4" fill="#2a1a0c"/>
+  <!-- 깃발 -->
+  <path d="M260 100 h70 l-14 20 l14 20 h-70z" fill="#1b120a"/>
+  <circle cx="290" cy="118" r="8" fill="#f3e3b8"/>
+  <!-- 돛 -->
+  <path d="M150 150 Q253 132 356 150 Q370 215 356 280 Q253 262 150 280 Q136 215 150 150z" fill="#f3e3b8" stroke="#1b120a" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M200 170 l40 90 M300 165 l-25 70" stroke="#7a4e24" stroke-width="8" stroke-linecap="round"/>
+  <!-- 배 -->
+  <path d="M110 330 h292 l-40 62 h-212z" fill="#7a4e24" stroke="#1b120a" stroke-width="10" stroke-linejoin="round"/>
+  <circle cx="200" cy="358" r="9" fill="#1b120a"/>
+  <circle cx="256" cy="358" r="9" fill="#1b120a"/>
+  <circle cx="312" cy="358" r="9" fill="#1b120a"/>
+  <!-- 물결 -->
+  <path d="M60 410 q32 -18 64 0 t64 0 t64 0 t64 0 t64 0 t64 0" fill="none" stroke="#8fc3d6" stroke-width="10" stroke-linecap="round"/>
+</svg>

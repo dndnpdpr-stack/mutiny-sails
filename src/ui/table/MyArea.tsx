@@ -1,6 +1,7 @@
 import { CHARACTER_INFO } from '../../engine/characters/roster';
 import { Portrait } from './Portrait';
 import type { CardView, Role, SeatView, Special } from '../../engine/types';
+import { FullscreenButton } from './FullscreenButton';
 import { RoleCard } from './RoleCard';
 import { CardFace } from './Card';
 import { FanHand } from './FanHand';
@@ -81,6 +82,7 @@ export function MyArea(p: {
         </div>
       )}
       <div className="actions">
+        <FullscreenButton />
         {p.doubleSpeed && (
           <button
             type="button"
