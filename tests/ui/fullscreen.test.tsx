@@ -22,7 +22,7 @@ describe('fullscreen', () => {
     Object.defineProperty(document, 'fullscreenElement', { value: null, configurable: true });
   });
   afterEach(() => {
-    delete el.requestFullscreen;
+    Reflect.deleteProperty(el, "requestFullscreen");
   });
 
   it('the in-game button turns fullscreen on and shows that it is on', () => {
@@ -34,7 +34,7 @@ describe('fullscreen', () => {
   });
 
   it('is hidden when the browser cannot go fullscreen', () => {
-    delete el.requestFullscreen;
+    Reflect.deleteProperty(el, "requestFullscreen");
     fakeDevice(true);
     const { container } = render(<FullscreenButton />);
     expect(container.innerHTML).toBe('');
