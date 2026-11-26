@@ -26,11 +26,12 @@ import morgan from './portraits/morgan.svg';
 import bartol from './portraits/bartol.svg';
 import pip from './portraits/pip.svg';
 import jack from './portraits/jack.svg';
+import rumbo from './portraits/rumbo.svg';
 
 export const PORTRAITS: Partial<Record<CharacterId, string>> = {
   tom, margo, lou, derrick, orso, nico, hanna, sila, bibi, bruno,
   dorothy, ori, felix, tara, luca, gordon, kiki, morgan,
-  bartol, pip, jack,
+  bartol, pip, jack, rumbo,
 };
 
 /** 그림이 없을 때 대신 보여줄 이모지 */
@@ -56,4 +57,5 @@ export const CHARACTER_FACE: Record<CharacterId, string> = {
   bartol: '🪨',
   pip: '🐭',
   jack: '⚔️',
+  rumbo: '🍺',
 };

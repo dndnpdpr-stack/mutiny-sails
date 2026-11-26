@@ -1,5 +1,5 @@
 import type { CharacterId } from '../../src/engine/types';
-import { distance, slashLimit } from '../../src/engine/rules';
+import { distance, handLimit, slashLimit } from '../../src/engine/rules';
 import { buildView } from '../../src/host/view';
 import { defaultActionFor } from '../../src/engine/defaults';
 import { giveEquip, ids, makeGame, setHand, stackTop } from './helpers';
@@ -222,5 +222,39 @@ describe('jack', () => {
       while (g.pending()?.seat !== 0) g.apply(g.pending()!.seat, { type: 'respond', cardIds: [] });
     }
     expect(slashLimit(g, 0)).toBe(Infinity);
+  });
+});
+
+describe('rumbo', () => {
+  it('has 2 hp and starts with 3 extra cards', () => {
+    const g = game(['tom', 'rumbo']);
+    expect(g.seats[1].maxHp).toBe(2);
+    expect(g.seats[1].hand.length).toBe(5);
+  });
+
+  it('a rum heals 2 and may go past max hp up to 5', () => {
+    const g = game(['rumbo']);
+    const [a, b, c] = setHand(g, 0, ['rum', 'rum', 'rum']);
+    g.seats[0].hp = 2; // 선장이라 최대 체력 3
+    expect(g.apply(0, { type: 'playCard', cardId: a.id }).ok).toBe(true);
+    expect(g.seats[0].hp).toBe(4);
+    expect(g.apply(0, { type: 'playCard', cardId: b.id }).ok).toBe(true);
+    expect(g.seats[0].hp).toBe(5);
+    expect(g.apply(0, { type: 'playCard', cardId: c.id }).ok).toBe(false);
+  });
+
+  it('other heals stop at max hp and never lower an over-max hp', () => {
+    const g = game(['rumbo']);
+    g.seats[0].hp = 5;
+    g.heal(0, 1);
+    expect(g.seats[0].hp).toBe(5);
+    g.seats[0].hp = 1;
+    g.heal(0, 5);
+    expect(g.seats[0].hp).toBe(g.seats[0].maxHp);
+  });
+
+  it('may hold hp + 3 cards', () => {
+    const g = game(['rumbo']);
+    expect(handLimit(g, 0)).toBe(g.seats[0].hp + 3);
   });
 });

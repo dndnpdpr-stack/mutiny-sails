@@ -37,11 +37,12 @@ export class Rum extends ActionCard {
     if (game.aliveSeats().length <= 2) return '두 명만 남으면 럼주를 쓸 수 없어요';
     if (game.modifiers.some((m) => m.rumOnlyWhenDying)) return '보급 부족: 럼주는 쓰러질 때만 쓸 수 있어요';
     const s = game.seats[actor];
-    if (s.hp >= s.maxHp) return '이미 체력이 가득해요';
+    if (s.hp >= s.character.rumCap(s.maxHp)) return '이미 체력이 가득해요';
     return null;
   }
   play(game: Game, actor: SeatId): void {
-    game.heal(actor, game.seats[actor].character.rumHeal());
+    const s = game.seats[actor];
+    game.heal(actor, s.character.rumHeal(), s.character.rumCap(s.maxHp));
   }
 }
 

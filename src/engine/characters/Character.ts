@@ -15,6 +15,14 @@ export abstract class Character {
   rumHeal(): number {
     return 1;
   }
+  /** 럼주로 회복할 수 있는 상한 (럼보는 최대 체력을 넘어 마신다) */
+  rumCap(maxHp: number): number {
+    return maxHp;
+  }
+  /** 럼보: 처음 받는 손패 추가 장수 */
+  openingHandBonus(): number {
+    return 0;
+  }
   handLimitBonus(): number {
     return 0;
   }

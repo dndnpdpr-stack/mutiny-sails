@@ -34,7 +34,9 @@ describe('game setup', () => {
     const cap = g.seats[g.captainSeat()];
     expect(cap.maxHp).toBe(cap.character.maxHp + 1);
     for (const s of g.seats) {
-      expect(s.hand.length).toBe(s.hp + (s.seat === g.captainSeat() ? 2 : 0)); // 선장은 첫 턴 뽑기 2장
+      // 선장은 첫 턴 뽑기 2장 (마고·루처럼 뽑기 전에 묻는 캐릭터면 아직), 럼보는 시작 손패 +3
+      const firstDraw = s.seat === g.captainSeat() && g.pending()?.kind === 'turn' ? 2 : 0;
+      expect(s.hand.length).toBe(s.hp + s.character.openingHandBonus() + firstDraw);
       expect(s.hp).toBe(s.maxHp);
     }
     const handSum = g.seats.reduce((a, s) => a + s.hand.length, 0);

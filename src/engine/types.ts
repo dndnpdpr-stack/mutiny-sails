@@ -25,7 +25,7 @@ export type JudgeReason = CardKind | 'seaMonster';
 export type CharacterId =
   | 'tom' | 'margo' | 'lou' | 'derrick' | 'orso' | 'nico' | 'hanna' | 'sila' | 'bibi' | 'bruno'
   | 'dorothy' | 'ori' | 'felix' | 'tara' | 'luca' | 'gordon' | 'kiki' | 'morgan'
-  | 'bartol' | 'pip' | 'jack';
+  | 'bartol' | 'pip' | 'jack' | 'rumbo';
 
 export interface CardView {
   id: CardId;

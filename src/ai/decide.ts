@@ -153,7 +153,8 @@ function decideTurn(view: PlayerView, mem: AiMemory): Action {
 
   // 회복. 어려움은 럼주를 쓰러질 때를 대비해 아껴 두고, 체력이 2 이하거나 손패가 넘칠 때만 마신다
   const saveRum = mem.level === 'hard' && me.hp > 2 && hand.length <= me.hp;
-  if (me.hp < me.maxHp && !saveRum) {
+  // 럼보는 최대 체력을 넘어서도 마신다 (마실 수 있으면 힌트가 있다)
+  if ((me.hp < me.maxHp || me.character === 'rumbo') && !saveRum) {
     const h = hintsOf('rum')[0];
     if (h) return play(h);
   }

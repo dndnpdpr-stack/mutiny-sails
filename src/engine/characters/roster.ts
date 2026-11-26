@@ -260,6 +260,25 @@ class Pip extends Character {
   }
 }
 
+class Rumbo extends Character {
+  readonly id = 'rumbo';
+  readonly name = '술고래 럼보';
+  readonly maxHp = 2;
+  readonly text = '럼주로 체력 2를 회복하고, 체력 5까지 넘쳐서 마실 수 있어요. 시작 손패와 손패 한도가 체력 +3이에요.';
+  rumHeal(): number {
+    return 2;
+  }
+  rumCap(): number {
+    return 5;
+  }
+  openingHandBonus(): number {
+    return 3;
+  }
+  handLimitBonus(): number {
+    return 3;
+  }
+}
+
 class Jack extends Character {
   readonly id = 'jack';
   readonly name = '쌍칼 잭';
@@ -292,6 +311,7 @@ export const CHARACTERS: Record<CharacterId, Character> = {
   bartol: new Bartol(),
   pip: new Pip(),
   jack: new Jack(),
+  rumbo: new Rumbo(),
 };
 
 export const CHARACTER_IDS = Object.keys(CHARACTERS) as CharacterId[];

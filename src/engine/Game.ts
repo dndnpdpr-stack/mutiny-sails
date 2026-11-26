@@ -343,7 +343,7 @@ export class Game {
   }
 
   private dealOpeningHands(): void {
-    for (const s of this.seats) s.hand.push(...this.draw(s.hp));
+    for (const s of this.seats) s.hand.push(...this.draw(s.hp + s.character.openingHandBonus()));
   }
 
   /** 선장부터 시계 방향으로 i번째 사람이 캐릭터를 고른다 */
@@ -772,10 +772,11 @@ export class Game {
     );
   }
 
-  heal(seat: SeatId, amount: number): void {
+  /** cap: 회복 상한 (기본은 최대 체력, 럼보의 럼주는 더 높다) */
+  heal(seat: SeatId, amount: number, cap = this.seats[seat].maxHp): void {
     const s = this.seats[seat];
     const before = s.hp;
-    s.hp = Math.min(s.maxHp, s.hp + amount);
+    s.hp = Math.max(s.hp, Math.min(cap, s.hp + amount));
     if (s.hp > before) this.emit({ type: 'heal', seat, amount: s.hp - before });
   }
 
