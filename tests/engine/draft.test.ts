@@ -78,7 +78,7 @@ describe('character draft', () => {
       expect(s.hp).toBe(s.maxHp);
     }
     expect(g.pending()).toEqual({ kind: 'turn', seat: cap });
-    for (const s of g.seats) expect(s.hand.length).toBe(s.hp + (s.seat === cap ? 2 : 0));
+    for (const s of g.seats) expect(s.hand.length).toBe(s.hp + s.character.openingHandBonus() + (s.seat === cap ? 2 : 0));
   });
 
   it('emits public characterChosen events and gapless seq from 1', () => {

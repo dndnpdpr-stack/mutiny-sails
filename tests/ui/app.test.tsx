@@ -90,7 +90,7 @@ describe('App', () => {
   });
 
   it('new game from spectating goes back to setup', async () => {
-    startGame(5, false, 1); // seed 1: 기본 행동만 하면 내가 먼저 쓰러진다
+    startGame(5, false, 3); // seed 3: 기본 행동만 하면 내가 먼저 쓰러진다
     await pickCharacter();
     await playUntil(() => screen.queryByText('관전 중') !== null, 25000);
     const ff = screen.getByRole('button', { name: /빨리 감기/ });

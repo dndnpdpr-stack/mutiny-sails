@@ -20,7 +20,7 @@ export interface CardInfo {
 const list: Array<Omit<CardInfo, 'needsTarget' | 'targetsCards' | 'weapon'>> = [
   { kind: 'slash', name: '칼질', count: 23, category: 'action', emoji: '🗡️', text: '사거리 안의 1명을 공격해요. 상대는 피하기를 내거나 체력 1을 잃어요. (한 턴에 1번)' },
   { kind: 'dodge', name: '피하기', count: 12, category: 'action', emoji: '💨', text: '공격을 받았을 때 내서 무효로 만들어요.' },
-  { kind: 'rum', name: '럼주', count: 6, category: 'action', emoji: '🍺', text: '체력 1을 회복해요. 두 명만 남으면 쓸 수 없어요.' },
+  { kind: 'rum', name: '럼주', count: 8, category: 'action', emoji: '🍺', text: '체력 1을 회복해요. 두 명만 남으면 쓸 수 없어요.' },
   { kind: 'cannonade', name: '포격', count: 1, category: 'action', emoji: '💥', text: '나를 뺀 모두를 공격해요. 각자 피하기를 내거나 체력 1을 잃어요.' },
   { kind: 'brawl', name: '갑판 난투', count: 2, category: 'action', emoji: '🤼', text: '나를 뺀 모두는 칼질을 내거나 체력 1을 잃어요.' },
   { kind: 'duel', name: '결투', count: 3, category: 'action', emoji: '⚔️', text: '1명을 지목해 번갈아 칼질을 버려요. 먼저 못 내는 쪽이 체력 1을 잃어요.' },

@@ -4,13 +4,15 @@ import { CARD_CATALOG } from './catalog';
 
 const ALL_RANKS: Rank[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 
-/** 80칸의 (문양, 숫자) 슬롯. 문양마다 20칸, ♠ 2~9는 12칸. 확장이면 문양마다 9·10·J·Q 4칸을 더해 96칸 */
+/** 82칸의 (문양, 숫자) 슬롯. 문양마다 20칸, ♠ 2~9는 12칸, 늘린 럼주 2장 몫으로 ♦9·♣9 2칸. 확장이면 문양마다 9·10·J·Q 4칸을 더해 98칸 */
 function slots(expansion: boolean): Array<{ suit: Suit; rank: Rank }> {
   const out: Array<{ suit: Suit; rank: Rank }> = [];
   const spadeRanks: Rank[] = [...ALL_RANKS, 2, 3, 4, 5, 10, 11, 12];
   const otherRanks: Rank[] = [...ALL_RANKS, 2, 3, 4, 5, 6, 7, 8];
   for (const r of spadeRanks) out.push({ suit: 'spades', rank: r });
   for (const s of ['hearts', 'diamonds', 'clubs'] as const) for (const r of otherRanks) out.push({ suit: s, rank: r });
+  // 럼주를 6→8장으로 늘리며 더한 칸 (판정에 유리한 ♥는 피했다)
+  out.push({ suit: 'diamonds', rank: 9 }, { suit: 'clubs', rank: 9 });
   if (expansion) for (const s of ['spades', 'hearts', 'diamonds', 'clubs'] as const) for (const r of [9, 10, 11, 12] as Rank[]) out.push({ suit: s, rank: r });
   return out;
 }

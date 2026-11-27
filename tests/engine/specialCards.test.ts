@@ -19,15 +19,15 @@ function started(): Game {
 describe('expansion deck', () => {
   it('is off by default and leaves the base deck unchanged', () => {
     const base = buildDeckSpec(new Rng(7));
-    expect(base).toHaveLength(80);
+    expect(base).toHaveLength(82);
     expect(base.some((c) => (NEW as readonly string[]).includes(c.kind))).toBe(false);
     expect(buildDeckSpec(new Rng(7), false)).toEqual(base);
   });
 
-  it('adds 16 cards for 96 in all, with every new kind at its count', () => {
+  it('adds 16 cards for 98 in all, with every new kind at its count', () => {
     const deck = buildDeckSpec(new Rng(7), true);
-    expect(deck).toHaveLength(96);
-    expect(new Set(deck.map((c) => c.id)).size).toBe(96);
+    expect(deck).toHaveLength(98);
+    expect(new Set(deck.map((c) => c.id)).size).toBe(98);
     for (const k of NEW) {
       expect(CARD_CATALOG[k].expansion).toBe(true);
       expect(deck.filter((c) => c.kind === k)).toHaveLength(CARD_CATALOG[k].count);

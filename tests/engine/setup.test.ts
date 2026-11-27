@@ -40,7 +40,7 @@ describe('game setup', () => {
       expect(s.hp).toBe(s.maxHp);
     }
     const handSum = g.seats.reduce((a, s) => a + s.hand.length, 0);
-    expect(g.deck.length).toBe(80 - handSum);
+    expect(g.deck.length).toBe(82 - handSum);
   });
 
   it('captain moves first', () => {
